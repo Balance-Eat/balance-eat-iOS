@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		49BF00AB2E1E301500876EC3 /* FlexLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AA2E1E301500876EC3 /* FlexLayout */; };
+		49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AD2E1E303200876EC3 /* PinLayout */; };
+		49BF00B12E1E309400876EC3 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B02E1E309400876EC3 /* RxCocoa */; };
+		49BF00B32E1E309400876EC3 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B22E1E309400876EC3 /* RxRelay */; };
+		49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B42E1E309400876EC3 /* RxSwift */; };
+		49BF00B72E1E309400876EC3 /* RxTest in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B62E1E309400876EC3 /* RxTest */; };
+		49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B92E1E323B00876EC3 /* RealmSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		49BF008C2E1E2FCA00876EC3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +75,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				49BF00B12E1E309400876EC3 /* RxCocoa in Frameworks */,
+				49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */,
+				49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */,
+				49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */,
+				49BF00B32E1E309400876EC3 /* RxRelay in Frameworks */,
+				49BF00B72E1E309400876EC3 /* RxTest in Frameworks */,
+				49BF00AB2E1E301500876EC3 /* FlexLayout in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +142,13 @@
 			);
 			name = BanlanceEat;
 			packageProductDependencies = (
+				49BF00AA2E1E301500876EC3 /* FlexLayout */,
+				49BF00AD2E1E303200876EC3 /* PinLayout */,
+				49BF00B02E1E309400876EC3 /* RxCocoa */,
+				49BF00B22E1E309400876EC3 /* RxRelay */,
+				49BF00B42E1E309400876EC3 /* RxSwift */,
+				49BF00B62E1E309400876EC3 /* RxTest */,
+				49BF00B92E1E323B00876EC3 /* RealmSwift */,
 			);
 			productName = BanlanceEat;
 			productReference = 49BF00722E1E2FC900876EC3 /* BanlanceEat.app */;
@@ -208,6 +232,12 @@
 			);
 			mainGroup = 49BF00692E1E2FC900876EC3;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				49BF00A92E1E301500876EC3 /* XCRemoteSwiftPackageReference "FlexLayout" */,
+				49BF00AC2E1E303200876EC3 /* XCRemoteSwiftPackageReference "Pinlayout" */,
+				49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				49BF00B82E1E323B00876EC3 /* XCRemoteSwiftPackageReference "realm-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 49BF00732E1E2FC900876EC3 /* Products */;
 			projectDirPath = "";
@@ -569,6 +599,79 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		49BF00A92E1E301500876EC3 /* XCRemoteSwiftPackageReference "FlexLayout" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/layoutBox/FlexLayout";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.1;
+			};
+		};
+		49BF00AC2E1E303200876EC3 /* XCRemoteSwiftPackageReference "Pinlayout" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/layoutBox/Pinlayout";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.10.5;
+			};
+		};
+		49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.9.0;
+			};
+		};
+		49BF00B82E1E323B00876EC3 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		49BF00AA2E1E301500876EC3 /* FlexLayout */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF00A92E1E301500876EC3 /* XCRemoteSwiftPackageReference "FlexLayout" */;
+			productName = FlexLayout;
+		};
+		49BF00AD2E1E303200876EC3 /* PinLayout */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF00AC2E1E303200876EC3 /* XCRemoteSwiftPackageReference "Pinlayout" */;
+			productName = PinLayout;
+		};
+		49BF00B02E1E309400876EC3 /* RxCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxCocoa;
+		};
+		49BF00B22E1E309400876EC3 /* RxRelay */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxRelay;
+		};
+		49BF00B42E1E309400876EC3 /* RxSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxSwift;
+		};
+		49BF00B62E1E309400876EC3 /* RxTest */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxTest;
+		};
+		49BF00B92E1E323B00876EC3 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF00B82E1E323B00876EC3 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 49BF006A2E1E2FC900876EC3 /* Project object */;
 }
