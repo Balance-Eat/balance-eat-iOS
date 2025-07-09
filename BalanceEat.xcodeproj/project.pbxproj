@@ -43,22 +43,11 @@
 		49BF00E42E1E338000876EC3 /* Exceptions for "BalanceEat" folder in "BalanceEat" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				BalanceEat.xcdatamodeld,
 				Info.plist,
 			);
 			target = 49BF00712E1E2FC900876EC3 /* BalanceEat */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		49BF00E52E1E338000876EC3 /* Exceptions for "BalanceEat" folder in "Compile Sources" phase from "BalanceEat" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 49BF006E2E1E2FC900876EC3 /* Sources */;
-			membershipExceptions = (
-				BalanceEat.xcdatamodeld,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		49BF008E2E1E2FCA00876EC3 /* BalanceEatTests */ = {
@@ -75,7 +64,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				49BF00E42E1E338000876EC3 /* Exceptions for "BalanceEat" folder in "BalanceEat" target */,
-				49BF00E52E1E338000876EC3 /* Exceptions for "BalanceEat" folder in "Compile Sources" phase from "BalanceEat" target */,
 			);
 			path = BalanceEat;
 			sourceTree = "<group>";
