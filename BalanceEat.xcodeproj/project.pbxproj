@@ -34,38 +34,50 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		49BF00722E1E2FC900876EC3 /* BanlanceEat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BanlanceEat.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		49BF008B2E1E2FCA00876EC3 /* BanlanceEatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BanlanceEatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		49BF00952E1E2FCA00876EC3 /* BanlanceEatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BanlanceEatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		49BF00722E1E2FC900876EC3 /* BalanceEat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceEat.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		49BF008B2E1E2FCA00876EC3 /* BalanceEatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BalanceEatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		49BF00952E1E2FCA00876EC3 /* BalanceEatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BalanceEatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		49BF009D2E1E2FCA00876EC3 /* Exceptions for "BanlanceEat" folder in "BanlanceEat" target */ = {
+		49BF00E42E1E338000876EC3 /* Exceptions for "BalanceEat" folder in "BalanceEat" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				BalanceEat.xcdatamodeld,
 				Info.plist,
 			);
-			target = 49BF00712E1E2FC900876EC3 /* BanlanceEat */;
+			target = 49BF00712E1E2FC900876EC3 /* BalanceEat */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		49BF00E52E1E338000876EC3 /* Exceptions for "BalanceEat" folder in "Compile Sources" phase from "BalanceEat" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 49BF006E2E1E2FC900876EC3 /* Sources */;
+			membershipExceptions = (
+				BalanceEat.xcdatamodeld,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		49BF00742E1E2FC900876EC3 /* BanlanceEat */ = {
+		49BF008E2E1E2FCA00876EC3 /* BalanceEatTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BalanceEatTests;
+			sourceTree = "<group>";
+		};
+		49BF00982E1E2FCA00876EC3 /* BalanceEatUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BalanceEatUITests;
+			sourceTree = "<group>";
+		};
+		49BF00DC2E1E338000876EC3 /* BalanceEat */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				49BF009D2E1E2FCA00876EC3 /* Exceptions for "BanlanceEat" folder in "BanlanceEat" target */,
+				49BF00E42E1E338000876EC3 /* Exceptions for "BalanceEat" folder in "BalanceEat" target */,
+				49BF00E52E1E338000876EC3 /* Exceptions for "BalanceEat" folder in "Compile Sources" phase from "BalanceEat" target */,
 			);
-			path = BanlanceEat;
-			sourceTree = "<group>";
-		};
-		49BF008E2E1E2FCA00876EC3 /* BanlanceEatTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = BanlanceEatTests;
-			sourceTree = "<group>";
-		};
-		49BF00982E1E2FCA00876EC3 /* BanlanceEatUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = BanlanceEatUITests;
+			path = BalanceEat;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -105,19 +117,19 @@
 		49BF00692E1E2FC900876EC3 = {
 			isa = PBXGroup;
 			children = (
-				49BF00742E1E2FC900876EC3 /* BanlanceEat */,
-				49BF008E2E1E2FCA00876EC3 /* BanlanceEatTests */,
-				49BF00982E1E2FCA00876EC3 /* BanlanceEatUITests */,
+				49BF008E2E1E2FCA00876EC3 /* BalanceEatTests */,
+				49BF00982E1E2FCA00876EC3 /* BalanceEatUITests */,
 				49BF00732E1E2FC900876EC3 /* Products */,
+				49BF00DC2E1E338000876EC3 /* BalanceEat */,
 			);
 			sourceTree = "<group>";
 		};
 		49BF00732E1E2FC900876EC3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				49BF00722E1E2FC900876EC3 /* BanlanceEat.app */,
-				49BF008B2E1E2FCA00876EC3 /* BanlanceEatTests.xctest */,
-				49BF00952E1E2FCA00876EC3 /* BanlanceEatUITests.xctest */,
+				49BF00722E1E2FC900876EC3 /* BalanceEat.app */,
+				49BF008B2E1E2FCA00876EC3 /* BalanceEatTests.xctest */,
+				49BF00952E1E2FCA00876EC3 /* BalanceEatUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,9 +137,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		49BF00712E1E2FC900876EC3 /* BanlanceEat */ = {
+		49BF00712E1E2FC900876EC3 /* BalanceEat */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 49BF009E2E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BanlanceEat" */;
+			buildConfigurationList = 49BF009E2E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BalanceEat" */;
 			buildPhases = (
 				49BF006E2E1E2FC900876EC3 /* Sources */,
 				49BF006F2E1E2FC900876EC3 /* Frameworks */,
@@ -138,9 +150,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				49BF00742E1E2FC900876EC3 /* BanlanceEat */,
+				49BF00DC2E1E338000876EC3 /* BalanceEat */,
 			);
-			name = BanlanceEat;
+			name = BalanceEat;
 			packageProductDependencies = (
 				49BF00AA2E1E301500876EC3 /* FlexLayout */,
 				49BF00AD2E1E303200876EC3 /* PinLayout */,
@@ -151,12 +163,12 @@
 				49BF00B92E1E323B00876EC3 /* RealmSwift */,
 			);
 			productName = BanlanceEat;
-			productReference = 49BF00722E1E2FC900876EC3 /* BanlanceEat.app */;
+			productReference = 49BF00722E1E2FC900876EC3 /* BalanceEat.app */;
 			productType = "com.apple.product-type.application";
 		};
-		49BF008A2E1E2FCA00876EC3 /* BanlanceEatTests */ = {
+		49BF008A2E1E2FCA00876EC3 /* BalanceEatTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 49BF00A32E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BanlanceEatTests" */;
+			buildConfigurationList = 49BF00A32E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BalanceEatTests" */;
 			buildPhases = (
 				49BF00872E1E2FCA00876EC3 /* Sources */,
 				49BF00882E1E2FCA00876EC3 /* Frameworks */,
@@ -168,18 +180,18 @@
 				49BF008D2E1E2FCA00876EC3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				49BF008E2E1E2FCA00876EC3 /* BanlanceEatTests */,
+				49BF008E2E1E2FCA00876EC3 /* BalanceEatTests */,
 			);
-			name = BanlanceEatTests;
+			name = BalanceEatTests;
 			packageProductDependencies = (
 			);
 			productName = BanlanceEatTests;
-			productReference = 49BF008B2E1E2FCA00876EC3 /* BanlanceEatTests.xctest */;
+			productReference = 49BF008B2E1E2FCA00876EC3 /* BalanceEatTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		49BF00942E1E2FCA00876EC3 /* BanlanceEatUITests */ = {
+		49BF00942E1E2FCA00876EC3 /* BalanceEatUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 49BF00A62E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BanlanceEatUITests" */;
+			buildConfigurationList = 49BF00A62E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BalanceEatUITests" */;
 			buildPhases = (
 				49BF00912E1E2FCA00876EC3 /* Sources */,
 				49BF00922E1E2FCA00876EC3 /* Frameworks */,
@@ -191,13 +203,13 @@
 				49BF00972E1E2FCA00876EC3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				49BF00982E1E2FCA00876EC3 /* BanlanceEatUITests */,
+				49BF00982E1E2FCA00876EC3 /* BalanceEatUITests */,
 			);
-			name = BanlanceEatUITests;
+			name = BalanceEatUITests;
 			packageProductDependencies = (
 			);
 			productName = BanlanceEatUITests;
-			productReference = 49BF00952E1E2FCA00876EC3 /* BanlanceEatUITests.xctest */;
+			productReference = 49BF00952E1E2FCA00876EC3 /* BalanceEatUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -223,7 +235,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 49BF006D2E1E2FC900876EC3 /* Build configuration list for PBXProject "BanlanceEat" */;
+			buildConfigurationList = 49BF006D2E1E2FC900876EC3 /* Build configuration list for PBXProject "BalanceEat" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -243,9 +255,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				49BF00712E1E2FC900876EC3 /* BanlanceEat */,
-				49BF008A2E1E2FCA00876EC3 /* BanlanceEatTests */,
-				49BF00942E1E2FCA00876EC3 /* BanlanceEatUITests */,
+				49BF00712E1E2FC900876EC3 /* BalanceEat */,
+				49BF008A2E1E2FCA00876EC3 /* BalanceEatTests */,
+				49BF00942E1E2FCA00876EC3 /* BalanceEatUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -301,12 +313,12 @@
 /* Begin PBXTargetDependency section */
 		49BF008D2E1E2FCA00876EC3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 49BF00712E1E2FC900876EC3 /* BanlanceEat */;
+			target = 49BF00712E1E2FC900876EC3 /* BalanceEat */;
 			targetProxy = 49BF008C2E1E2FCA00876EC3 /* PBXContainerItemProxy */;
 		};
 		49BF00972E1E2FCA00876EC3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 49BF00712E1E2FC900876EC3 /* BanlanceEat */;
+			target = 49BF00712E1E2FC900876EC3 /* BalanceEat */;
 			targetProxy = 49BF00962E1E2FCA00876EC3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -332,7 +344,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BanlanceEat;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BalanceEat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -360,7 +372,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BanlanceEat;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BalanceEat;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -502,7 +514,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BanlanceEat.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BanlanceEat";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BalanceEat.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BalanceEat";
 			};
 			name = Debug;
 		};
@@ -521,7 +533,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BanlanceEat.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BanlanceEat";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BalanceEat.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BalanceEat";
 			};
 			name = Release;
 		};
@@ -562,7 +574,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		49BF006D2E1E2FC900876EC3 /* Build configuration list for PBXProject "BanlanceEat" */ = {
+		49BF006D2E1E2FC900876EC3 /* Build configuration list for PBXProject "BalanceEat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49BF00A12E1E2FCA00876EC3 /* Debug */,
@@ -571,7 +583,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49BF009E2E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BanlanceEat" */ = {
+		49BF009E2E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BalanceEat" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49BF009F2E1E2FCA00876EC3 /* Debug */,
@@ -580,7 +592,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49BF00A32E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BanlanceEatTests" */ = {
+		49BF00A32E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BalanceEatTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49BF00A42E1E2FCA00876EC3 /* Debug */,
@@ -589,7 +601,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		49BF00A62E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BanlanceEatUITests" */ = {
+		49BF00A62E1E2FCA00876EC3 /* Build configuration list for PBXNativeTarget "BalanceEatUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				49BF00A72E1E2FCA00876EC3 /* Debug */,
