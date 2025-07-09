@@ -12,7 +12,6 @@
 		49BF00B12E1E309400876EC3 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B02E1E309400876EC3 /* RxCocoa */; };
 		49BF00B32E1E309400876EC3 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B22E1E309400876EC3 /* RxRelay */; };
 		49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B42E1E309400876EC3 /* RxSwift */; };
-		49BF00B72E1E309400876EC3 /* RxTest in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B62E1E309400876EC3 /* RxTest */; };
 		49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B92E1E323B00876EC3 /* RealmSwift */; };
 /* End PBXBuildFile section */
 
@@ -80,7 +79,6 @@
 				49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */,
 				49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */,
 				49BF00B32E1E309400876EC3 /* RxRelay in Frameworks */,
-				49BF00B72E1E309400876EC3 /* RxTest in Frameworks */,
 				49BF00AB2E1E301500876EC3 /* FlexLayout in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -321,7 +319,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 697ACQDW6C;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BanlanceEat/Info.plist;
+				INFOPLIST_FILE = BalanceEat/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -349,7 +347,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 697ACQDW6C;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = BanlanceEat/Info.plist;
+				INFOPLIST_FILE = BalanceEat/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
