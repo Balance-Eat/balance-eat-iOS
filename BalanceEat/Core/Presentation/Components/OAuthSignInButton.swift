@@ -45,6 +45,21 @@ final class OAuthSignInButton: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        self.alpha = 0.6
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        self.alpha = 1.0
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+        self.alpha = 1.0
+    }
+    
     init(icon: UIImage, name: String, color: UIColor, textColor: UIColor) {
         self.icon = icon
         self.name = name
@@ -61,6 +76,7 @@ final class OAuthSignInButton: UIView {
         self.layer.cornerRadius = 8
         self.clipsToBounds = true
         
+        iconImageView.image = icon
         iconImageView.snp.makeConstraints { make in
             make.width.height.equalTo(24)
         }
