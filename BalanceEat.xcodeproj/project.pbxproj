@@ -13,6 +13,7 @@
 		49BF00B32E1E309400876EC3 /* RxRelay in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B22E1E309400876EC3 /* RxRelay */; };
 		49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B42E1E309400876EC3 /* RxSwift */; };
 		49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B92E1E323B00876EC3 /* RealmSwift */; };
+		49BF011C2E1F4CE500876EC3 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF011B2E1F4CE500876EC3 /* SnapKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,6 +78,7 @@
 				49BF00B12E1E309400876EC3 /* RxCocoa in Frameworks */,
 				49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */,
 				49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */,
+				49BF011C2E1F4CE500876EC3 /* SnapKit in Frameworks */,
 				49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */,
 				49BF00B32E1E309400876EC3 /* RxRelay in Frameworks */,
 				49BF00AB2E1E301500876EC3 /* FlexLayout in Frameworks */,
@@ -147,6 +149,7 @@
 				49BF00B42E1E309400876EC3 /* RxSwift */,
 				49BF00B62E1E309400876EC3 /* RxTest */,
 				49BF00B92E1E323B00876EC3 /* RealmSwift */,
+				49BF011B2E1F4CE500876EC3 /* SnapKit */,
 			);
 			productName = BanlanceEat;
 			productReference = 49BF00722E1E2FC900876EC3 /* BalanceEat.app */;
@@ -235,6 +238,7 @@
 				49BF00AC2E1E303200876EC3 /* XCRemoteSwiftPackageReference "Pinlayout" */,
 				49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */,
 				49BF00B82E1E323B00876EC3 /* XCRemoteSwiftPackageReference "realm-swift" */,
+				49BF011A2E1F4CE500876EC3 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 49BF00732E1E2FC900876EC3 /* Products */;
@@ -631,6 +635,14 @@
 				kind = branch;
 			};
 		};
+		49BF011A2E1F4CE500876EC3 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -668,6 +680,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 49BF00B82E1E323B00876EC3 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		49BF011B2E1F4CE500876EC3 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF011A2E1F4CE500876EC3 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
