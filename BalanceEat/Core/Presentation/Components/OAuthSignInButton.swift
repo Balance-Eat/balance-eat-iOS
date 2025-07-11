@@ -61,6 +61,9 @@ final class OAuthSignInButton: UIView {
     }
     
     private let tap: PublishSubject<Void> = .init()
+    var tapObservable: Observable<Void> {
+        return tap.asObservable()
+    }
     private let disposeBag = DisposeBag()
     
     private let iconImageView: UIImageView = {

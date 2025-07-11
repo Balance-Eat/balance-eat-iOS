@@ -38,8 +38,15 @@ class LoginViewController: UIViewController {
         return oAuthSignInButton
     }()
     
+    private let disposeBag = DisposeBag()
+    
     init() {
         super.init(nibName: nil, bundle: nil)
+        setUpView()
+        setUpBinding()
+    }
+    
+    private func setUpView() {
         view.backgroundColor = .white
         view.addSubview(appLogoImageView)
         view.addSubview(stackView)
@@ -59,7 +66,26 @@ class LoginViewController: UIViewController {
             make.leading.trailing.equalToSuperview().inset(32)
             make.height.equalTo(190)
         }
+    }
+    
+    private func setUpBinding() {
+        kakaoSignInButton.tapObservable
+            .subscribe(onNext: {
+                print("카카오 로그인")
+            })
+            .disposed(by: disposeBag)
         
+        googleSignInButton.tapObservable
+            .subscribe(onNext: {
+                print("구글 로그인")
+            })
+            .disposed(by: disposeBag)
+        
+        appleSignInButton.tapObservable
+            .subscribe(onNext: {
+                print("애플 로그인")
+            })
+            .disposed(by: disposeBag)
     }
     
     required init?(coder: NSCoder) {
