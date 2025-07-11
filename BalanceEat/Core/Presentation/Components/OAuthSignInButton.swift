@@ -121,9 +121,9 @@ final class OAuthSignInButton: UIView {
         self.clipsToBounds = true
         
         self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOpacity = 0.2
+        self.layer.shadowOpacity = 0.1
         self.layer.shadowOffset = CGSize(width: 0, height: 2)
-        self.layer.shadowRadius = 8
+        self.layer.shadowRadius = 4
         self.layer.masksToBounds = false
         
         self.layer.borderWidth = provider == .google ? 1 : 0

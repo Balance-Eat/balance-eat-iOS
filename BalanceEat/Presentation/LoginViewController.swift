@@ -19,7 +19,7 @@ class LoginViewController: UIViewController {
     private let stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.spacing = 20
+        stackView.spacing = 30
         return stackView
     }()
     
@@ -64,26 +64,28 @@ class LoginViewController: UIViewController {
             make.centerX.equalToSuperview()
             make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.bottom).offset(-40)
             make.leading.trailing.equalToSuperview().inset(32)
-            make.height.equalTo(190)
         }
     }
     
     private func setUpBinding() {
         kakaoSignInButton.tapObservable
-            .subscribe(onNext: {
+            .subscribe(onNext: { [weak self] in
                 print("카카오 로그인")
+                self?.navigateToMain()
             })
             .disposed(by: disposeBag)
         
         googleSignInButton.tapObservable
-            .subscribe(onNext: {
+            .subscribe(onNext: { [weak self] in
                 print("구글 로그인")
+                self?.navigateToMain()
             })
             .disposed(by: disposeBag)
         
         appleSignInButton.tapObservable
-            .subscribe(onNext: {
+            .subscribe(onNext: { [weak self] in
                 print("애플 로그인")
+                self?.navigateToMain()
             })
             .disposed(by: disposeBag)
     }
@@ -94,5 +96,10 @@ class LoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    private func navigateToMain() {
+        let mainViewController = MainViewController()
+        self.navigationController?.setViewControllers([mainViewController], animated: true)
     }
 }
