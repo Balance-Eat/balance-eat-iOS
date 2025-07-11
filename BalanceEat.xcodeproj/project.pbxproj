@@ -14,6 +14,7 @@
 		49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B42E1E309400876EC3 /* RxSwift */; };
 		49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B92E1E323B00876EC3 /* RealmSwift */; };
 		49BF011C2E1F4CE500876EC3 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF011B2E1F4CE500876EC3 /* SnapKit */; };
+		49BF020F2E20E42800876EC3 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B92E1E323B00876EC3 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +33,20 @@
 			remoteInfo = BanlanceEat;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		49BF02102E20E42800876EC3 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				49BF020F2E20E42800876EC3 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		49BF00722E1E2FC900876EC3 /* BalanceEat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceEat.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -132,6 +147,7 @@
 				49BF006E2E1E2FC900876EC3 /* Sources */,
 				49BF006F2E1E2FC900876EC3 /* Frameworks */,
 				49BF00702E1E2FC900876EC3 /* Resources */,
+				49BF02102E20E42800876EC3 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

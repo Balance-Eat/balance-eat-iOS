@@ -10,11 +10,55 @@ import RxSwift
 import RxCocoa
 import SnapKit
 
+enum OAuthProvider: String {
+    case apple
+    case google
+    case kakao
+}
+
 final class OAuthSignInButton: UIView {
-    private let icon: UIImage
-    private let name: String
-    private let color: UIColor
-    private let textColor: UIColor
+    private let provider: OAuthProvider
+    
+    private var icon: UIImage {
+        switch provider {
+        case .apple:
+            UIImage(systemName: "apple.logo") ?? UIImage()
+        case .google:
+            UIImage(named: "GoogleLogo") ?? UIImage()
+        case .kakao:
+            UIImage(named: "KakaoLogo") ?? UIImage()
+        }
+    }
+    private var color: UIColor {
+        switch provider {
+        case .apple:
+                .appleBackground
+        case .google:
+                .googleBackground
+        case .kakao:
+                .kakaoBackground
+        }
+    }
+    private var textColor: UIColor {
+        switch provider {
+        case .apple:
+                .appleText
+        case .google:
+                .googleText
+        case .kakao:
+                .kakaoText
+        }
+    }
+    private var titleText: String {
+        switch provider {
+        case .apple:
+            "Apple로"
+        case .google:
+            "Google로"
+        case .kakao:
+            "카카오로"
+        }
+    }
     
     private let tap: PublishSubject<Void> = .init()
     private let disposeBag = DisposeBag()
@@ -49,22 +93,19 @@ final class OAuthSignInButton: UIView {
         super.touchesBegan(touches, with: event)
         self.alpha = 0.6
     }
-
+    
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
         self.alpha = 1.0
     }
-
+    
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesCancelled(touches, with: event)
         self.alpha = 1.0
     }
     
-    init(icon: UIImage, name: String, color: UIColor, textColor: UIColor) {
-        self.icon = icon
-        self.name = name
-        self.color = color
-        self.textColor = textColor
+    init(provider: OAuthProvider) {
+        self.provider = provider
         super.init(frame: .zero)
         
         setUpView()
@@ -76,20 +117,40 @@ final class OAuthSignInButton: UIView {
         self.layer.cornerRadius = 8
         self.clipsToBounds = true
         
-        iconImageView.image = icon
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOpacity = 0.2
+        self.layer.shadowOffset = CGSize(width: 0, height: 2)
+        self.layer.shadowRadius = 8
+        self.layer.masksToBounds = false
+        
+        self.layer.borderWidth = provider == .google ? 1 : 0
+        self.layer.borderColor = provider == .google ? UIColor(named: "GoogleBorderColor")?.cgColor : UIColor.clear.cgColor
+        
+        if provider == .apple {
+            iconImageView.image = icon.withRenderingMode(.alwaysTemplate)
+            iconImageView.tintColor = textColor
+        } else {
+            iconImageView.image = icon
+        }
+        
+        titleLabel.text = "\(titleText) 시작하기"
+        titleLabel.textColor = textColor
+        
+        self.addSubview(iconImageView)
+        self.addSubview(titleLabel)
+        
         iconImageView.snp.makeConstraints { make in
+            make.leading.equalToSuperview().inset(16)
+            make.centerY.equalToSuperview()
             make.width.height.equalTo(24)
         }
         
-        titleLabel.text = "\(name)으로 시작하기"
-        titleLabel.textColor = textColor
+        titleLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
         
-        containerView.addArrangedSubview(iconImageView)
-        containerView.addArrangedSubview(titleLabel)
-        
-        self.addSubview(containerView)
-        containerView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(12)
+        self.snp.makeConstraints { make in
+            make.height.equalTo(50)
         }
     }
     

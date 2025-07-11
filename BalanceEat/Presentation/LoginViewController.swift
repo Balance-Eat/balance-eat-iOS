@@ -10,18 +10,56 @@ import SnapKit
 import RxSwift
 
 class LoginViewController: UIViewController {
-    private let oAuthSignInButton: OAuthSignInButton = {
-        let oAuthSignInButton = OAuthSignInButton(icon: UIImage(systemName: "pencil.slash")!, name: "name", color: UIColor.red, textColor: UIColor.blue)
+    private let appLogoImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "BalanceEat_Logo"))
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    
+    private let stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 20
+        return stackView
+    }()
+    
+    private let kakaoSignInButton: OAuthSignInButton = {
+        let oAuthSignInButton = OAuthSignInButton(provider: .kakao)
+        return oAuthSignInButton
+    }()
+    
+    private let googleSignInButton: OAuthSignInButton = {
+        let oAuthSignInButton = OAuthSignInButton(provider: .google)
+        return oAuthSignInButton
+    }()
+    
+    private let appleSignInButton: OAuthSignInButton = {
+        let oAuthSignInButton = OAuthSignInButton(provider: .apple)
         return oAuthSignInButton
     }()
     
     init() {
         super.init(nibName: nil, bundle: nil)
         view.backgroundColor = .white
-        view.addSubview(oAuthSignInButton)
-        oAuthSignInButton.snp.makeConstraints { make in
+        view.addSubview(appLogoImageView)
+        view.addSubview(stackView)
+        
+        stackView.addArrangedSubview(kakaoSignInButton)
+        stackView.addArrangedSubview(googleSignInButton)
+        stackView.addArrangedSubview(appleSignInButton)
+        
+        appLogoImageView.snp.makeConstraints { make in
+            make.width.equalTo(280)
             make.center.equalToSuperview()
         }
+        
+        stackView.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.bottom.lessThanOrEqualTo(view.safeAreaLayoutGuide.snp.bottom).offset(-40)
+            make.leading.trailing.equalToSuperview().inset(32)
+            make.height.equalTo(190)
+        }
+        
     }
     
     required init?(coder: NSCoder) {
