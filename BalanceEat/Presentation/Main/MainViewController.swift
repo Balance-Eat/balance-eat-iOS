@@ -42,7 +42,7 @@ class MainViewController: UIViewController {
     private let disposeBag = DisposeBag()
 
     private let viewControllers: [UIViewController] = [
-        UINavigationController(rootViewController: HomeViewController()),
+        HomeViewController(),
         CreateViewController(),
         ListViewController(),
         ChartViewController(),
@@ -60,6 +60,11 @@ class MainViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
+    }
 
     private func setupUI() {
         view.backgroundColor = .white
@@ -71,7 +76,8 @@ class MainViewController: UIViewController {
         view.addSubview(contentView)
 
         contentView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(bottomNavigationBar.snp.top)
         }
 
