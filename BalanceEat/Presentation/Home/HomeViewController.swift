@@ -48,8 +48,8 @@ class HomeViewController: UIViewController {
         contentView.addSubview(welcomeBackgroundView)
         welcomeBackgroundView.addSubview(welcomeLabelStackView)
         welcomeBackgroundView.colors = [
-            UIColor(named: "WelcomeTitleStartBackgroundColor") ?? .clear,
-            UIColor(named: "WelcomeTitleEndBackgroundColor") ?? .clear
+            UIColor.welcomeTitleStartBackground,
+            UIColor.welcomeTitleEndBackground
         ]
         
         scrollView.snp.makeConstraints { make in
