@@ -36,6 +36,7 @@ class MainViewController: UIViewController {
     ]
 
     private var tabButtons: [BottomNavigationBarTabButton] = []
+    
     private let bottomNavigationBar = UIStackView()
     private let contentView = UIView()
 
