@@ -50,6 +50,17 @@ class HomeViewController: UIViewController {
     private let nowBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(title: "현재 체성분", weight: 72.53, skeletalMuscleMass: 32.932, bodyFatMass: 15.212312)
     private let targetBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(title: "목표 체성분", weight: -2.6, skeletalMuscleMass: 1.5, bodyFatMass: -3.23, isTarget: true)
     
+    private let todayCalorieView: TodayCalorieView = TodayCalorieView(
+        currentCalorie: 1420,
+        targetCalorie: 2000,
+        currentCarbohydrate: 178,
+        targetCarbohydrate: 250,
+        currentProtein: 95,
+        targetProtein: 120,
+        currentFat: 45,
+        targetFat: 67
+    )
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .homeScreenBackground
@@ -58,6 +69,7 @@ class HomeViewController: UIViewController {
         scrollView.addSubview(contentView)
         contentView.addSubview(welcomeBackgroundView)
         contentView.addSubview(bodyStatusStackView)
+        contentView.addSubview(todayCalorieView)
         
         welcomeBackgroundView.addSubview(welcomeLabelStackView)
         welcomeBackgroundView.colors = [
@@ -90,6 +102,11 @@ class HomeViewController: UIViewController {
             make.top.equalTo(welcomeBackgroundView.snp.bottom).inset(-20)
             make.leading.trailing.equalToSuperview().inset(20)
             
+        }
+        
+        todayCalorieView.snp.makeConstraints { make in
+            make.top.equalTo(bodyStatusStackView.snp.bottom).inset(-20)
+            make.leading.trailing.equalToSuperview().inset(20)
         }
     }
 }
