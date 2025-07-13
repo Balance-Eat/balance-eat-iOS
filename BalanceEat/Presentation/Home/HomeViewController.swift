@@ -61,6 +61,8 @@ class HomeViewController: UIViewController {
         targetFat: 67
     )
     
+    private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date())!)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .homeScreenBackground
@@ -70,6 +72,7 @@ class HomeViewController: UIViewController {
         contentView.addSubview(welcomeBackgroundView)
         contentView.addSubview(bodyStatusStackView)
         contentView.addSubview(todayCalorieView)
+        contentView.addSubview(proteinRemindCardView)
         
         welcomeBackgroundView.addSubview(welcomeLabelStackView)
         welcomeBackgroundView.colors = [
@@ -107,6 +110,12 @@ class HomeViewController: UIViewController {
         todayCalorieView.snp.makeConstraints { make in
             make.top.equalTo(bodyStatusStackView.snp.bottom).inset(-20)
             make.leading.trailing.equalToSuperview().inset(20)
+        }
+        
+        proteinRemindCardView.snp.makeConstraints { make in
+            make.top.equalTo(todayCalorieView.snp.bottom).inset(-40)
+            make.leading.trailing.equalToSuperview().inset(20)
+            make.bottom.equalToSuperview().inset(20)
         }
     }
 }
