@@ -39,18 +39,34 @@ class HomeViewController: UIViewController {
         return stackView
     }()
     
+    private let bodyStatusStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.distribution = .fillEqually
+        stackView.spacing = 20
+        return stackView
+    }()
+    
+    private let nowBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(title: "현재 체성분", weight: 72.53, skeletalMuscleMass: 32.932, bodyFatMass: 15.212312)
+    private let targetBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(title: "목표 체성분", weight: -2.6, skeletalMuscleMass: 1.5, bodyFatMass: -3.23, isTarget: true)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .homeScreenBackground
         
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(welcomeBackgroundView)
+        contentView.addSubview(bodyStatusStackView)
+        
         welcomeBackgroundView.addSubview(welcomeLabelStackView)
         welcomeBackgroundView.colors = [
             UIColor.welcomeTitleStartBackground,
             UIColor.welcomeTitleEndBackground
         ]
+        
+        bodyStatusStackView.addArrangedSubview(nowBodyStatusCardView)
+        bodyStatusStackView.addArrangedSubview(targetBodyStatusCardView)
         
         scrollView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -68,6 +84,12 @@ class HomeViewController: UIViewController {
         
         welcomeLabelStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(16)
+        }
+        
+        bodyStatusStackView.snp.makeConstraints { make in
+            make.top.equalTo(welcomeBackgroundView.snp.bottom).inset(-20)
+            make.leading.trailing.equalToSuperview().inset(20)
+            
         }
     }
 }
