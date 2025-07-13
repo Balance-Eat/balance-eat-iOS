@@ -14,18 +14,7 @@ final class BodyStatusCardView: UIView {
     private let bodyFatMass: Double
     private let isTarget: Bool
     
-    private let containerView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 16
-        view.clipsToBounds = true
-        view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.1
-        view.layer.shadowOffset = CGSize(width: 0, height: 2)
-        view.layer.shadowRadius = 4
-        view.layer.masksToBounds = false
-        return view
-    }()
+    private let containerView: HomeMenuContentView = HomeMenuContentView()
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
