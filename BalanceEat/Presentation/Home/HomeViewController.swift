@@ -8,9 +8,6 @@
 import UIKit
 import SnapKit
 
-import UIKit
-import SnapKit
-
 class HomeViewController: UIViewController {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -63,6 +60,8 @@ class HomeViewController: UIViewController {
     
     private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date())!)
     
+    private let mealLogView = MealLogView(icon: .chickenChest, title: "닭가슴살", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 120, consumedSugars: 0, consumedCarbohydrates: 0, consumedProteins: 23, consumedFats: 1)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .homeScreenBackground
@@ -73,6 +72,7 @@ class HomeViewController: UIViewController {
         contentView.addSubview(bodyStatusStackView)
         contentView.addSubview(todayCalorieView)
         contentView.addSubview(proteinRemindCardView)
+        contentView.addSubview(mealLogView)
         
         welcomeBackgroundView.addSubview(welcomeLabelStackView)
         welcomeBackgroundView.colors = [
@@ -114,6 +114,12 @@ class HomeViewController: UIViewController {
         
         proteinRemindCardView.snp.makeConstraints { make in
             make.top.equalTo(todayCalorieView.snp.bottom).inset(-40)
+            make.leading.trailing.equalToSuperview().inset(20)
+//            make.bottom.equalToSuperview().inset(20)
+        }
+        
+        mealLogView.snp.makeConstraints { make in
+            make.top.equalTo(proteinRemindCardView.snp.bottom).inset(-40)
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)
         }
