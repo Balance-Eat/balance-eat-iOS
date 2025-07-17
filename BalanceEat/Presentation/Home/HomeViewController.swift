@@ -60,7 +60,68 @@ class HomeViewController: UIViewController {
     
     private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date())!)
     
-    private let mealLogView = MealLogView(icon: .chickenChest, title: "닭가슴살", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 120, consumedSugars: 0, consumedCarbohydrates: 0, consumedProteins: 23, consumedFats: 1)
+    private let todayAteMealLogListView: UIView = {
+        let contentView = HomeMenuContentView()
+        
+        let titleLabel: UILabel = {
+            let titleLabel = UILabel()
+            titleLabel.text = "최근 식사 기록"
+            titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
+            titleLabel.textColor = .bodyStatusCardNumber
+            return titleLabel
+        }()
+        
+        let mealLogs: [MealLogView] = [
+            MealLogView(icon: .chickenChest, title: "닭가슴살", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 120, consumedSugars: 0, consumedCarbohydrates: 0, consumedProteins: 23, consumedFats: 1),
+            MealLogView(icon: .salad, title: "샐러드", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 25, consumedSugars: 3, consumedCarbohydrates: 4, consumedProteins: 2, consumedFats: 0)
+        ]
+        
+        let stackView: UIStackView = {
+            let stackView = UIStackView()
+            stackView.axis = .vertical
+            stackView.distribution = .fill
+            stackView.spacing = 0 
+            return stackView
+        }()
+        
+        for (index, mealLog) in mealLogs.enumerated() {
+            if index > 0 {
+                let separator = UIView()
+                separator.backgroundColor = .systemGray5
+
+                separator.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    separator.heightAnchor.constraint(equalToConstant: 1)
+                ])
+                
+                let separatorContainer = UIView()
+                separatorContainer.addSubview(separator)
+                separator.snp.makeConstraints { make in
+                    make.top.bottom.equalToSuperview()
+                    make.leading.trailing.equalToSuperview().inset(20)
+                }
+
+                stackView.addArrangedSubview(separatorContainer)
+            }
+            
+            stackView.addArrangedSubview(mealLog)
+        }
+        
+        contentView.addSubview(titleLabel)
+        contentView.addSubview(stackView)
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview().inset(20)
+        }
+        
+        stackView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(10)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalToSuperview()
+        }
+        
+        return contentView
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -72,7 +133,7 @@ class HomeViewController: UIViewController {
         contentView.addSubview(bodyStatusStackView)
         contentView.addSubview(todayCalorieView)
         contentView.addSubview(proteinRemindCardView)
-        contentView.addSubview(mealLogView)
+        contentView.addSubview(todayAteMealLogListView)
         
         welcomeBackgroundView.addSubview(welcomeLabelStackView)
         welcomeBackgroundView.colors = [
@@ -118,7 +179,7 @@ class HomeViewController: UIViewController {
 //            make.bottom.equalToSuperview().inset(20)
         }
         
-        mealLogView.snp.makeConstraints { make in
+        todayAteMealLogListView.snp.makeConstraints { make in
             make.top.equalTo(proteinRemindCardView.snp.bottom).inset(-40)
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)

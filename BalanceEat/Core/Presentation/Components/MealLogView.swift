@@ -19,6 +19,7 @@ final class MealLogView: UIView {
     private let consumedProteins: Int
     private let consumedFats: Int
     
+    private let containerView: UIView = UIView()
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -26,23 +27,23 @@ final class MealLogView: UIView {
     }()
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 18, weight: .bold)
+        label.font = .systemFont(ofSize: 14, weight: .bold)
         return label
     }()
     private let ateTimeLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 13, weight: .regular)
+        label.font = .systemFont(ofSize: 12, weight: .regular)
         label.textColor = .secondaryLabel
         return label
     }()
     private let consumedCaloriesLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 22, weight: .heavy)
+        label.font = .systemFont(ofSize: 18, weight: .heavy)
         return label
     }()
     private let consumedFoodAmountLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 18, weight: .bold)
+        label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textColor = .darkGray
         return label
     }()
@@ -84,18 +85,24 @@ final class MealLogView: UIView {
         consumedFoodAmountLabel.text = "\(consumedFoodAmount)g"
         consumedCaloriesLabel.text = "\(consumedCalories) kcal"
         
+        self.addSubview(containerView)
+        
         [iconImageView, titleLabel, ateTimeLabel, consumedCaloriesLabel, consumedFoodAmountLabel, nutrientStackView].forEach {
-            self.addSubview($0)
+            containerView.addSubview($0)
+        }
+        
+        containerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(20)
         }
         
         iconImageView.snp.makeConstraints { make in
-            make.top.leading.equalToSuperview().inset(16)
+            make.top.leading.equalToSuperview()
             make.width.height.equalTo(30)
         }
         
         titleLabel.snp.makeConstraints { make in
             make.leading.equalTo(iconImageView.snp.trailing).inset(-16)
-            make.top.equalToSuperview().inset(16)
+            make.top.equalToSuperview()
         }
         
         ateTimeLabel.snp.makeConstraints { make in
@@ -104,18 +111,17 @@ final class MealLogView: UIView {
         }
         
         consumedFoodAmountLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(24)
-            make.trailing.equalToSuperview().inset(16)
+            make.top.trailing.equalToSuperview().inset(8)
         }
         
         consumedCaloriesLabel.snp.makeConstraints { make in
-            make.top.equalTo(consumedFoodAmountLabel.snp.bottom).offset(50)
-            make.leading.equalToSuperview().inset(16)
+            make.top.equalTo(consumedFoodAmountLabel.snp.bottom).offset(40)
+            make.leading.equalToSuperview()
         }
 
         nutrientStackView.snp.makeConstraints { make in
             make.top.equalTo(consumedCaloriesLabel.snp.bottom).offset(8)
-            make.leading.trailing.bottom.equalToSuperview().inset(16)
+            make.leading.trailing.bottom.equalToSuperview()
         }
         
         nutrientStackView.addArrangedSubview(consumedSugarView)
@@ -159,7 +165,7 @@ final class ConsumedNutirientItemView: UIView {
     
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 20, weight: .bold)
+        label.font = .systemFont(ofSize: 14, weight: .bold)
         label.textAlignment = .center
         return label
     }()
