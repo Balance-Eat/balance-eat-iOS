@@ -12,17 +12,19 @@ final class TitledContainerView: UIView {
     private let title: String
     private let backgroundView = HomeMenuContentView()
     private let contentView: UIView
+    private let isSmall: Bool
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 17, weight: .bold)
+        label.font = .systemFont(ofSize: isSmall ? 14 : 17, weight: .bold)
         label.textColor = .bodyStatusCardNumber
         return label
     }()
     
-    init(title: String, contentView: UIView) {
+    init(title: String, contentView: UIView, isSmall: Bool = false) {
         self.title = title
         self.contentView = contentView
+        self.isSmall = isSmall
         super.init(frame: .zero)
         
         setUpView()

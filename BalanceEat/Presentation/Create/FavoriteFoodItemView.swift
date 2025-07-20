@@ -10,10 +10,15 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
+struct FavoriteFood {
+    let iconImage: UIImage
+    let name: String
+    let calorie: Int
+}
+
 final class FavoriteFoodItemView: UIView {
-    private let iconImage: UIImage
-    private let name: String
-    private let calorie: Int
+    private let favoriteFood: FavoriteFood
+    private let index: Int
     
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
@@ -33,23 +38,44 @@ final class FavoriteFoodItemView: UIView {
         return label
     }()
     
-    init(iconImage: UIImage, name: String, calorie: Int) {
-        self.iconImage = iconImage
-        self.name = name
-        self.calorie = calorie
+    private let disposeBag = DisposeBag()
+    private let tap: PublishSubject<Int> = .init()
+    var tapObservable: Observable<Int> {
+        tap.asObservable()
+    }
+    
+    init(favoriteFood: FavoriteFood, index: Int) {
+        self.favoriteFood = favoriteFood
+        self.index = index
         super.init(frame: .zero)
         
         setUpView()
+        setUpBinding()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        self.alpha = 0.6
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        self.alpha = 1.0
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesCancelled(touches, with: event)
+        self.alpha = 1.0
+    }
+    
     private func setUpView() {
-        iconImageView.image = iconImage
-        nameLabel.text = name
-        calorieLabel.text = "\(calorie) kcal"
+        iconImageView.image = favoriteFood.iconImage
+        nameLabel.text = favoriteFood.name
+        calorieLabel.text = "\(favoriteFood.calorie) kcal"
         
         [iconImageView, nameLabel, calorieLabel].forEach {
             addSubview($0)
@@ -61,7 +87,7 @@ final class FavoriteFoodItemView: UIView {
         self.layer.borderColor = UIColor.mealTimePickerBorder.cgColor
         
         iconImageView.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(8)
+            make.top.equalToSuperview().offset(16)
             make.centerX.equalToSuperview()
             make.width.height.equalTo(24)
         }
@@ -74,7 +100,19 @@ final class FavoriteFoodItemView: UIView {
         calorieLabel.snp.makeConstraints { make in
             make.top.equalTo(nameLabel.snp.bottom).offset(4)
             make.centerX.equalToSuperview()
-            make.bottom.equalToSuperview().offset(-8)
+            make.bottom.equalToSuperview().offset(-16)
         }
+    }
+    
+    private func setUpBinding() {
+        let tapGesture = UITapGestureRecognizer()
+        self.addGestureRecognizer(tapGesture)
+        
+        tapGesture.rx.event
+            .bind { [weak self] _ in
+                guard let self = self else { return }
+                self.tap.onNext(self.index)
+            }
+            .disposed(by: disposeBag)
     }
 }
