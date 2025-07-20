@@ -28,6 +28,8 @@ class CreateViewController: UIViewController {
     private let searchInputField = SearchInputField(placeholder: "음식 이름을 입력하세요")
     private lazy var searchMealTitledView = TitledContainerView(title: "음식 검색", contentView: searchInputField)
     
+    private let favoriteFoodItemView = FavoriteFoodItemView(iconImage: .chickenChest, name: "닭가슴살", calorie: 165)
+    
     init() {
         super.init(nibName: nil, bundle: nil)
         
@@ -49,6 +51,7 @@ class CreateViewController: UIViewController {
         scrollView.addSubview(contentView)
         contentView.addSubview(mealTimeTitledView)
         contentView.addSubview(searchMealTitledView)
+        contentView.addSubview(favoriteFoodItemView)
         
         scrollView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -66,8 +69,15 @@ class CreateViewController: UIViewController {
         
         searchMealTitledView.snp.makeConstraints { make in
             make.leading.trailing.equalTo(mealTimeTitledView)
-            make.top.equalTo(mealTimeTitledView.snp.bottom).inset(20)
+            make.top.equalTo(mealTimeTitledView.snp.bottom).offset(20)
+//            make.bottom.equalToSuperview().inset(20)
+        }
+        
+        favoriteFoodItemView.snp.makeConstraints { make in
+            make.top.equalTo(searchMealTitledView.snp.bottom).offset(20)
+            make.centerX.equalToSuperview()
             make.bottom.equalToSuperview().inset(20)
+            make.width.equalTo(300)
         }
     }
     
