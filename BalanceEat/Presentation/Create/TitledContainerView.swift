@@ -37,6 +37,8 @@ final class TitledContainerView: UIView {
         backgroundView.addSubview(titleLabel)
         backgroundView.addSubview(contentView)
         
+        contentView.isUserInteractionEnabled = true
+        
         titleLabel.text = title
         
         backgroundView.snp.makeConstraints { make in

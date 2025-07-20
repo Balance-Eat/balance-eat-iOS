@@ -12,12 +12,16 @@ class CreateViewController: UIViewController {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
-    private let vvvv: UIView = {
-        let view = UIView()
-        view.backgroundColor = .blue
+    private var mealTime: MealTime = .breakfast
+    
+    private lazy var mealTimePickerView: MealTimePickerView = {
+        let view = MealTimePickerView(selectedMealTime: mealTime)
+        view.snp.makeConstraints { make in
+            make.height.equalTo(40)  // 아이템 높이와 맞추기
+        }
         return view
     }()
-    private lazy var titledContainerView = TitledContainerView(title: "타이트르를", contentView: vvvv)
+    private lazy var titledContainerView = TitledContainerView(title: "언제 드셨나요?", contentView: mealTimePickerView)
     
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -49,8 +53,8 @@ class CreateViewController: UIViewController {
         }
         
         titledContainerView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview().inset(20)
-            make.height.equalTo(300)
+            make.top.leading.trailing.bottom.equalToSuperview().inset(20)
+            make.height.equalTo(120)
         }
     }
 }

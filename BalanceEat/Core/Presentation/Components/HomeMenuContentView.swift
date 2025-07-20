@@ -24,6 +24,7 @@ final class HomeMenuContentView: UIView {
     
     init() {
         super.init(frame: .zero)
+        self.isUserInteractionEnabled = true
         self.addSubview(containerView)
         
         containerView.snp.makeConstraints { make in
