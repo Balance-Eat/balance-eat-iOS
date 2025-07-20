@@ -7,26 +7,32 @@
 
 import UIKit
 import SnapKit
+import RxSwift
+import RxCocoa
 
 class CreateViewController: UIViewController {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
+    private let disposeBag = DisposeBag()
     private var mealTime: MealTime = .breakfast
     
     private lazy var mealTimePickerView: MealTimePickerView = {
         let view = MealTimePickerView(selectedMealTime: mealTime)
         view.snp.makeConstraints { make in
-            make.height.equalTo(40)  // 아이템 높이와 맞추기
+            make.height.equalTo(40)
         }
         return view
     }()
-    private lazy var titledContainerView = TitledContainerView(title: "언제 드셨나요?", contentView: mealTimePickerView)
+    private lazy var mealTimeTitledView = TitledContainerView(title: "언제 드셨나요?", contentView: mealTimePickerView)
+    private let searchInputField = SearchInputField(placeholder: "음식 이름을 입력하세요")
+    private lazy var searchMealTitledView = TitledContainerView(title: "음식 검색", contentView: searchInputField)
     
     init() {
         super.init(nibName: nil, bundle: nil)
         
         setUpView()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -41,7 +47,8 @@ class CreateViewController: UIViewController {
         view.backgroundColor = .homeScreenBackground
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
-        contentView.addSubview(titledContainerView)
+        contentView.addSubview(mealTimeTitledView)
+        contentView.addSubview(searchMealTitledView)
         
         scrollView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -52,9 +59,33 @@ class CreateViewController: UIViewController {
             make.width.equalTo(scrollView.snp.width)
         }
         
-        titledContainerView.snp.makeConstraints { make in
-            make.top.leading.trailing.bottom.equalToSuperview().inset(20)
+        mealTimeTitledView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(120)
         }
+        
+        searchMealTitledView.snp.makeConstraints { make in
+            make.leading.trailing.equalTo(mealTimeTitledView)
+            make.top.equalTo(mealTimeTitledView.snp.bottom).inset(20)
+            make.bottom.equalToSuperview().inset(20)
+        }
+    }
+    
+    private func setBinding() {
+        searchInputField.textObservable
+            .compactMap { $0 }
+            .distinctUntilChanged()
+            .bind { text in
+                print("📝 입력된 텍스트: \(text)")
+                
+            }
+            .disposed(by: disposeBag)
+        
+        searchInputField.searchTap
+            .bind {
+                print("🔍 돋보기 아이콘 눌림!")
+                
+            }
+            .disposed(by: disposeBag)
     }
 }
