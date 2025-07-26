@@ -35,4 +35,8 @@ final class HomeMenuContentView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    func setBackgroundColor(_ color: UIColor) {
+        containerView.backgroundColor = color
+    }
 }

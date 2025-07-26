@@ -46,6 +46,8 @@ final class CreateViewController: UIViewController {
         contentView: mealTimePickerView
     )
     
+    private let addedFoodListView = AddedFoodListView()
+    
     private let disposeBag = DisposeBag()
     private var mealTime: MealTime = .breakfast
     
@@ -77,6 +79,7 @@ final class CreateViewController: UIViewController {
         scrollView.addSubview(contentView)
         contentView.addSubview(mealTimeTitledView)
         contentView.addSubview(searchMealTitledView)
+        contentView.addSubview(addedFoodListView)
         
         scrollView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -95,6 +98,12 @@ final class CreateViewController: UIViewController {
         searchMealTitledView.snp.makeConstraints { make in
             make.top.equalTo(mealTimeTitledView.snp.bottom).offset(20)
             make.leading.trailing.equalTo(mealTimeTitledView)
+//            make.bottom.equalToSuperview().inset(20)
+        }
+        
+        addedFoodListView.snp.makeConstraints { make in
+            make.top.equalTo(searchMealTitledView.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)
         }
     }
