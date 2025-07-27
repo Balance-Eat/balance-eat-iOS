@@ -18,6 +18,9 @@ enum ServingUnitType: String {
 
 class AddFoodViewController: UIViewController {
     private let foodItem: FoodItem
+    private let selectedServingUnitType = BehaviorRelay<ServingUnitType>(value: .serving)
+    private let inputAmount = BehaviorRelay<Int>(value: 100)
+    private let disposeBag = DisposeBag()
     
     init(foodItem: FoodItem) {
         self.foodItem = foodItem
@@ -25,6 +28,7 @@ class AddFoodViewController: UIViewController {
         
         setUpView()
         setupPopupContent()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -77,12 +81,16 @@ class AddFoodViewController: UIViewController {
         }
         
         let servingUnitSelectPickerView = ServingUnitSelectPickerView(
-            selectedServingUnitType: .serving,
+            selectedServingUnitType: selectedServingUnitType.value,
             items: [
                 ServingUnitSelectPickerItem(servingUnitType: .serving, isSelected: true),
                 ServingUnitSelectPickerItem(servingUnitType: .gram, isSelected: false)
             ]
         )
+        
+        servingUnitSelectPickerView.selectedServingUnitTypeRelay
+            .bind(to: selectedServingUnitType)
+            .disposed(by: disposeBag)
         
         let servingUnitSelectTitledContainerView = TitledContainerView(
             title: "입력 방법",
@@ -98,33 +106,49 @@ class AddFoodViewController: UIViewController {
             make.leading.trailing.equalToSuperview().inset(8)
         }
         
-        let amountTextField = SearchInputField(placeholder: "")
+        let amountCountingView = AmountCountingView(amount: inputAmount.value)
+        
+        let amountCountingTitledContainerView = TitledContainerView(
+            title: "중량",
+            contentView: amountCountingView,
+            isSmall: true,
+            isShadowBackground: false
+        )
+            
+        contentView.addSubview(amountCountingTitledContainerView)
+        
+        amountCountingTitledContainerView.snp.makeConstraints { make in
+            make.top.equalTo(servingUnitSelectTitledContainerView.snp.bottom)
+            make.leading.trailing.equalToSuperview().inset(8)
+        }
+    }
+    
+    private func setBinding() {
+        
     }
     
     @objc private func didTapClose() {
         dismiss(animated: true)
     }
+    
+    
 }
 
 final class ServingUnitSelectPickerView: UIView {
     private let stackView = UIStackView()
     
-    var selectedServingUnitType: ServingUnitType {
-        didSet {
-            updateSelectedItem()
-        }
-    }
+    let selectedServingUnitTypeRelay: BehaviorRelay<ServingUnitType>
     
     private var items: [ServingUnitSelectPickerItem] = []
     private let disposeBag = DisposeBag()
     
     init(selectedServingUnitType: ServingUnitType, items: [ServingUnitSelectPickerItem]) {
-        self.selectedServingUnitType = selectedServingUnitType
+        self.selectedServingUnitTypeRelay = BehaviorRelay(value: selectedServingUnitType)
         self.items = items
         super.init(frame: .zero)
         setUpView()
         setUpItems()
-        updateSelectedItem()
+        updateSelectedItem(selectedType: selectedServingUnitType)
     }
     
     required init?(coder: NSCoder) {
@@ -155,15 +179,16 @@ final class ServingUnitSelectPickerView: UIView {
             item.tapObservable
                 .bind { [weak self] in
                     guard let self = self else { return }
-                    self.selectedServingUnitType = item.servingUnitType
+                    self.selectedServingUnitTypeRelay.accept(item.servingUnitType)
+                    self.updateSelectedItem(selectedType: item.servingUnitType)
                 }
                 .disposed(by: disposeBag)
         }
     }
     
-    private func updateSelectedItem() {
+    private func updateSelectedItem(selectedType: ServingUnitType) {
         for item in items {
-            item.setSelected(item.servingUnitType == selectedServingUnitType)
+            item.setSelected(item.servingUnitType == selectedType)
         }
     }
 }
@@ -257,5 +282,102 @@ final class ServingUnitSelectPickerItem: UIView {
         isSelected = selected
         self.layer.borderColor = selected ? UIColor.systemBlue.cgColor : UIColor.mealTimePickerBorder.cgColor
         self.titleLabel.textColor = selected ? .systemBlue : .mealTimePickerTitle
+    }
+}
+
+final class AmountCountingView: UIView {
+    let amountRelay: BehaviorRelay<Int>
+    
+    private let disposeBag = DisposeBag()
+    
+    private let textField: UITextField = {
+        let textField = UITextField()
+        textField.borderStyle = .roundedRect
+        textField.clearButtonMode = .whileEditing
+        textField.font = .systemFont(ofSize: 16, weight: .medium)
+        textField.textColor = .label
+        textField.textAlignment = .center
+        textField.autocapitalizationType = .none
+        return textField
+    }()
+    
+    private let minusButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("-", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        return button
+    }()
+    
+    private let plusButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("+", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        return button
+    }()
+
+    init(amount: Int) {
+        self.amountRelay = BehaviorRelay<Int>(value: amount)
+        super.init(frame: .zero)
+        
+        setUpView()
+        setEvent()
+        bind()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setUpView() {
+        self.addSubview(textField)
+        self.addSubview(minusButton)
+        self.addSubview(plusButton)
+
+        minusButton.snp.makeConstraints { make in
+            make.leading.equalToSuperview()
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(40)
+        }
+
+        plusButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview()
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(40)
+        }
+
+        textField.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.leading.equalTo(minusButton.snp.trailing).offset(12)
+            make.trailing.equalTo(plusButton.snp.leading).offset(-12)
+            make.height.equalTo(40)
+        }
+        
+        self.snp.makeConstraints { make in
+            make.height.equalTo(40)
+        }
+    }
+
+    private func setEvent() {
+        minusButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                let newValue = max(0, self.amountRelay.value - 1)
+                self.amountRelay.accept(newValue)
+            })
+            .disposed(by: disposeBag)
+
+        plusButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                self.amountRelay.accept(self.amountRelay.value + 1)
+            })
+            .disposed(by: disposeBag)
+    }
+
+    private func bind() {
+        amountRelay
+            .map { "\($0)" }
+            .bind(to: textField.rx.text)
+            .disposed(by: disposeBag)
     }
 }
