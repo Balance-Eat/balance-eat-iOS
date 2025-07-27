@@ -124,8 +124,26 @@ final class CreateViewController: UIViewController {
             .disposed(by: disposeBag)
         
         favoriteFoodGridView.tappedIndexObservable
-            .subscribe(onNext: { index in
-                print("선택된 food index: \(index)")
+            .subscribe(
+                onNext: { [weak self] index in
+                    guard let self = self,
+                              index < self.favoriteFoods.count else { return }
+                    print("선택된 food index: \(index)")
+                    let favoriteFood = self.favoriteFoods[index]
+                    let addFoodViewController = AddFoodViewController(
+                        foodItem: FoodItem(
+                            id: UUID(),
+                            name: favoriteFood.name,
+                            amount: 200,
+                            unit: "gram",
+                            nutritionalInfo: NutritionalInfo(calories: Double(favoriteFood.calorie), carbs: 100, protein: 30, fat: 20)
+                        )
+                    )
+                
+                    addFoodViewController.modalPresentationStyle = .overCurrentContext
+                    addFoodViewController.modalTransitionStyle = .crossDissolve
+                    
+                    present(addFoodViewController, animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
     }

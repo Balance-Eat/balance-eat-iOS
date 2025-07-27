@@ -10,9 +10,12 @@ import SnapKit
 
 final class TitledContainerView: UIView {
     private let title: String
-    private let backgroundView = HomeMenuContentView()
+    private lazy var backgroundView: UIView = {
+            return isShadowBackground ? HomeMenuContentView() : UIView()
+        }()
     private let contentView: UIView
     private let isSmall: Bool
+    private let isShadowBackground: Bool
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -21,10 +24,11 @@ final class TitledContainerView: UIView {
         return label
     }()
     
-    init(title: String, contentView: UIView, isSmall: Bool = false) {
+    init(title: String, contentView: UIView, isSmall: Bool = false, isShadowBackground: Bool = true) {
         self.title = title
         self.contentView = contentView
         self.isSmall = isSmall
+        self.isShadowBackground = isShadowBackground
         super.init(frame: .zero)
         
         setUpView()
