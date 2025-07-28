@@ -47,7 +47,7 @@ class AddFoodViewController: UIViewController {
         contentView.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.leading.trailing.equalToSuperview().inset(32)
-            make.height.equalTo(400)
+//            make.height.equalTo(400)
         }
         
         let titleLabel: UILabel = {
@@ -120,6 +120,18 @@ class AddFoodViewController: UIViewController {
         amountCountingTitledContainerView.snp.makeConstraints { make in
             make.top.equalTo(servingUnitSelectTitledContainerView.snp.bottom)
             make.leading.trailing.equalToSuperview().inset(8)
+        }
+        
+        let totalNutritionalInfoView = TotalNutritionalInfoView(title: "예상 영양정보", foodItems: [
+            AddedFoodItem(foodName: foodItem.name, amount: String(foodItem.amount), calorie: foodItem.nutritionalInfo.calories, carbon: foodItem.nutritionalInfo.carbs, protein: foodItem.nutritionalInfo.protein, fat: foodItem.nutritionalInfo.fat)
+        ])
+        
+        contentView.addSubview(totalNutritionalInfoView)
+        
+        totalNutritionalInfoView.snp.makeConstraints { make in
+            make.top.equalTo(amountCountingTitledContainerView.snp.bottom)
+            make.leading.trailing.equalToSuperview().inset(24)
+            make.bottom.equalToSuperview().inset(8)
         }
     }
     
