@@ -129,9 +129,42 @@ class AddFoodViewController: UIViewController {
         contentView.addSubview(totalNutritionalInfoView)
         
         totalNutritionalInfoView.snp.makeConstraints { make in
-            make.top.equalTo(amountCountingTitledContainerView.snp.bottom)
+            make.top.equalTo(amountCountingTitledContainerView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(24)
-            make.bottom.equalToSuperview().inset(8)
+            
+        }
+        
+        let buttonStackView = UIStackView()
+        buttonStackView.axis = .horizontal
+        buttonStackView.distribution = .fillEqually
+        buttonStackView.spacing = 8
+        
+        let cancelTitledButton = TitledButton(
+            title: "취소",
+            style: .init(
+                backgroundColor: .white,
+                titleColor: .label,
+                borderColor: .mealTimePickerBorder
+            )
+        )
+        let addTitledButton = TitledButton(
+            title: "추가",
+            style: .init(
+                backgroundColor: .systemBlue,
+                titleColor: .white,
+                borderColor: nil
+            )
+        )
+        buttonStackView.addArrangedSubview(cancelTitledButton)
+        buttonStackView.addArrangedSubview(addTitledButton)
+        
+        contentView.addSubview(buttonStackView)
+        
+        buttonStackView.snp.makeConstraints { make in
+            make.top.equalTo(totalNutritionalInfoView.snp.bottom).offset(24)
+            make.leading.trailing.equalToSuperview().inset(24)
+            make.bottom.equalToSuperview().inset(24)
+            make.height.equalTo(48)
         }
     }
     
