@@ -48,6 +48,15 @@ final class CreateViewController: UIViewController {
     
     private let addedFoodListView = AddedFoodListView()
     
+    private let saveButton = TitledButton(
+        title: "저장",
+        style: .init(
+            backgroundColor: .systemBlue,
+            titleColor: .white,
+            borderColor: nil
+        )
+    )
+    
     private let disposeBag = DisposeBag()
     private var mealTime: MealTime = .breakfast
     
@@ -80,6 +89,7 @@ final class CreateViewController: UIViewController {
         contentView.addSubview(mealTimeTitledView)
         contentView.addSubview(searchMealTitledView)
         contentView.addSubview(addedFoodListView)
+        contentView.addSubview(saveButton)
         
         scrollView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -104,7 +114,13 @@ final class CreateViewController: UIViewController {
         addedFoodListView.snp.makeConstraints { make in
             make.top.equalTo(searchMealTitledView.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(20)
+        }
+        
+        saveButton.snp.makeConstraints { make in
+            make.top.equalTo(addedFoodListView.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)
+            make.height.equalTo(50)
         }
     }
     
