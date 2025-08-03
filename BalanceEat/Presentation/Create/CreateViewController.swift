@@ -45,8 +45,13 @@ final class CreateViewController: UIViewController {
         title: "언제 드셨나요?",
         contentView: mealTimePickerView
     )
+    private var foodItems: [AddedFoodItem] = [
+        AddedFoodItem(foodName: "닭가슴살", amount: "1인분 (100g)", calorie: 165, carbon: 0, protein: 31, fat: 3.6),
+        AddedFoodItem(foodName: "샐러드", amount: "1인분 (150g)", calorie: 35, carbon: 3, protein: 40, fat: 5.6),
+        AddedFoodItem(foodName: "피자", amount: "1인분 (200g)", calorie: 400, carbon: 50, protein: 31, fat: 18.6)
+    ]
     
-    private let addedFoodListView = AddedFoodListView()
+    private lazy var addedFoodListView = AddedFoodListView(foodItems: foodItems)
     
     private let saveButton = TitledButton(
         title: "저장",
@@ -76,7 +81,7 @@ final class CreateViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
@@ -108,7 +113,7 @@ final class CreateViewController: UIViewController {
         searchMealTitledView.snp.makeConstraints { make in
             make.top.equalTo(mealTimeTitledView.snp.bottom).offset(20)
             make.leading.trailing.equalTo(mealTimeTitledView)
-//            make.bottom.equalToSuperview().inset(20)
+            //            make.bottom.equalToSuperview().inset(20)
         }
         
         addedFoodListView.snp.makeConstraints { make in
@@ -143,7 +148,7 @@ final class CreateViewController: UIViewController {
             .subscribe(
                 onNext: { [weak self] index in
                     guard let self = self,
-                              index < self.favoriteFoods.count else { return }
+                          index < self.favoriteFoods.count else { return }
                     print("선택된 food index: \(index)")
                     let favoriteFood = self.favoriteFoods[index]
                     let addFoodViewController = AddFoodViewController(
@@ -155,11 +160,22 @@ final class CreateViewController: UIViewController {
                             nutritionalInfo: NutritionalInfo(calories: Double(favoriteFood.calorie), carbs: 100, protein: 30, fat: 20)
                         )
                     )
-                
+                    
                     addFoodViewController.modalPresentationStyle = .overCurrentContext
                     addFoodViewController.modalTransitionStyle = .crossDissolve
                     
                     present(addFoodViewController, animated: true, completion: nil)
+                })
+            .disposed(by: disposeBag)
+        
+        addedFoodListView.deletedFoodItem
+            .subscribe(onNext: { [weak self] item in
+                guard let self = self else { return }
+                
+                if let index = self.foodItems.firstIndex(where: { $0.foodName == item.foodName }) {
+                    self.foodItems.remove(at: index)
+                    self.addedFoodListView.deleteItem(at: IndexPath(row: index, section: 0))
+                }
             })
             .disposed(by: disposeBag)
     }

@@ -28,11 +28,7 @@ struct AddedFoodItem {
 
 final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSource {
     
-    private let foodItems: [AddedFoodItem] = [
-        AddedFoodItem(foodName: "닭가슴살", amount: "1인분 (100g)", calorie: 165, carbon: 0, protein: 31, fat: 3.6),
-        AddedFoodItem(foodName: "샐러드", amount: "1인분 (150g)", calorie: 35, carbon: 3, protein: 40, fat: 5.6),
-        AddedFoodItem(foodName: "피자", amount: "1인분 (200g)", calorie: 400, carbon: 50, protein: 31, fat: 18.6)
-    ]
+    private var foodItems: [AddedFoodItem] = []
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -47,7 +43,11 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     
     private lazy var totalNutritionInfo = TotalNutritionalInfoView(title: "총 영양정보", foodItems: foodItems)
     
-    init() {
+    let deletedFoodItem = PublishRelay<AddedFoodItem>()
+    private let disposeBag = DisposeBag()
+    
+    init(foodItems: [AddedFoodItem]) {
+        self.foodItems = foodItems
         super.init(frame: .zero)
         
         setUpView()
@@ -61,7 +61,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(AddedFoodCell.self, forCellReuseIdentifier: "AddedFoodCell")
-        tableView.rowHeight = 80
+        tableView.rowHeight = 100
         tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
         
@@ -99,7 +99,16 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         }
         
         let foodItem = foodItems[indexPath.row]
-        cell.configure(foodName: foodItem.foodName, amount: foodItem.amount, nutrition: "\(foodItem.calorie)kcal 탄 (\(foodItem.carbon)g 단 \(foodItem.protein)g 지 \(foodItem.fat)g 지방)")
+        cell.configure(
+            foodName: foodItem.foodName,
+            amount: foodItem.amount,
+            nutrition: "\(foodItem.calorie)kcal (탄 \(foodItem.carbon)g, 단 \(foodItem.protein)g, 지 \(foodItem.fat)g)"
+        )
+        
+        cell.closeButtonTapped
+            .map { foodItem }
+            .bind(to: deletedFoodItem)
+            .disposed(by: disposeBag)
         
         return cell
     }
@@ -108,6 +117,20 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         tableView.layoutIfNeeded()
         let height = tableView.contentSize.height
         tableViewHeightConstraint?.update(offset: height)
+    }
+    
+    func deleteItem(at indexPath: IndexPath) {
+        guard indexPath.row < foodItems.count else { return }
+
+        tableView.beginUpdates()
+        foodItems.remove(at: indexPath.row)
+        tableView.deleteRows(at: [indexPath], with: .automatic)
+        tableView.endUpdates()
+
+        UIView.animate(withDuration: 0.25) {
+            self.updateTableViewHeight()
+            self.layoutIfNeeded()
+        }
     }
 }
 
@@ -151,12 +174,17 @@ final class AddedFoodCell: UITableViewCell {
         return stack
     }()
     
+    let closeButtonTapped = PublishRelay<Void>()
+    
+    private let disposeBag = DisposeBag()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         selectionStyle = .none
         setupView()
         setupConstraints()
+        setEvent()
     }
     
     required init?(coder: NSCoder) {
@@ -181,7 +209,6 @@ final class AddedFoodCell: UITableViewCell {
         foodNameLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(16)
             make.leading.equalToSuperview().inset(12)
-            make.trailing.lessThanOrEqualTo(closeButton.snp.leading).offset(-8)
         }
         
         closeButton.snp.makeConstraints { make in
@@ -191,10 +218,16 @@ final class AddedFoodCell: UITableViewCell {
         }
         
         bottomInfoStackView.snp.makeConstraints { make in
-            make.top.equalTo(foodNameLabel.snp.bottom).offset(8)
+            make.top.equalTo(foodNameLabel.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(12)
             make.bottom.equalToSuperview().inset(16)
         }
+    }
+    
+    private func setEvent() {
+        closeButton.rx.tap
+            .bind(to: closeButtonTapped)
+            .disposed(by: disposeBag)
     }
     
     func configure(foodName: String, amount: String, nutrition: String) {
@@ -202,6 +235,7 @@ final class AddedFoodCell: UITableViewCell {
         foodAmountLabel.text = amount
         foodNutritionLabel.text = nutrition
     }
+    
 }
 
 final class NutritionInfoView: UIView {
