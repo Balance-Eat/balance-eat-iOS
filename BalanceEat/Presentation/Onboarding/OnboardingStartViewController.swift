@@ -155,7 +155,7 @@ class OnboardingStartViewController: UIViewController {
             .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
             .bind { [weak self] in
                 guard let self = self else { return }
-                let nextVC = TutorialPageViewController()
+                let nextVC = TutorialContentViewController()
                 self.navigationController?.setViewControllers([nextVC], animated: true)
                 
             }
