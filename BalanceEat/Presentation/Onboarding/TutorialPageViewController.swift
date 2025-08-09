@@ -19,7 +19,9 @@ class TutorialPageViewController: UIPageViewController {
     }
     
     private func setUpPage() {
+        let basicInfoViewController = BasicInfoViewController()
         
+        pages.append(basicInfoViewController)
     }
     
     private func setUpUI() {

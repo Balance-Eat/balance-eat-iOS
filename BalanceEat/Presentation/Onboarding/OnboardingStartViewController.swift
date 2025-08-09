@@ -7,6 +7,8 @@
 
 import UIKit
 import SnapKit
+import RxSwift
+import RxCocoa
 
 class OnboardingStartViewController: UIViewController {
     
@@ -60,6 +62,8 @@ class OnboardingStartViewController: UIViewController {
         button.backgroundColor = .clear
         return button
     }()
+    
+    private let disposeBag = DisposeBag()
     
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -147,6 +151,15 @@ class OnboardingStartViewController: UIViewController {
         startButton.addTarget(self, action: #selector(buttonTouchDown), for: .touchDown)
         startButton.addTarget(self, action: #selector(buttonTouchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel])
         
+        startButton.rx.tap
+            .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
+            .bind { [weak self] in
+                guard let self = self else { return }
+                let nextVC = TutorialPageViewController()
+                self.navigationController?.setViewControllers([nextVC], animated: true)
+                
+            }
+            .disposed(by: disposeBag)
     }
     
     @objc private func buttonTouchDown() {
