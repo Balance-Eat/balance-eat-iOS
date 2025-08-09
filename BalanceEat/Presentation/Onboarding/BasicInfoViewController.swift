@@ -25,11 +25,11 @@ class BasicInfoViewController: UIViewController {
     
     init() {
         super.init(nibName: nil, bundle: nil)
-        
+        view.backgroundColor = .red
         view.addSubview(titleLabel)
         
         titleLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
+            make.edges.equalToSuperview()
         }
     }
     

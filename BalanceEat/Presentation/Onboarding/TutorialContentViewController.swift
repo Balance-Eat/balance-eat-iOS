@@ -62,7 +62,7 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
         }
         
         scrollView.snp.makeConstraints { make in
-            make.top.equalTo(tutorialIndicatorView.snp.bottom).offset(16)
+            make.top.equalTo(tutorialIndicatorView.snp.bottom).offset(50)
             make.leading.trailing.bottom.equalToSuperview()
         }
         
@@ -94,6 +94,8 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
         
         tutorialPageViewController.view.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.greaterThanOrEqualTo(100)
         }
         
         tutorialPageViewController.didMove(toParent: self)
