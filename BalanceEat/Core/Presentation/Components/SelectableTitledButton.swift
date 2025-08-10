@@ -74,13 +74,17 @@ final class SelectableTitledButton: UIView {
             .bind { [weak self] isSelected in
                 guard let self = self else { return }
                 if isSelected {
-                    self.backgroundColor = .systemBlue.withAlphaComponent(0.1)
-                    self.titleLabel.textColor = .systemBlue
-                    self.layer.borderColor = UIColor.systemBlue.cgColor
+                    UIView.animate(withDuration: 0.25) {
+                        self.backgroundColor = .systemBlue.withAlphaComponent(0.05)
+                        self.titleLabel.textColor = .systemBlue
+                        self.layer.borderColor = UIColor.systemBlue.cgColor
+                    }
                 } else {
-                    self.backgroundColor = self.style?.backgroundColor
-                    self.titleLabel.textColor = self.style?.titleColor
-                    self.layer.borderColor = self.style?.borderColor?.cgColor ?? UIColor.clear.cgColor
+                    UIView.animate(withDuration: 0.25) {
+                        self.backgroundColor = self.style?.backgroundColor
+                        self.titleLabel.textColor = self.style?.titleColor
+                        self.layer.borderColor = self.style?.borderColor?.cgColor ?? UIColor.clear.cgColor
+                    }
                 }
             }
             .disposed(by: disposeBag)
