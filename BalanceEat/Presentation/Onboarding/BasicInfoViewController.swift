@@ -17,6 +17,13 @@ enum Gender: String {
 }
 
 class BasicInfoViewController: UIViewController {
+    private let mainStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 20
+        return stackView
+    }()
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "안녕하세요!"
@@ -51,12 +58,14 @@ class BasicInfoViewController: UIViewController {
     
     private func setUpView() {
         view.backgroundColor = .white
+        
         view.addSubview(titleLabel)
         view.addSubview(subtitleLabel)
+        view.addSubview(mainStackView)
         
         titleLabel.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.top.equalToSuperview().inset(12)
+            make.top.equalTo(view.safeAreaLayoutGuide).inset(12)
         }
         
         subtitleLabel.snp.makeConstraints { make in
@@ -64,21 +73,18 @@ class BasicInfoViewController: UIViewController {
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
         }
         
+        mainStackView.snp.makeConstraints { make in
+            make.top.equalTo(subtitleLabel.snp.bottom).offset(16)
+            make.leading.trailing.equalToSuperview().inset(16)
+        }
+        
         let maleButton = SelectableTitledButton(
             title: "남성",
-            style: .init(
-                backgroundColor: .white,
-                titleColor: .black,
-                borderColor: .gray
-            )
+            style: .init(backgroundColor: .white, titleColor: .black, borderColor: .gray)
         )
         let femaleButton = SelectableTitledButton(
             title: "여성",
-            style: .init(
-                backgroundColor: .white,
-                titleColor: .black,
-                borderColor: .gray
-            )
+            style: .init(backgroundColor: .white, titleColor: .black, borderColor: .gray)
         )
         let genderButtons = [maleButton, femaleButton]
         
@@ -86,66 +92,38 @@ class BasicInfoViewController: UIViewController {
             button.isSelectedRelay
                 .subscribe(onNext: { [weak self, weak button] isSelected in
                     guard let self = self, let button = button else { return }
-                    
                     if isSelected {
-                        // 선택된 버튼만 true, 나머지 false 처리
                         genderButtons.forEach {
-                            if $0 != button {
-                                $0.isSelectedRelay.accept(false)
-                            }
+                            if $0 != button { $0.isSelectedRelay.accept(false) }
                         }
-                        
-                        // gender 값 설정
-                        if button === maleButton {
-                            self.gender = .male
-                        } else if button === femaleButton {
-                            self.gender = .female
-                        }
+                        self.gender = button === maleButton ? .male : .female
                     } else {
-                        // 선택 해제 시 gender 초기화
                         self.gender = .none
                     }
                 })
                 .disposed(by: disposeBag)
         }
         
-        let genderStackView = UIStackView(arrangedSubviews: [maleButton, femaleButton])
+        let genderStackView = UIStackView(arrangedSubviews: genderButtons)
+        genderStackView.axis = .horizontal
         genderStackView.distribution = .fillEqually
         genderStackView.spacing = 8
         
-        let genderTitledInputView = TitledInputUserInfoView(
-            title: "성별",
-            inputView: genderStackView
-        )
-        view.addSubview(genderTitledInputView)
+        let genderInputView = TitledInputUserInfoView(title: "성별", inputView: genderStackView)
+        let ageInputField = InputFieldWithIcon(icon: UIImage(systemName: "calendar.and.person")!, placeholder: "나이를 입력해주세요.", unit: "세")
+        let ageInputView = TitledInputUserInfoView(title: "나이", inputView: ageInputField)
+        let heightInputField = InputFieldWithIcon(icon: UIImage(systemName: "ruler")!, placeholder: "신장을 입력해주세요.", unit: "cm")
+        let heightInputView = TitledInputUserInfoView(title: "신장", inputView: heightInputField)
+        let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "체중을 입력해주세요.", unit: "kg")
+        let weightInputView = TitledInputUserInfoView(title: "체중", inputView: weightInputField)
         
-        genderTitledInputView.snp.makeConstraints { make in
-            make.top.equalTo(subtitleLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
-        }
-        
-        let ageInputField = InputFieldWithIcon(
-            icon: UIImage(systemName: "calendar.and.person") ?? UIImage(),
-            placeholder: "나이를 입력해주세요.",
-            unit: "세"
-        )
-        let ageTitledInputView = TitledInputUserInfoView(
-            title: "나이",
-            inputView: ageInputField
-        )
-        view.addSubview(ageTitledInputView)
-        
-        ageTitledInputView.snp.makeConstraints { make in
-            make.top.equalTo(genderTitledInputView.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
+        [genderInputView, ageInputView, heightInputView, weightInputView].forEach {
+            mainStackView.addArrangedSubview($0)
         }
     }
 }
 
 final class TitledInputUserInfoView: UIView {
-    private let title: String
-    private let contentView: UIView
-    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .medium)
@@ -153,11 +131,20 @@ final class TitledInputUserInfoView: UIView {
         return label
     }()
     
+    private let contentView: UIView
+    
+    private let stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        return stackView
+    }()
+    
     init(title: String, inputView: UIView) {
-        self.title = title
         self.contentView = inputView
         super.init(frame: .zero)
         
+        titleLabel.text = title
         setUpView()
     }
     
@@ -166,21 +153,14 @@ final class TitledInputUserInfoView: UIView {
     }
     
     private func setUpView() {
-        addSubview(titleLabel)
-        addSubview(contentView)
+        addSubview(stackView)
         
-        titleLabel.text = title
-        
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(8)
-            make.leading.equalToSuperview()
+        stackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
         
-        contentView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(8)
-            make.leading.trailing.equalToSuperview()
-            make.bottom.equalToSuperview().inset(8)
-        }
+        stackView.addArrangedSubview(titleLabel)
+        stackView.addArrangedSubview(contentView)
     }
 }
 
@@ -209,6 +189,10 @@ final class InputFieldWithIcon: UIView {
         label.textColor = .black
         return label
     }()
+    
+    var textObservable: Observable<String?> {
+        textField.rx.text.asObservable()
+    }
     
     init(icon: UIImage, placeholder: String, unit: String? = nil) {
         self.icon = icon
@@ -250,7 +234,7 @@ final class InputFieldWithIcon: UIView {
         }
         
         unitLabel.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(16)
+            make.trailing.equalToSuperview().inset(16).priority(.high)
             make.centerY.equalToSuperview()
         }
     }
