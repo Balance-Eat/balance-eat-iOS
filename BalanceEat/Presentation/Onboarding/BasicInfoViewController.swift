@@ -74,8 +74,9 @@ class BasicInfoViewController: UIViewController {
         }
         
         mainStackView.snp.makeConstraints { make in
-            make.top.equalTo(subtitleLabel.snp.bottom).offset(16)
+            make.top.equalTo(subtitleLabel.snp.bottom).offset(40)
             make.leading.trailing.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().inset(16)
         }
         
         let maleButton = SelectableTitledButton(
@@ -116,8 +117,25 @@ class BasicInfoViewController: UIViewController {
         let heightInputView = TitledInputUserInfoView(title: "신장", inputView: heightInputField)
         let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "체중을 입력해주세요.", unit: "kg")
         let weightInputView = TitledInputUserInfoView(title: "체중", inputView: weightInputField)
+        let nextButton = TitledButton(
+            title: "다음",
+            style: .init(
+                backgroundColor: .systemBlue,
+                titleColor: .white,
+                borderColor: nil
+            )
+        )
+        nextButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
         
-        [genderInputView, ageInputView, heightInputView, weightInputView].forEach {
+        nextButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.inputCompleted.accept(())
+            })
+            .disposed(by: disposeBag)
+        
+        [genderInputView, ageInputView, heightInputView, weightInputView, nextButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
     }

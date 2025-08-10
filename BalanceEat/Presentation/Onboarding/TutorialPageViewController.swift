@@ -10,10 +10,11 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class TutorialPageViewController: UIPageViewController {
+class TutorialPageViewController: UIViewController {
     let currentPageRelay = PublishRelay<(currentIndex: Int, totalPages: Int)>()
     
     private var pages: [UIViewController] = []
+    private var currentIndex: Int = 0
     
     private let disposeBag = DisposeBag()
     
@@ -21,64 +22,55 @@ class TutorialPageViewController: UIPageViewController {
         super.viewDidLoad()
         
         setUpPage()
-        setUpUI()
+        displayCurrentPage(animated: true)
     }
     
     private func setUpPage() {
         let basicInfoViewController = BasicInfoViewController()
         
         basicInfoViewController.inputCompleted
-            .subscribe(onNext: { [weak self, weak basicInfoViewController] in
-                guard let self = self, let currentViewController = basicInfoViewController else { return }
-                self.goToNextPage(from: currentViewController)
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                self.goToNextPage()
             })
             .disposed(by: disposeBag)
         
         pages.append(basicInfoViewController)
+        pages.append(LoginViewController())
     }
     
-    private func setUpUI() {
-        self.dataSource = self
-        self.delegate = self
+    private func displayCurrentPage(animated: Bool) {
+        if let currentChild = children.first {
+            currentChild.willMove(toParent: nil)
+            currentChild.view.removeFromSuperview()
+            currentChild.removeFromParent()
+        }
         
-        if let first = pages.first {
-            setViewControllers([first], direction: .forward, animated: true)
-            currentPageRelay.accept((currentIndex: 0, totalPages: pages.count))
+        let vc = pages[currentIndex]
+        addChild(vc)
+        vc.view.frame = view.bounds
+        view.addSubview(vc.view)
+        vc.didMove(toParent: self)
+        
+        currentPageRelay.accept((currentIndex: currentIndex, totalPages: pages.count))
+        
+        if animated {
+            vc.view.alpha = 0
+            UIView.animate(withDuration: 0.3) {
+                vc.view.alpha = 1
+            }
         }
     }
     
-    private func goToNextPage(from currentViewController: UIViewController) {
-        guard let currentIndex = pages.firstIndex(of: currentViewController) else { return }
-        let nextIndex = currentIndex + 1
-        guard nextIndex < pages.count else { return }
-        
-        let nextViewController = pages[nextIndex]
-        setViewControllers([nextViewController], direction: .forward, animated: true)
-    }
-}
-
-extension TutorialPageViewController: UIPageViewControllerDataSource {
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        guard let currentIndex = pages.firstIndex(of: viewController) else { return nil }
-        
-        guard currentIndex > 0 else { return nil }
-        return pages[currentIndex - 1]
+    func goToNextPage() {
+        guard currentIndex + 1 < pages.count else { return }
+        currentIndex += 1
+        displayCurrentPage(animated: true)
     }
     
-    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let currentIndex = pages.firstIndex(of: viewController) else { return nil }
-        
-        guard currentIndex < (pages.count - 1) else { return nil }
-        return pages[currentIndex + 1]
-    }
-}
-
-extension TutorialPageViewController: UIPageViewControllerDelegate {
-    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        guard completed,
-              let currentVC = pageViewController.viewControllers?.first,
-              let currentIndex = pages.firstIndex(of: currentVC) else { return }
-        
-        currentPageRelay.accept((currentIndex: currentIndex, totalPages: pages.count))
+    func goToPreviousPage() {
+        guard currentIndex - 1 >= 0 else { return }
+        currentIndex -= 1
+        displayCurrentPage(animated: true)
     }
 }

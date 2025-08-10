@@ -25,7 +25,7 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
     }()
     
     private lazy var tutorialIndicatorView = TutorialPageIndicatorView(currentPage: 1, totalPage: pageTitle.count)
-    private let tutorialPageViewController = TutorialPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+    private let tutorialPageViewController = TutorialPageViewController()
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -91,7 +91,7 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
         tutorialPageViewController.view.snp.makeConstraints { make in
             make.top.equalTo(tutorialIndicatorView.snp.bottom).offset(50)
             make.leading.trailing.equalToSuperview()
-            make.height.equalTo(500)
+            make.height.greaterThanOrEqualTo(540)
             make.bottom.equalToSuperview()
         }
         
