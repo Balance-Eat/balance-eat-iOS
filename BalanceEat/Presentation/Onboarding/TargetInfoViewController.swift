@@ -91,9 +91,27 @@ class TargetInfoViewController: UIViewController {
             .disposed(by: disposeBag)
         let goalPickerInputView = TitledInputUserInfoView(title: "목표 유형", inputView: goalPickerView)
         
-        mainStackView.addArrangedSubview(currentWeightView)
-        mainStackView.addArrangedSubview(weightInputView)
-        mainStackView.addArrangedSubview(goalPickerInputView)
+        let nextButton = TitledButton(
+            title: "다음",
+            style: .init(
+                backgroundColor: .systemBlue,
+                titleColor: .white,
+                borderColor: nil
+            )
+        )
+        nextButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
+        
+        nextButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.inputCompleted.accept(())
+            })
+            .disposed(by: disposeBag)
+        
+        [currentWeightView, weightInputView, goalPickerInputView, nextButton].forEach {
+            mainStackView.addArrangedSubview($0)
+        }
     }
     
     private func currentWeightView(weight: String) -> UIView {
