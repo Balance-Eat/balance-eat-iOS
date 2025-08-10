@@ -28,7 +28,7 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
     private let tutorialPageViewController = TutorialPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     
     private let scrollView = UIScrollView()
-    private let containerView = UIView()
+    private let contentView = UIView()
     
     private let disposeBag = DisposeBag()
         
@@ -42,34 +42,30 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func loadView() {
+        view = scrollView
+    }
+    
     private func setUpView() {
-        view.backgroundColor = .white
+        scrollView.addSubview(contentView)
+        scrollView.backgroundColor = .white
         
-        view.addSubview(titleLabel)
-        view.addSubview(tutorialIndicatorView)
-        view.addSubview(scrollView)
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalToSuperview()
+        }
         
-        scrollView.addSubview(containerView)
+        contentView.addSubview(titleLabel)
+        contentView.addSubview(tutorialIndicatorView)
         
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.top.equalTo(contentView.safeAreaLayoutGuide)
             make.leading.equalToSuperview().offset(16)
         }
         
         tutorialIndicatorView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(16)
-        }
-        
-        scrollView.snp.makeConstraints { make in
-            make.top.equalTo(tutorialIndicatorView.snp.bottom).offset(50)
-            make.leading.trailing.bottom.equalToSuperview()
-        }
-        
-        containerView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalTo(scrollView)
-            make.height.equalTo(scrollView)
         }
     }
     
@@ -90,17 +86,19 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
             .disposed(by: disposeBag)
         
         addChild(tutorialPageViewController)
-        containerView.addSubview(tutorialPageViewController.view)
+        contentView.addSubview(tutorialPageViewController.view)
         
         tutorialPageViewController.view.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalToSuperview()
-            make.height.greaterThanOrEqualTo(100)
+            make.top.equalTo(tutorialIndicatorView.snp.bottom).offset(50)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(500)
+            make.bottom.equalToSuperview()
         }
         
         tutorialPageViewController.didMove(toParent: self)
     }
 }
+
 
 final class TutorialPageIndicatorView: UIView {
 
