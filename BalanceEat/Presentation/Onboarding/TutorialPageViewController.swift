@@ -36,8 +36,17 @@ class TutorialPageViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
+        let targetInfoViewController = TargetInfoViewController()
+        
+        targetInfoViewController.inputCompleted
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                self.goToNextPage()
+            })
+            .disposed(by: disposeBag)
+        
         pages.append(basicInfoViewController)
-        pages.append(LoginViewController())
+        pages.append(targetInfoViewController)
     }
     
     private func displayCurrentPage(animated: Bool) {
@@ -59,7 +68,8 @@ class TutorialPageViewController: UIViewController {
         
         let vc = pages[currentIndex]
         addChild(vc)
-        if animated {
+        
+        if animated && currentIndex > 1 {
             let direction: CGFloat = (currentIndex > previousIndex) ? 1 : -1
             let startX = direction * view.bounds.width
             vc.view.frame = view.bounds.offsetBy(dx: startX, dy: 0)
@@ -74,6 +84,10 @@ class TutorialPageViewController: UIViewController {
             vc.view.frame = view.bounds
             view.addSubview(vc.view)
             vc.didMove(toParent: self)
+        }
+        
+        vc.view.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
         
         currentPageRelay.accept((currentIndex: currentIndex, totalPages: pages.count))

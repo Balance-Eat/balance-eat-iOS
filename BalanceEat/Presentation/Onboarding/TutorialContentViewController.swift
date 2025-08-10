@@ -85,13 +85,13 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
             .bind(to: titleLabel.rx.text)
             .disposed(by: disposeBag)
         
-        addChild(tutorialPageViewController)
+//        addChild(tutorialPageViewController)
         contentView.addSubview(tutorialPageViewController.view)
         
         tutorialPageViewController.view.snp.makeConstraints { make in
             make.top.equalTo(tutorialIndicatorView.snp.bottom).offset(50)
             make.leading.trailing.equalToSuperview()
-            make.height.greaterThanOrEqualTo(540)
+//            make.height.greaterThanOrEqualTo(400)
             make.bottom.equalToSuperview()
         }
         
