@@ -143,7 +143,7 @@ class BasicInfoViewController: UIViewController {
 
 final class InputFieldWithIcon: UIView {
     private let icon: UIImage
-    private let placeholder: String
+    private let placeholder: String = ""
     private let unit: String?
     
     private let iconImageView: UIImageView = {
@@ -156,8 +156,9 @@ final class InputFieldWithIcon: UIView {
         let textField = UITextField()
         textField.autocapitalizationType = .none
         textField.borderStyle = .none
-        textField.clearButtonMode = .whileEditing
         textField.font = .systemFont(ofSize: 16, weight: .medium)
+        textField.textAlignment = .right
+        textField.keyboardType = .numberPad
         return textField
     }()
     private let unitLabel: UILabel = {
@@ -167,17 +168,19 @@ final class InputFieldWithIcon: UIView {
         return label
     }()
     
+    let disposeBag = DisposeBag()
     var textObservable: Observable<String?> {
         textField.rx.text.asObservable()
     }
     
     init(icon: UIImage, placeholder: String, unit: String? = nil) {
         self.icon = icon
-        self.placeholder = placeholder
+//        self.placeholder = placeholder
         self.unit = unit
         super.init(frame: .zero)
         
         setUpView()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -206,13 +209,27 @@ final class InputFieldWithIcon: UIView {
         
         textField.snp.makeConstraints { make in
             make.leading.equalTo(iconImageView.snp.trailing).offset(8)
-            make.trailing.equalTo(unitLabel.snp.leading)
+            make.trailing.equalTo(unitLabel.snp.leading).offset(-8)
             make.centerY.equalToSuperview()
         }
+        textField.clipsToBounds = true
         
         unitLabel.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(16).priority(.high)
             make.centerY.equalToSuperview()
         }
+    }
+    
+    private func setBinding() {
+        textField.rx.text.orEmpty
+            .map { text in
+                let filtered = text.filter { $0.isNumber || $0 == "." }
+                if filtered.count > 10 {
+                    return String(filtered.prefix(10))
+                }
+                return filtered
+            }
+            .bind(to: textField.rx.text)
+            .disposed(by: disposeBag)
     }
 }
