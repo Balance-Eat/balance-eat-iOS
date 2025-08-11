@@ -12,6 +12,7 @@ import RxCocoa
 
 class TutorialPageViewController: UIViewController {
     let currentPageRelay = PublishRelay<(currentIndex: Int, totalPages: Int)>()
+    let goToNextPageRelay = PublishRelay<Void>()
     
     private var pages: [UIViewController] = []
     private(set) var currentIndex: Int = 0
@@ -50,7 +51,7 @@ class TutorialPageViewController: UIViewController {
         activityLevelViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
-                self.goToNextPage()
+                self.goToNextPageRelay.accept(())
             })
             .disposed(by: disposeBag)
         

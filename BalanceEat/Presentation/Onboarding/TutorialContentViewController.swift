@@ -110,6 +110,14 @@ class TutorialContentViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
+        tutorialPageViewController.goToNextPageRelay
+            .subscribe(onNext: { [weak self] in
+                let mainViewController = MainViewController()
+                self?.navigationController?.setViewControllers([mainViewController], animated: true)
+            })
+            .disposed(by: disposeBag)
+                
+        
 //        addChild(tutorialPageViewController)
         contentView.addSubview(tutorialPageViewController.view)
         
