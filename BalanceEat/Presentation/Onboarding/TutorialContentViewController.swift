@@ -10,7 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class TutorialContentViewController: UIViewController, UIPageViewControllerDelegate {
+class TutorialContentViewController: UIViewController {
     private let pageTitle: [String] = [
         "기본 정보 입력",
         "목표 설정",
@@ -43,17 +43,28 @@ class TutorialContentViewController: UIViewController, UIPageViewControllerDeleg
     }
     
     override func loadView() {
-        view = scrollView
-    }
-    
-    private func setUpView() {
-        scrollView.addSubview(contentView)
-        scrollView.backgroundColor = .white
+        super.loadView()
+        view.backgroundColor = .white
         
+        view.addSubview(scrollView)
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
+        }
+        
+        scrollView.addSubview(contentView)
         contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
             make.width.equalToSuperview()
         }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
+    private func setUpView() {
+        
         
         contentView.addSubview(titleLabel)
         contentView.addSubview(tutorialIndicatorView)
