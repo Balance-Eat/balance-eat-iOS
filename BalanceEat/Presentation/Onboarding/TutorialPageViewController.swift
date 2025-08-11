@@ -14,7 +14,7 @@ class TutorialPageViewController: UIViewController {
     let currentPageRelay = PublishRelay<(currentIndex: Int, totalPages: Int)>()
     
     private var pages: [UIViewController] = []
-    private var currentIndex: Int = 0
+    private(set) var currentIndex: Int = 0
     private var previousIndex: Int = 0
     
     private let disposeBag = DisposeBag()

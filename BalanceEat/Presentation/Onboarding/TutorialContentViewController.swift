@@ -17,6 +17,8 @@ class TutorialContentViewController: UIViewController {
         "활동량 선택"
     ]
     
+    private let backButton = BackButton()
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 24, weight: .bold)
@@ -36,6 +38,7 @@ class TutorialContentViewController: UIViewController {
         super.init(nibName: nil, bundle: nil)
         setUpView()
         addTutorialPageViewController()
+        bindBackButton()
     }
     
     required init?(coder: NSCoder) {
@@ -64,13 +67,15 @@ class TutorialContentViewController: UIViewController {
     }
     
     private func setUpView() {
+        let titleStackView = UIStackView(arrangedSubviews: [backButton, titleLabel])
+        titleStackView.axis = .horizontal
+        titleStackView.spacing = 8
         
-        
-        contentView.addSubview(titleLabel)
+        contentView.addSubview(titleStackView)
         contentView.addSubview(tutorialIndicatorView)
         
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(contentView.safeAreaLayoutGuide)
+        titleStackView.snp.makeConstraints { make in
+            make.top.equalToSuperview()
             make.leading.equalToSuperview().offset(16)
         }
         
@@ -96,6 +101,15 @@ class TutorialContentViewController: UIViewController {
             .bind(to: titleLabel.rx.text)
             .disposed(by: disposeBag)
         
+        tutorialPageViewController.currentPageRelay
+            .map { $0.currentIndex }
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] currentIndex in
+                guard let self = self else { return }
+                self.backButton.isHidden = (currentIndex == 0)  
+            })
+            .disposed(by: disposeBag)
+        
 //        addChild(tutorialPageViewController)
         contentView.addSubview(tutorialPageViewController.view)
         
@@ -107,6 +121,18 @@ class TutorialContentViewController: UIViewController {
         }
         
         tutorialPageViewController.didMove(toParent: self)
+    }
+    
+    private func bindBackButton() {
+        backButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                
+                if self.tutorialPageViewController.currentIndex > 0 {
+                    self.tutorialPageViewController.goToPreviousPage()
+                }
+            })
+            .disposed(by: disposeBag)
     }
 }
 
