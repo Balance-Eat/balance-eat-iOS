@@ -201,7 +201,7 @@ final class GoalPickerView: UIView {
     
     private func setupActions() {
         [dietCard, bulkUpCard, maintainCard].forEach { card in
-            card.isUserInteractionEnabled = true // 혹시 모르니 명시
+            card.isUserInteractionEnabled = true
             let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap(_:)))
             card.addGestureRecognizer(tap)
         }
