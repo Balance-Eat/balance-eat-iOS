@@ -37,6 +37,7 @@ class TargetInfoViewController: UIViewController {
     }()
     
     let inputCompleted = PublishRelay<Void>()
+    private let optionalIsOpen = BehaviorRelay(value: false)
     
     private let disposeBag = DisposeBag()
     
@@ -91,6 +92,91 @@ class TargetInfoViewController: UIViewController {
             .disposed(by: disposeBag)
         let goalPickerInputView = TitledInputUserInfoView(title: "목표 유형", inputView: goalPickerView)
         
+        let optionalTargetTitleLabel: UILabel = {
+            let label = UILabel()
+            label.font = .systemFont(ofSize: 20, weight: .bold)
+            label.textColor = .black
+            label.text = "선택 사항 설정"
+            return label
+        }()
+        let optionalTargetOpenButton: UIButton = {
+            let button = UIButton(type: .system)
+            button.setImage(UIImage(systemName: "chevron.down"), for: .normal)
+            button.tintColor = .black
+            return button
+        }()
+        optionalTargetOpenButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                var optionalIsOpenValue = self.optionalIsOpen.value
+                optionalIsOpenValue.toggle()
+                self.optionalIsOpen.accept(optionalIsOpenValue)
+            })
+            .disposed(by: disposeBag)
+        
+        let optionalTargetTitleStackView: UIStackView = {
+            let stackView = UIStackView(arrangedSubviews: [optionalTargetTitleLabel, optionalTargetOpenButton])
+            stackView.axis = .horizontal
+            stackView.distribution = .fillProportionally
+            return stackView
+        }()
+        
+        let currentSMIInputView = InputFieldWithIcon(
+            icon: UIImage(systemName: "figure.walk") ?? UIImage(),
+            placeholder: "",
+            unit: "kg"
+        )
+        let currentSMITitledInputView = TitledInputUserInfoView(title: "현재 골격근량", inputView: currentSMIInputView)
+        let targetSMIInputView = InputFieldWithIcon(
+            icon: UIImage(systemName: "target") ?? UIImage(),
+            placeholder: "",
+            unit: "kg"
+        )
+        let targetSMITitledInputView = TitledInputUserInfoView(title: "목표 골격근량", inputView: targetSMIInputView)
+        let SMIStackView: UIStackView = {
+            let stackView = UIStackView(arrangedSubviews: [currentSMITitledInputView, targetSMITitledInputView])
+            stackView.axis = .horizontal
+            stackView.distribution = .fillEqually
+            stackView.spacing = 8
+            return stackView
+        }()
+        
+        let currentFatPercentageInputView = InputFieldWithIcon(
+            icon: UIImage(systemName: "drop.fill") ?? UIImage(),
+            placeholder: "",
+            unit: "%"
+        )
+        let currentFatTitledInputView = TitledInputUserInfoView(title: "현재 체지방률", inputView: currentFatPercentageInputView)
+        let targetFatPercentageInputView = InputFieldWithIcon(
+            icon: UIImage(systemName: "flag.fill") ?? UIImage(),
+            placeholder: "",
+            unit: "%"
+        )
+        let targetFatTitledInputView = TitledInputUserInfoView(title: "현재 체지방률", inputView: targetFatPercentageInputView)
+        let fatPercentageStackView: UIStackView = {
+            let stackView = UIStackView(arrangedSubviews: [currentFatTitledInputView, targetFatTitledInputView])
+            stackView.axis = .horizontal
+            stackView.distribution = .fillEqually
+            stackView.spacing = 8
+            return stackView
+        }()
+        
+        optionalIsOpen
+            .subscribe(onNext: { isOpen in
+                UIView.animate(withDuration: 0.3) {
+                    if isOpen {
+                        optionalTargetOpenButton.setImage(UIImage(systemName: "chevron.up"), for: .normal)
+                        SMIStackView.isHidden = false
+                        fatPercentageStackView.isHidden = false
+                    } else {
+                        optionalTargetOpenButton.setImage(UIImage(systemName: "chevron.down"), for: .normal)
+                        SMIStackView.isHidden = true
+                        fatPercentageStackView.isHidden = true
+                    }
+                }
+            })
+            .disposed(by: disposeBag)
+        
         let nextButton = TitledButton(
             title: "다음",
             style: .init(
@@ -109,7 +195,7 @@ class TargetInfoViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        [currentWeightView, weightInputView, goalPickerInputView, nextButton].forEach {
+        [currentWeightView, weightInputView, goalPickerInputView, optionalTargetTitleStackView, SMIStackView, fatPercentageStackView, nextButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
     }
