@@ -111,7 +111,7 @@ class BasicInfoViewController: UIViewController {
         genderStackView.spacing = 8
         
         let genderInputView = TitledInputUserInfoView(title: "성별", inputView: genderStackView)
-        let ageInputField = InputFieldWithIcon(icon: UIImage(systemName: "calendar.and.person")!, placeholder: "나이를 입력해주세요.", unit: "세")
+        let ageInputField = InputFieldWithIcon(icon: UIImage(systemName: "calendar.and.person")!, placeholder: "나이를 입력해주세요.", unit: "세", isAge: true)
         let ageInputView = TitledInputUserInfoView(title: "나이", inputView: ageInputField)
         let heightInputField = InputFieldWithIcon(icon: UIImage(systemName: "ruler")!, placeholder: "신장을 입력해주세요.", unit: "cm")
         let heightInputView = TitledInputUserInfoView(title: "신장", inputView: heightInputField)
@@ -139,12 +139,21 @@ class BasicInfoViewController: UIViewController {
             mainStackView.addArrangedSubview($0)
         }
     }
+    
+    private func isChekcedGender() -> Bool {
+        return self.gender == .none ? false : true
+    }
+    
+//    private func isValidAge() -> Bool {
+//        
+//    }
 }
 
 final class InputFieldWithIcon: UIView {
     private let icon: UIImage
     private let placeholder: String = ""
     private let unit: String?
+    private var isAge: Bool = false
     
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
@@ -173,10 +182,11 @@ final class InputFieldWithIcon: UIView {
         textField.rx.text.asObservable()
     }
     
-    init(icon: UIImage, placeholder: String, unit: String? = nil) {
+    init(icon: UIImage, placeholder: String, unit: String? = nil, isAge: Bool = false) {
         self.icon = icon
 //        self.placeholder = placeholder
         self.unit = unit
+        self.isAge = isAge
         super.init(frame: .zero)
         
         setUpView()
@@ -222,14 +232,24 @@ final class InputFieldWithIcon: UIView {
     
     private func setBinding() {
         textField.rx.text.orEmpty
-            .map { text in
-                let filtered = text.filter { $0.isNumber || $0 == "." }
-                if filtered.count > 10 {
-                    return String(filtered.prefix(10))
+            .map { [weak self] text in
+                guard let self = self else { return "" }
+                var dotCount = 0
+                let filtered = text.filter {
+                    if $0 == "." {
+                        dotCount += 1
+                        if self.isAge {
+                            return dotCount <= 0
+                        } else {
+                            return dotCount <= 1
+                        }
+                    }
+                    return $0.isNumber
                 }
-                return filtered
+                return String(filtered.prefix(10))
             }
             .bind(to: textField.rx.text)
             .disposed(by: disposeBag)
+
     }
 }
