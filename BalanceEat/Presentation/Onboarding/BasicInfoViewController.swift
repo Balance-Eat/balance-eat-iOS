@@ -40,7 +40,10 @@ class BasicInfoViewController: UIViewController {
         return label
     }()
     
-    private var gender = Gender.none
+    private var gender: BehaviorRelay<Gender> = BehaviorRelay(value: .none)
+    private var ageText: Observable<String?> = Observable.just(nil)
+    private var heightText: Observable<String?> = Observable.just(nil)
+    private var weightText: Observable<String?> = Observable.just(nil)
     
     let inputCompleted = PublishRelay<Void>()
     
@@ -97,9 +100,9 @@ class BasicInfoViewController: UIViewController {
                         genderButtons.forEach {
                             if $0 != button { $0.isSelectedRelay.accept(false) }
                         }
-                        self.gender = button === maleButton ? .male : .female
+                        self.gender.accept(button === maleButton ? .male : .female)
                     } else {
-                        self.gender = .none
+                        self.gender.accept(.none)
                     }
                 })
                 .disposed(by: disposeBag)
@@ -113,10 +116,16 @@ class BasicInfoViewController: UIViewController {
         let genderInputView = TitledInputUserInfoView(title: "성별", inputView: genderStackView)
         let ageInputField = InputFieldWithIcon(icon: UIImage(systemName: "calendar.and.person")!, placeholder: "나이를 입력해주세요.", unit: "세", isAge: true)
         let ageInputView = TitledInputUserInfoView(title: "나이", inputView: ageInputField)
+        self.ageText = ageInputField.textObservable
+        
         let heightInputField = InputFieldWithIcon(icon: UIImage(systemName: "ruler")!, placeholder: "신장을 입력해주세요.", unit: "cm")
         let heightInputView = TitledInputUserInfoView(title: "신장", inputView: heightInputField)
+        self.heightText = heightInputField.textObservable
+        
         let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "체중을 입력해주세요.", unit: "kg")
         let weightInputView = TitledInputUserInfoView(title: "체중", inputView: weightInputField)
+        self.weightText = weightInputField.textObservable
+        
         let nextButton = TitledButton(
             title: "다음",
             style: .init(
@@ -138,15 +147,16 @@ class BasicInfoViewController: UIViewController {
         [genderInputView, ageInputView, heightInputView, weightInputView, nextButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
+        
+        Observable.combineLatest(gender, ageText, heightText, weightText) { gender, age, height, weight -> Bool in
+            guard let age = age, let height = height, let weight = weight else {
+                return false
+            }
+            return !(gender == .none) && !age.isEmpty && !height.isEmpty && !weight.isEmpty
+        }
+        .bind(to: nextButton.rx.isEnabled)
+        .disposed(by: disposeBag)
     }
-    
-    private func isChekcedGender() -> Bool {
-        return self.gender == .none ? false : true
-    }
-    
-//    private func isValidAge() -> Bool {
-//        
-//    }
 }
 
 final class InputFieldWithIcon: UIView {
