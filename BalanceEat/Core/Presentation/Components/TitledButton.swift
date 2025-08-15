@@ -53,4 +53,19 @@ final class TitledButton: UIButton {
                           : style.titleColor, for: .normal)
         }
     }
+    
+    override var isEnabled: Bool {
+        didSet {
+            guard let style = style else { return }
+            
+            if isEnabled {
+                backgroundColor = style.backgroundColor
+                setTitleColor(style.titleColor, for: .normal)
+            } else {
+                backgroundColor = .lightGray.withAlphaComponent(0.6)
+                setTitleColor(.white, for: .disabled)
+            }
+        }
+    }
+    
 }
