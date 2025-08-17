@@ -36,13 +36,18 @@ class TargetInfoViewController: UIViewController {
         return label
     }()
     
+    private var targetWeightText: Observable<String?> = Observable.just(nil)
+    private var selectedGoal: BehaviorRelay<GoalType?> = BehaviorRelay(value: .none)
+    private var currentSMIText: Observable<String?> = Observable.just(nil)
+    private var targetSMIText: Observable<String?> = Observable.just(nil)
+    private var currentFatPercentageText: Observable<String?> = Observable.just(nil)
+    private var targetFatPercentageText: Observable<String?> = Observable.just(nil)
+    
     let inputCompleted = PublishRelay<Void>()
     private let optionalIsOpen = BehaviorRelay(value: false)
     
     private let disposeBag = DisposeBag()
     
-    private var selectedGoal: GoalType?
-
     
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -82,12 +87,13 @@ class TargetInfoViewController: UIViewController {
         
         let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "목표 체중을 입력해주세요.", unit: "kg")
         let weightInputView = TitledInputUserInfoView(title: "목표 체중", inputView: weightInputField)
+        self.targetWeightText = weightInputField.textObservable
         
         let goalPickerView = GoalPickerView()
         goalPickerView.selectedGoalRelay
             .subscribe(onNext: { [weak self] goal in
                 guard let self = self else { return }
-                self.selectedGoal = goal
+                self.selectedGoal.accept(goal)
             })
             .disposed(by: disposeBag)
         let goalPickerInputView = TitledInputUserInfoView(title: "목표 유형", inputView: goalPickerView)
@@ -127,12 +133,16 @@ class TargetInfoViewController: UIViewController {
             unit: "kg"
         )
         let currentSMITitledInputView = TitledInputUserInfoView(title: "현재 골격근량", inputView: currentSMIInputView)
+        self.currentSMIText = currentSMIInputView.textObservable
+        
         let targetSMIInputView = InputFieldWithIcon(
             icon: UIImage(systemName: "target") ?? UIImage(),
             placeholder: "",
             unit: "kg"
         )
         let targetSMITitledInputView = TitledInputUserInfoView(title: "목표 골격근량", inputView: targetSMIInputView)
+        self.targetSMIText = targetSMIInputView.textObservable
+        
         let SMIStackView: UIStackView = {
             let stackView = UIStackView(arrangedSubviews: [currentSMITitledInputView, targetSMITitledInputView])
             stackView.axis = .horizontal
@@ -147,12 +157,16 @@ class TargetInfoViewController: UIViewController {
             unit: "%"
         )
         let currentFatTitledInputView = TitledInputUserInfoView(title: "현재 체지방률", inputView: currentFatPercentageInputView)
+        self.currentFatPercentageText = currentFatPercentageInputView.textObservable
+        
         let targetFatPercentageInputView = InputFieldWithIcon(
             icon: UIImage(systemName: "flag.fill") ?? UIImage(),
             placeholder: "",
             unit: "%"
         )
         let targetFatTitledInputView = TitledInputUserInfoView(title: "현재 체지방률", inputView: targetFatPercentageInputView)
+        self.targetFatPercentageText = targetFatPercentageInputView.textObservable
+        
         let fatPercentageStackView: UIStackView = {
             let stackView = UIStackView(arrangedSubviews: [currentFatTitledInputView, targetFatTitledInputView])
             stackView.axis = .horizontal
@@ -198,6 +212,13 @@ class TargetInfoViewController: UIViewController {
         [currentWeightView, weightInputView, goalPickerInputView, optionalTargetTitleStackView, SMIStackView, fatPercentageStackView, nextButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
+        
+        Observable.combineLatest(targetWeightText, selectedGoal) { weight, goal -> Bool in
+            guard let weight = weight, let goal = goal else { return false }
+            return !weight.isEmpty && goal != .none
+        }
+        .bind(to: nextButton.rx.isEnabled)
+        .disposed(by: disposeBag)
     }
     
     private func currentWeightView(weight: String) -> UIView {
@@ -237,6 +258,7 @@ enum GoalType {
     case diet
     case bulkUp
     case maintain
+    case none
 }
 
 final class GoalPickerView: UIView {
