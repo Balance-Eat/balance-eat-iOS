@@ -37,7 +37,7 @@ class TargetInfoViewController: UIViewController {
     }()
     
     private var targetWeightText: Observable<String?> = Observable.just(nil)
-    private var selectedGoal: BehaviorRelay<GoalType?> = BehaviorRelay(value: .none)
+    private var selectedGoal: BehaviorRelay<GoalType?> = BehaviorRelay(value: GoalType.none)
     private var currentSMIText: Observable<String?> = Observable.just(nil)
     private var targetSMIText: Observable<String?> = Observable.just(nil)
     private var currentFatPercentageText: Observable<String?> = Observable.just(nil)
@@ -164,7 +164,7 @@ class TargetInfoViewController: UIViewController {
             placeholder: "",
             unit: "%"
         )
-        let targetFatTitledInputView = TitledInputUserInfoView(title: "현재 체지방률", inputView: targetFatPercentageInputView)
+        let targetFatTitledInputView = TitledInputUserInfoView(title: "목표 체지방률", inputView: targetFatPercentageInputView)
         self.targetFatPercentageText = targetFatPercentageInputView.textObservable
         
         let fatPercentageStackView: UIStackView = {
