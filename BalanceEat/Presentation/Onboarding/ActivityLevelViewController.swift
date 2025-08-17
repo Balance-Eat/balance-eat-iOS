@@ -37,11 +37,10 @@ class ActivityLevelViewController: UIViewController {
     }()
     private let estimatedDailyCalorieView = EstimatedDailyCalorieView(calorie: 2635)
     
+    private var selectedActivityLevel: BehaviorRelay<ActivityLevel> = BehaviorRelay(value: .none)
     let inputCompleted = PublishRelay<Void>()
     
     private let disposeBag = DisposeBag()
-    
-    private var selectedActivityLevel: ActivityLevel?
     
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -81,7 +80,7 @@ class ActivityLevelViewController: UIViewController {
         activityLevelPickerView.selectedActivityLevelRelay
             .subscribe(onNext: { [weak self] level in
                 guard let self = self else { return }
-                self.selectedActivityLevel = level
+                self.selectedActivityLevel.accept(level)
                 self.estimatedDailyCalorieView.isHidden = false
             })
             .disposed(by: disposeBag)
@@ -111,81 +110,15 @@ class ActivityLevelViewController: UIViewController {
             mainStackView.addArrangedSubview($0)
         }
         
+        selectedActivityLevel
+            .subscribe(onNext: { level in
+                
+                nextButton.isEnabled = level != .none
+            })
+            .disposed(by: disposeBag)
     }
     
     private func setUpBinding() {
-    }
-}
-
-enum ActivityLevel {
-    case sedentary
-    case light
-    case moderate
-    case vigorous
-    
-    var emoji: String {
-        switch self {
-        case .sedentary:
-            "🛋️"
-        case .light:
-            "🚶"
-        case .moderate:
-            "🏃"
-        case .vigorous:
-            "💪"
-        }
-    }
-    
-    var title: String {
-        switch self {
-        case .sedentary:
-            "거의 움직이지 않음"
-        case .light:
-            "가벼운 활동"
-        case .moderate:
-            "중간 활동"
-        case .vigorous:
-            "고강도 활동"
-        }
-    }
-    
-    var subtitle: String {
-        switch self {
-        case .sedentary:
-            "사무직, 재택근무"
-        case .light:
-            "가벼운 운동 1-3일/주"
-        case .moderate:
-            "중강도 운동 3-5일/주"
-        case .vigorous:
-            "고강도 운동 6-7일/주"
-        }
-    }
-    
-    var description: String {
-        switch self {
-        case .sedentary:
-            "하루 대부분을 앉아서 보내며, 운동을 거의 하지 않음"
-        case .light:
-            "산책, 가벼운 집안일, 주 1-3회 가벼운 운동"
-        case .moderate:
-            "조깅, 헬스장, 주 3-5회 중강도 운동"
-        case .vigorous:
-            "매일 운동, 고강도 트레이닝, 육체적 직업"
-        }
-    }
-    
-    var selectedBorderColor: UIColor {
-        switch self {
-        case .sedentary:
-                .sedentarySelectedBorder
-        case .light:
-                .lightSelectedBorder
-        case .moderate:
-                .moderateSelectedBorder
-        case .vigorous:
-                .vigorousSelectedBorder
-        }
     }
 }
 
