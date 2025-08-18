@@ -119,11 +119,11 @@ class TutorialContentViewController: UIViewController {
         tutorialPageViewController.goToNextPageRelay
             .subscribe(onNext: { [weak self] createUserDTO in
                 guard let self = self else { return }
-                Task {
-                    await self.viewModel.createUser(createUserDTO: createUserDTO)
-                }
-//                let mainViewController = MainViewController()
-//                self?.navigationController?.setViewControllers([mainViewController], animated: true)
+//                Task {
+//                    await self.viewModel.createUser(createUserDTO: createUserDTO)
+//                }
+                let mainViewController = MainViewController()
+                self.navigationController?.setViewControllers([mainViewController], animated: true)
             })
             .disposed(by: disposeBag)
                 
