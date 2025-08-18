@@ -319,6 +319,19 @@ enum GoalType {
             return 0
         }
     }
+    
+    var description: String {
+        switch self {
+        case .diet:
+            return "다이어트 🔥"
+        case .bulkUp:
+            return "근육량 증가 💪"
+        case .maintain:
+            return "현재 체중 유지 ⚖️"
+        case .none:
+            return ""
+        }
+    }
 }
 
 final class GoalPickerView: UIView {
