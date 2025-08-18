@@ -11,6 +11,8 @@ import RxSwift
 import RxCocoa
 
 class TutorialContentViewController: UIViewController {
+    private let viewModel: TutorialContentViewModel
+    
     private let pageTitle: [String] = [
         "기본 정보 입력",
         "목표 설정",
@@ -35,7 +37,11 @@ class TutorialContentViewController: UIViewController {
     private let disposeBag = DisposeBag()
         
     init() {
+        let repository = UserRepository()
+        let useCase = UserUseCase(repository: repository)
+        self.viewModel = TutorialContentViewModel(userUseCase: useCase)
         super.init(nibName: nil, bundle: nil)
+        
         setUpView()
         addTutorialPageViewController()
         bindBackButton()
@@ -111,9 +117,13 @@ class TutorialContentViewController: UIViewController {
             .disposed(by: disposeBag)
         
         tutorialPageViewController.goToNextPageRelay
-            .subscribe(onNext: { [weak self] in
-                let mainViewController = MainViewController()
-                self?.navigationController?.setViewControllers([mainViewController], animated: true)
+            .subscribe(onNext: { [weak self] createUserDTO in
+                guard let self = self else { return }
+                Task {
+                    await self.viewModel.createUser(createUserDTO: createUserDTO)
+                }
+//                let mainViewController = MainViewController()
+//                self?.navigationController?.setViewControllers([mainViewController], animated: true)
             })
             .disposed(by: disposeBag)
                 
@@ -129,6 +139,13 @@ class TutorialContentViewController: UIViewController {
         }
         
         tutorialPageViewController.didMove(toParent: self)
+        
+        viewModel.onCreateUserSuccessRelay
+            .subscribe(onNext: { [weak self] in
+                let mainViewController = MainViewController()
+                self?.navigationController?.setViewControllers([mainViewController], animated: true)
+            })
+            .disposed(by: disposeBag)
     }
     
     private func bindBackButton() {

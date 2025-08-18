@@ -36,6 +36,8 @@ class TargetInfoViewController: UIViewController {
         return label
     }()
     
+    private let currentWeightLabel = UILabel()
+    
     private var targetWeightText: Observable<String?> = Observable.just(nil)
     private var selectedGoal: BehaviorRelay<GoalType?> = BehaviorRelay(value: GoalType.none)
     private var currentSMIText: Observable<String?> = Observable.just(nil)
@@ -83,7 +85,7 @@ class TargetInfoViewController: UIViewController {
             make.bottom.equalToSuperview().inset(16)
         }
         
-        let currentWeightView = self.currentWeightView(weight: "70.0")
+        let currentWeightView = self.currentWeightView()
         
         let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "목표 체중을 입력해주세요.", unit: "kg")
         let weightInputView = TitledInputUserInfoView(title: "목표 체중", inputView: weightInputField)
@@ -204,8 +206,33 @@ class TargetInfoViewController: UIViewController {
         }
         
         nextButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                self?.inputCompleted.accept(())
+            .withLatestFrom(Observable.combineLatest(currentSMIText,
+                                                     targetSMIText,
+                                                     currentFatPercentageText,
+                                                     targetFatPercentageText))
+            .subscribe(onNext: { [weak self] currentSMI, targetSMI, currentFat, targetFat in
+                guard let self = self else { return }
+
+                let currentSMIEntered = !(currentSMI?.isEmpty ?? true)
+                let targetSMIEntered = !(targetSMI?.isEmpty ?? true)
+                let currentFatEntered = !(currentFat?.isEmpty ?? true)
+                let targetFatEntered = !(targetFat?.isEmpty ?? true)
+
+                if currentSMIEntered != targetSMIEntered {
+                    let alert = UIAlertController(title: "입력 오류",
+                                                  message: "골격근량 값이 하나만 입력되었습니다!",
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "확인", style: .default))
+                    self.present(alert, animated: true)
+                } else if currentFatEntered != targetFatEntered {
+                    let alert = UIAlertController(title: "입력 오류",
+                                                  message: "체지방률 값이 하나만 입력되었습니다!",
+                                                  preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "확인", style: .default))
+                    self.present(alert, animated: true)
+                } else {
+                    self.inputCompleted.accept(())
+                }
             })
             .disposed(by: disposeBag)
         
@@ -219,9 +246,23 @@ class TargetInfoViewController: UIViewController {
         }
         .bind(to: nextButton.rx.isEnabled)
         .disposed(by: disposeBag)
+        
+        Observable.combineLatest(targetWeightText, selectedGoal, currentSMIText, targetSMIText, currentFatPercentageText, targetFatPercentageText)
+            .subscribe(onNext: { weight, goal, currentSMI, targetSMI, currentFatPercentage, targetFatPercentage in
+                var data = TutorialPageViewModel.shared.dataRelay.value
+                data.targetWeight = Double(weight ?? "") ?? 0
+                data.smi = Double(currentSMI ?? "") ?? 0
+                data.targetSmi = Double(targetSMI ?? "") ?? 0
+                data.fatPercentage = Double(currentFatPercentage ?? "") ?? 0
+                data.targetFatPercentage = Double(targetFatPercentage ?? "") ?? 0
+                
+                TutorialPageViewModel.shared.goalTypeRelay.accept(goal ?? .none)
+                TutorialPageViewModel.shared.dataRelay.accept(data)
+            })
+            .disposed(by: disposeBag)
     }
     
-    private func currentWeightView(weight: String) -> UIView {
+    private func currentWeightView() -> UIView {
         let view = UIView()
         view.backgroundColor = .systemGray6
         view.layer.cornerRadius = 8
@@ -231,12 +272,10 @@ class TargetInfoViewController: UIViewController {
         titleLabel.font = .systemFont(ofSize: 14, weight: .medium)
         titleLabel.textColor = .black
         
-        let weightLabel = UILabel()
-        weightLabel.text = "\(weight)kg"
-        weightLabel.font = .systemFont(ofSize: 18, weight: .bold)
-        weightLabel.textColor = .black
+        currentWeightLabel.font = .systemFont(ofSize: 18, weight: .bold)
+        currentWeightLabel.textColor = .black
         
-        let stackView = UIStackView(arrangedSubviews: [titleLabel, weightLabel])
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, currentWeightLabel])
         stackView.axis = .horizontal
         stackView.spacing = 4
         stackView.distribution = .equalCentering
@@ -251,6 +290,14 @@ class TargetInfoViewController: UIViewController {
     }
     
     private func setUpBinding() {
+        TutorialPageViewModel.shared.dataRelay
+            .map { $0.weight ?? 0 }
+            .distinctUntilChanged()
+            .map { weight in
+                String(format: "%.1fkg", weight)
+            }
+            .bind(to: currentWeightLabel.rx.text)
+            .disposed(by: disposeBag)
     }
 }
 
@@ -259,6 +306,19 @@ enum GoalType {
     case bulkUp
     case maintain
     case none
+    
+    var coefficient: Double {
+        switch self {
+        case .diet:
+            return 0.8
+        case .bulkUp:
+            return 1.15
+        case .maintain:
+            return 1
+        case .none:
+            return 0
+        }
+    }
 }
 
 final class GoalPickerView: UIView {

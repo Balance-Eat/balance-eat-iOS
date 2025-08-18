@@ -9,16 +9,28 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
+import UUIDV7
 
 class TutorialPageViewController: UIViewController {
+    private let viewModel: TutorialPageViewModel
+    
     let currentPageRelay = PublishRelay<(currentIndex: Int, totalPages: Int)>()
-    let goToNextPageRelay = PublishRelay<Void>()
+    let goToNextPageRelay = PublishRelay<CreateUserDTO>()
     
     private var pages: [UIViewController] = []
     private(set) var currentIndex: Int = 0
     private var previousIndex: Int = 0
     
     private let disposeBag = DisposeBag()
+    
+    init() {
+        viewModel = TutorialPageViewModel.shared
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,7 +63,25 @@ class TutorialPageViewController: UIViewController {
         activityLevelViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
-                self.goToNextPageRelay.accept(())
+                let data = self.viewModel.dataRelay.value
+                let createUserDTO = CreateUserDTO(
+                    uuid: UUID.uuidV7String(),
+                    name: viewModel.generateRandomNickname(),
+                    gender: data.gender,
+                    age: data.age ?? 0,
+                    height: data.height ?? 0,
+                    weight: data.weight ?? 0,
+                    email: "",
+                    activityLevel: data.activityLevel ?? .none,
+                    smi: data.smi ?? 0,
+                    fatPercentage: data.fatPercentage ?? 0,
+                    targetWeight: data.targetWeight ?? 0,
+                    targetCalorie: viewModel.targetCaloriesRelay.value,
+                    targetSmi: data.targetSmi ?? 0,
+                    targetFatPercentage: data.targetFatPercentage ?? 0
+                    
+                )
+                self.goToNextPageRelay.accept(createUserDTO)
             })
             .disposed(by: disposeBag)
         

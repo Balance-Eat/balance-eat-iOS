@@ -35,7 +35,7 @@ class ActivityLevelViewController: UIViewController {
         label.font = .systemFont(ofSize: 16)
         return label
     }()
-    private let estimatedDailyCalorieView = EstimatedDailyCalorieView(calorie: 2635)
+    private let estimatedDailyCalorieView = EstimatedDailyCalorieView()
     
     private var selectedActivityLevel: BehaviorRelay<ActivityLevel> = BehaviorRelay(value: .none)
     let inputCompleted = PublishRelay<Void>()
@@ -87,6 +87,10 @@ class ActivityLevelViewController: UIViewController {
         
         estimatedDailyCalorieView.isHidden = true
         
+        TutorialPageViewModel.shared.targetCaloriesObservable
+            .bind(to: self.estimatedDailyCalorieView.calorieRelay)
+            .disposed(by: disposeBag)
+        
         
         let nextButton = TitledButton(
             title: "설정 완료",
@@ -111,9 +115,17 @@ class ActivityLevelViewController: UIViewController {
         }
         
         selectedActivityLevel
-            .subscribe(onNext: { level in
+            .subscribe(onNext: { [weak self] level in
+                guard let self = self else { return }
+                var data = TutorialPageViewModel.shared.dataRelay.value
+                data.activityLevel = level
+                TutorialPageViewModel.shared.dataRelay.accept(data)
                 
-                nextButton.isEnabled = level != .none
+                self.estimatedDailyCalorieView.isHidden = false
+                
+                TutorialPageViewModel.shared.targetCaloriesObservable
+                    .bind(to: self.estimatedDailyCalorieView.calorieRelay)
+                    .disposed(by: self.disposeBag)
             })
             .disposed(by: disposeBag)
     }
@@ -315,11 +327,14 @@ final class EstimatedDailyCalorieView: UIView {
         return label
     }()
     
-    init(calorie: Int) {
+    let calorieRelay: PublishRelay<Int> = PublishRelay<Int>()
+    let disposeBag = DisposeBag()
+    
+    init() {
         super.init(frame: .zero)
         
-        setCalorieLabelText(formatNumberWithComma(calorie))
         setUpView()
+        setUpBinding()
     }
     
     required  init?(coder: NSCoder) {
@@ -368,5 +383,13 @@ final class EstimatedDailyCalorieView: UIView {
         layer.cornerRadius = 8
         layer.borderWidth = 1
         layer.borderColor = UIColor.estimatedDailyCalorie.withAlphaComponent(0.2).cgColor
+    }
+    
+    private func setUpBinding() {
+        calorieRelay.subscribe(onNext: { [weak self] calorie in
+            guard let self = self else { return }
+            self.setCalorieLabelText(self.formatNumberWithComma(calorie))
+        })
+        .disposed(by: disposeBag)
     }
 }

@@ -10,12 +10,6 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-enum Gender: String {
-    case male = "남성"
-    case female = "여성"
-    case none = ""
-}
-
 class BasicInfoViewController: UIViewController {
     private let mainStackView: UIStackView = {
         let stackView = UIStackView()
@@ -156,6 +150,18 @@ class BasicInfoViewController: UIViewController {
         }
         .bind(to: nextButton.rx.isEnabled)
         .disposed(by: disposeBag)
+        
+        Observable.combineLatest(gender, ageText, heightText, weightText)
+            .subscribe(onNext: { gender, age, height, weight in
+                var data = TutorialPageViewModel.shared.dataRelay.value
+                data.gender = gender
+                data.age = Int(age ?? "")
+                data.height = Double(height ?? "")
+                data.weight = Double(weight ?? "")
+                TutorialPageViewModel.shared.dataRelay.accept(data)
+            })
+            .disposed(by: disposeBag)
+
     }
 }
 

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		490295E12E51F79200BE288B /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 490295E02E51F79200BE288B /* Alamofire */; };
+		4965DEAA2E5220BD006D7CDA /* UUIDV7 in Frameworks */ = {isa = PBXBuildFile; productRef = 4965DEA92E5220BD006D7CDA /* UUIDV7 */; };
+		49808CFF2E51F9D6003ACBCF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 49808CFE2E51F9D6003ACBCF /* Alamofire */; };
 		49BF00AB2E1E301500876EC3 /* FlexLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AA2E1E301500876EC3 /* FlexLayout */; };
 		49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AD2E1E303200876EC3 /* PinLayout */; };
 		49BF00B12E1E309400876EC3 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B02E1E309400876EC3 /* RxCocoa */; };
@@ -90,9 +93,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4965DEAA2E5220BD006D7CDA /* UUIDV7 in Frameworks */,
+				490295E12E51F79200BE288B /* Alamofire in Frameworks */,
 				49BF00B12E1E309400876EC3 /* RxCocoa in Frameworks */,
 				49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */,
 				49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */,
+				49808CFF2E51F9D6003ACBCF /* Alamofire in Frameworks */,
 				49BF011C2E1F4CE500876EC3 /* SnapKit in Frameworks */,
 				49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */,
 				49BF00B32E1E309400876EC3 /* RxRelay in Frameworks */,
@@ -166,6 +172,9 @@
 				49BF00B62E1E309400876EC3 /* RxTest */,
 				49BF00B92E1E323B00876EC3 /* RealmSwift */,
 				49BF011B2E1F4CE500876EC3 /* SnapKit */,
+				490295E02E51F79200BE288B /* Alamofire */,
+				49808CFE2E51F9D6003ACBCF /* Alamofire */,
+				4965DEA92E5220BD006D7CDA /* UUIDV7 */,
 			);
 			productName = BanlanceEat;
 			productReference = 49BF00722E1E2FC900876EC3 /* BalanceEat.app */;
@@ -255,6 +264,8 @@
 				49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */,
 				49BF00B82E1E323B00876EC3 /* XCRemoteSwiftPackageReference "realm-swift" */,
 				49BF011A2E1F4CE500876EC3 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				49808CFD2E51F9D6003ACBCF /* XCRemoteSwiftPackageReference "Alamofire" */,
+				4965DEA82E5220BD006D7CDA /* XCRemoteSwiftPackageReference "UUIDV7" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 49BF00732E1E2FC900876EC3 /* Products */;
@@ -619,6 +630,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		4965DEA82E5220BD006D7CDA /* XCRemoteSwiftPackageReference "UUIDV7" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nthState/UUIDV7";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		49808CFD2E51F9D6003ACBCF /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.2;
+			};
+		};
 		49BF00A92E1E301500876EC3 /* XCRemoteSwiftPackageReference "FlexLayout" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/layoutBox/FlexLayout";
@@ -662,6 +689,20 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		490295E02E51F79200BE288B /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Alamofire;
+		};
+		4965DEA92E5220BD006D7CDA /* UUIDV7 */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4965DEA82E5220BD006D7CDA /* XCRemoteSwiftPackageReference "UUIDV7" */;
+			productName = UUIDV7;
+		};
+		49808CFE2E51F9D6003ACBCF /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49808CFD2E51F9D6003ACBCF /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
 		49BF00AA2E1E301500876EC3 /* FlexLayout */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 49BF00A92E1E301500876EC3 /* XCRemoteSwiftPackageReference "FlexLayout" */;

@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import BanlanceEat
+@testable import BalanceEat
 
 final class BanlanceEatTests: XCTestCase {
 
