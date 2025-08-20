@@ -198,7 +198,7 @@ final class InputFieldWithIcon: UIView {
         textField.rx.text.asObservable()
     }
     
-    init(icon: UIImage, placeholder: String, unit: String? = nil, isAge: Bool = false) {
+    init(icon: UIImage = UIImage(), placeholder: String, unit: String? = nil, isAge: Bool = false) {
         self.icon = icon
 //        self.placeholder = placeholder
         self.unit = unit
@@ -262,7 +262,23 @@ final class InputFieldWithIcon: UIView {
                     }
                     return $0.isNumber
                 }
-                return String(filtered.prefix(10))
+                if isAge {
+                    return Int(filtered) ?? 0 > 999 ? "999" : filtered
+                }
+                
+                var number = filtered
+                if filtered.contains(".") {
+                    let parts = filtered.split(separator: ".", omittingEmptySubsequences: false)
+                    
+                    if let firstPart = parts.first, let secondPart = parts.last {
+                        if secondPart.count > 1  {
+                            number = "\(String(firstPart)).\(String(secondPart).prefix(1))"
+                        }
+                    }
+                }
+                
+                
+                return Double(number) ?? 0 > 999.9 ? "999.9" : String(number)
             }
             .bind(to: textField.rx.text)
             .disposed(by: disposeBag)
