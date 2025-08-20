@@ -15,12 +15,13 @@ protocol Endpoint {
 }
 
 enum UserEndPoints: Endpoint {
+
     case createUser(createUserDTO: CreateUserDTO)
     
     var path: String {
         switch self {
         case .createUser:
-            return "/api/v1/users"
+            return "/v1/users"
         }
     }
     
