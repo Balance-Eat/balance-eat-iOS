@@ -31,6 +31,19 @@ final class APIClient {
                 case .success(let value):
                     continuation.resume(returning: .success(value))
                 case .failure(let afError):
+                    let statusCode = response.response?.statusCode
+                                    let responseData = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "No Body"
+                                    
+                                    let errorMessage = """
+                                    ❌ API Request Failed
+                                    - URL: \(url)
+                                    - Status Code: \(statusCode ?? 0)
+                                    - Error: \(afError.localizedDescription)
+                                    - Response Body: \(responseData)
+                                    """
+                                    
+                                    print(errorMessage)
+                    print("parameters: \(endpoint.parameters ?? [:])")
                     continuation.resume(returning: .failure(.requestFailed(afError.localizedDescription)))
                 }
             }
