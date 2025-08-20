@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		490295E12E51F79200BE288B /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 490295E02E51F79200BE288B /* Alamofire */; };
 		4965DEAA2E5220BD006D7CDA /* UUIDV7 in Frameworks */ = {isa = PBXBuildFile; productRef = 4965DEA92E5220BD006D7CDA /* UUIDV7 */; };
+		4965DEB52E5619D5006D7CDA /* BalanceEat.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4965DEAD2E560D89006D7CDA /* BalanceEat.xcdatamodeld */; };
 		49808CFF2E51F9D6003ACBCF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 49808CFE2E51F9D6003ACBCF /* Alamofire */; };
 		49BF00AB2E1E301500876EC3 /* FlexLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AA2E1E301500876EC3 /* FlexLayout */; };
 		49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AD2E1E303200876EC3 /* PinLayout */; };
@@ -52,6 +53,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4965DEAE2E560D89006D7CDA /* BalanceEat.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = BalanceEat.xcdatamodel; sourceTree = "<group>"; };
 		49BF00722E1E2FC900876EC3 /* BalanceEat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BalanceEat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		49BF008B2E1E2FCA00876EC3 /* BalanceEatTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BalanceEatTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		49BF00952E1E2FCA00876EC3 /* BalanceEatUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BalanceEatUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -126,6 +128,7 @@
 		49BF00692E1E2FC900876EC3 = {
 			isa = PBXGroup;
 			children = (
+				4965DEAD2E560D89006D7CDA /* BalanceEat.xcdatamodeld */,
 				49BF008E2E1E2FCA00876EC3 /* BalanceEatTests */,
 				49BF00982E1E2FCA00876EC3 /* BalanceEatUITests */,
 				49BF00732E1E2FC900876EC3 /* Products */,
@@ -308,6 +311,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4965DEB52E5619D5006D7CDA /* BalanceEat.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -744,6 +748,19 @@
 			productName = SnapKit;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		4965DEAD2E560D89006D7CDA /* BalanceEat.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				4965DEAE2E560D89006D7CDA /* BalanceEat.xcdatamodel */,
+			);
+			currentVersion = 4965DEAE2E560D89006D7CDA /* BalanceEat.xcdatamodel */;
+			path = BalanceEat.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 49BF006A2E1E2FC900876EC3 /* Project object */;
 }

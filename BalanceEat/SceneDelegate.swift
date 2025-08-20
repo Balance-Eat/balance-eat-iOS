@@ -21,11 +21,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
         
+        let repository = UserRepository()
+        let useCase = UserUseCase(repository: repository)
+        let getUserUUIDResult = useCase.getUserUUID()
+        let navigationController: UINavigationController
+        
+        switch getUserUUIDResult {
+        case .success(let uuid):
+            print("uuid: \(uuid)")
+            let mainViewController = MainViewController()
+            navigationController = UINavigationController(rootViewController: mainViewController)
+            
+        case .failure(let error):
+            let onboardingViewController = OnboardingStartViewController()
+            navigationController = UINavigationController(rootViewController: onboardingViewController)
+        }
 //        let loginViewController = LoginViewController()
 //        let navigationController = UINavigationController(rootViewController: loginViewController)
         
-        let onboardingViewController = OnboardingStartViewController()
-        let navigationController = UINavigationController(rootViewController: onboardingViewController)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }

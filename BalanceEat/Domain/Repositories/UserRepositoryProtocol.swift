@@ -9,5 +9,7 @@ import Foundation
 
 protocol UserRepositoryProtocol {
     func createUser(createUserDTO: CreateUserDTO) async -> Result<Void, NetworkError>
-    
+    func getUserUUID() -> Result<String, CoreDataError>
+    func saveUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
+    func deleteUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
 }

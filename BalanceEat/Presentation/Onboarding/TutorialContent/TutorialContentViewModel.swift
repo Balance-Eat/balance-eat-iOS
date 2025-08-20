@@ -24,9 +24,17 @@ final class TutorialContentViewModel {
         
         switch createUserResponse {
         case .success():
+            saveUserUUID(createUserDTO.uuid)
             onCreateUserSuccessRelay.accept(())
+            
         case .failure(let failure):
             onCreateUserFailureRelay.accept(failure.localizedDescription)
+        }
+    }
+    
+    private func saveUserUUID(_ userUUID: String) {
+        if case .failure(let error) = userUseCase.saveUserUUID(userUUID) {
+            print("UUID 저장 실패: \(error.localizedDescription)")
         }
     }
 }
