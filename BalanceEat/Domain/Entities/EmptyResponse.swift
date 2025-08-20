@@ -9,7 +9,8 @@ import Foundation
 struct EmptyData: Decodable {} 
 
 struct EmptyResponse: Decodable {
-    let data: EmptyData
+    let data: EmptyData?
+    let status: String
     let message: String
     let serverDatetime: String
 }

@@ -117,35 +117,36 @@ class TutorialContentViewController: UIViewController {
             .disposed(by: disposeBag)
         
         tutorialPageViewController.goToNextPageRelay
-            .subscribe(onNext: { [weak self] createUserDTO in
+            .flatMapLatest { [weak self] createUserDTO -> Observable<Void> in
+                guard let self = self else { return .empty() }
+                
+                return Observable.create { observer in
+                    Task {
+                        await self.viewModel.createUser(createUserDTO: createUserDTO)
+                        observer.onNext(())
+                        observer.onCompleted()
+                    }
+                    return Disposables.create()
+                }
+            }
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
-//                Task {
-//                    await self.viewModel.createUser(createUserDTO: createUserDTO)
-//                }
-                let mainViewController = MainViewController()
-                self.navigationController?.setViewControllers([mainViewController], animated: true)
+                let mainVC = MainViewController()
+                self.navigationController?.setViewControllers([mainVC], animated: true)
             })
             .disposed(by: disposeBag)
                 
         
-//        addChild(tutorialPageViewController)
         contentView.addSubview(tutorialPageViewController.view)
         
         tutorialPageViewController.view.snp.makeConstraints { make in
             make.top.equalTo(tutorialIndicatorView.snp.bottom).offset(50)
             make.leading.trailing.equalToSuperview()
-//            make.height.greaterThanOrEqualTo(400)
             make.bottom.equalToSuperview()
         }
         
         tutorialPageViewController.didMove(toParent: self)
-        
-        viewModel.onCreateUserSuccessRelay
-            .subscribe(onNext: { [weak self] in
-                let mainViewController = MainViewController()
-                self?.navigationController?.setViewControllers([mainViewController], animated: true)
-            })
-            .disposed(by: disposeBag)
     }
     
     private func bindBackButton() {
