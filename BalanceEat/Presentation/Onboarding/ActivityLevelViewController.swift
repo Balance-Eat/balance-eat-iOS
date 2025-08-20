@@ -142,7 +142,7 @@ final class ActivityLevelPickerView: UIView {
     private let sedentaryCard = ActivityLevelCardView(activityLevel: .sedentary)
     private let lightlyActiveCard = ActivityLevelCardView(activityLevel: .light)
     private let moderatelyActiveCard = ActivityLevelCardView(activityLevel: .moderate)
-    private let vigorouslyActiveCard = ActivityLevelCardView(activityLevel: .vigorous)
+    private let vigorouslyActiveCard = ActivityLevelCardView(activityLevel: .active)
     
     private var selectedLevel: ActivityLevel? {
         didSet {
@@ -206,7 +206,7 @@ final class ActivityLevelPickerView: UIView {
         } else if tappedView === moderatelyActiveCard {
             selectedLevel = .moderate
         } else if tappedView === vigorouslyActiveCard {
-            selectedLevel = .vigorous
+            selectedLevel = .active
         }
     }
     
@@ -214,7 +214,7 @@ final class ActivityLevelPickerView: UIView {
         sedentaryCard.setSelected(selectedLevel == .sedentary, animated: animated)
         lightlyActiveCard.setSelected(selectedLevel == .light, animated: animated)
         moderatelyActiveCard.setSelected(selectedLevel == .moderate, animated: animated)
-        vigorouslyActiveCard.setSelected(selectedLevel == .vigorous, animated: animated)
+        vigorouslyActiveCard.setSelected(selectedLevel == .active, animated: animated)
     }
     
     override func layoutSubviews() {

@@ -94,7 +94,7 @@ enum ActivityLevel: String, Codable {
     case sedentary = "SEDENTARY"
     case light = "LIGHT"
     case moderate = "MODERATE"
-    case vigorous = "VIGOROUS"
+    case active = "ACTIVE"
     case none
 
     init(from decoder: Decoder) throws {
@@ -110,7 +110,7 @@ enum ActivityLevel: String, Codable {
             "🚶"
         case .moderate:
             "🏃"
-        case .vigorous:
+        case .active:
             "💪"
         default:
             ""
@@ -125,7 +125,7 @@ enum ActivityLevel: String, Codable {
             "가벼운 활동"
         case .moderate:
             "중간 활동"
-        case .vigorous:
+        case .active:
             "고강도 활동"
         default:
             ""
@@ -140,7 +140,7 @@ enum ActivityLevel: String, Codable {
             "가벼운 운동 1-3일/주"
         case .moderate:
             "중강도 운동 3-5일/주"
-        case .vigorous:
+        case .active:
             "고강도 운동 6-7일/주"
         default:
             ""
@@ -155,7 +155,7 @@ enum ActivityLevel: String, Codable {
             "산책, 가벼운 집안일, 주 1-3회 가벼운 운동"
         case .moderate:
             "조깅, 헬스장, 주 3-5회 중강도 운동"
-        case .vigorous:
+        case .active:
             "매일 운동, 고강도 트레이닝, 육체적 직업"
         default:
             ""
@@ -170,7 +170,7 @@ enum ActivityLevel: String, Codable {
                 .lightSelectedBorder
         case .moderate:
                 .moderateSelectedBorder
-        case .vigorous:
+        case .active:
                 .vigorousSelectedBorder
         default:
                 .clear
@@ -185,7 +185,7 @@ enum ActivityLevel: String, Codable {
             return 1.375
         case .moderate:
             return 1.55
-        case .vigorous:
+        case .active:
             return 1.725
         case .none:
             return 0
