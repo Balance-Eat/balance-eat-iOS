@@ -170,6 +170,7 @@ final class InputFieldWithIcon: UIView {
     private let placeholder: String = ""
     private let unit: String?
     private var isAge: Bool = false
+    private var isFat: Bool = false
     
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
@@ -198,11 +199,12 @@ final class InputFieldWithIcon: UIView {
         textField.rx.text.asObservable()
     }
     
-    init(icon: UIImage = UIImage(), placeholder: String, unit: String? = nil, isAge: Bool = false) {
+    init(icon: UIImage = UIImage(), placeholder: String, unit: String? = nil, isAge: Bool = false, isFat: Bool = false) {
         self.icon = icon
 //        self.placeholder = placeholder
         self.unit = unit
         self.isAge = isAge
+        self.isFat = isFat
         super.init(frame: .zero)
         
         setUpView()
@@ -276,7 +278,9 @@ final class InputFieldWithIcon: UIView {
                         }
                     }
                 }
-                
+                if isFat {
+                    return Double(number) ?? 0 > 100 ? "100" : String(number)
+                }
                 
                 return Double(number) ?? 0 > 999.9 ? "999.9" : String(number)
             }

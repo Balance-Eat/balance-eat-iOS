@@ -156,7 +156,8 @@ class TargetInfoViewController: UIViewController {
         let currentFatPercentageInputView = InputFieldWithIcon(
             icon: UIImage(systemName: "drop.fill") ?? UIImage(),
             placeholder: "",
-            unit: "%"
+            unit: "%",
+            isFat: true
         )
         let currentFatTitledInputView = TitledInputUserInfoView(title: "현재 체지방률", inputView: currentFatPercentageInputView)
         self.currentFatPercentageText = currentFatPercentageInputView.textObservable
@@ -164,7 +165,8 @@ class TargetInfoViewController: UIViewController {
         let targetFatPercentageInputView = InputFieldWithIcon(
             icon: UIImage(systemName: "flag.fill") ?? UIImage(),
             placeholder: "",
-            unit: "%"
+            unit: "%",
+            isFat: true
         )
         let targetFatTitledInputView = TitledInputUserInfoView(title: "목표 체지방률", inputView: targetFatPercentageInputView)
         self.targetFatPercentageText = targetFatPercentageInputView.textObservable
@@ -260,6 +262,7 @@ class TargetInfoViewController: UIViewController {
                 TutorialPageViewModel.shared.dataRelay.accept(data)
             })
             .disposed(by: disposeBag)
+        
     }
     
     private func currentWeightView() -> UIView {
