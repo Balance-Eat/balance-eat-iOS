@@ -29,7 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         switch getUserUUIDResult {
         case .success(let uuid):
             print("uuid: \(uuid)")
-            let mainViewController = MainViewController()
+            let mainViewController = MainViewController(uuid: uuid)
             navigationController = UINavigationController(rootViewController: mainViewController)
             
         case .failure(let error):

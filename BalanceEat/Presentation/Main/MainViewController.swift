@@ -21,6 +21,7 @@ struct TabItem {
 }
 
 class MainViewController: UIViewController {
+    private let uuid: String
     private var selectedTab: SelectedTab = .home {
         didSet {
             updateTabsAndViews()
@@ -50,7 +51,8 @@ class MainViewController: UIViewController {
         MenuViewController()
     ]
 
-    init() {
+    init(uuid: String) {
+        self.uuid = uuid
         super.init(nibName: nil, bundle: nil)
         setupUI()
         setupTabButtons()

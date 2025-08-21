@@ -43,7 +43,7 @@ class LoginViewController: UIViewController {
     init() {
         super.init(nibName: nil, bundle: nil)
         setUpView()
-        setUpBinding()
+//        setUpBinding()
     }
     
     private func setUpView() {
@@ -67,28 +67,28 @@ class LoginViewController: UIViewController {
         }
     }
     
-    private func setUpBinding() {
-        kakaoSignInButton.tapObservable
-            .subscribe(onNext: { [weak self] in
-                print("카카오 로그인")
-                self?.navigateToMain()
-            })
-            .disposed(by: disposeBag)
-        
-        googleSignInButton.tapObservable
-            .subscribe(onNext: { [weak self] in
-                print("구글 로그인")
-                self?.navigateToMain()
-            })
-            .disposed(by: disposeBag)
-        
-        appleSignInButton.tapObservable
-            .subscribe(onNext: { [weak self] in
-                print("애플 로그인")
-                self?.navigateToMain()
-            })
-            .disposed(by: disposeBag)
-    }
+//    private func setUpBinding() {
+//        kakaoSignInButton.tapObservable
+//            .subscribe(onNext: { [weak self] in
+//                print("카카오 로그인")
+//                self?.navigateToMain()
+//            })
+//            .disposed(by: disposeBag)
+//        
+//        googleSignInButton.tapObservable
+//            .subscribe(onNext: { [weak self] in
+//                print("구글 로그인")
+//                self?.navigateToMain()
+//            })
+//            .disposed(by: disposeBag)
+//        
+//        appleSignInButton.tapObservable
+//            .subscribe(onNext: { [weak self] in
+//                print("애플 로그인")
+//                self?.navigateToMain()
+//            })
+//            .disposed(by: disposeBag)
+//    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -97,9 +97,9 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-    
-    private func navigateToMain() {
-        let mainViewController = MainViewController()
-        self.navigationController?.setViewControllers([mainViewController], animated: true)
-    }
+//    
+//    private func navigateToMain() {
+//        let mainViewController = MainViewController(uuid: <#String#>)
+//        self.navigationController?.setViewControllers([mainViewController], animated: true)
+//    }
 }

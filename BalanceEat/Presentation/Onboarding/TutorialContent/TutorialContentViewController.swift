@@ -132,7 +132,7 @@ class TutorialContentViewController: UIViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
-                let mainVC = MainViewController()
+                let mainVC = MainViewController(uuid: viewModel.getUserUUID())
                 self.navigationController?.setViewControllers([mainVC], animated: true)
             })
             .disposed(by: disposeBag)

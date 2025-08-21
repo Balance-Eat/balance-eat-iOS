@@ -37,4 +37,17 @@ final class TutorialContentViewModel {
             print("UUID 저장 실패: \(error.localizedDescription)")
         }
     }
+    
+    func getUserUUID() -> String {
+        let getUserUUIDResponse = userUseCase.getUserUUID()
+        
+        switch getUserUUIDResponse {
+        case .success(let uuid):
+            return uuid
+        case .failure(let failure):
+            print("UUID 불러오기 실패: \(failure.localizedDescription)")
+            return ""
+        }
+        
+    }
 }
