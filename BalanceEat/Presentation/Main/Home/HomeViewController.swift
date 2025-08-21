@@ -7,8 +7,13 @@
 
 import UIKit
 import SnapKit
+import RxSwift
+import RxCocoa
 
 class HomeViewController: UIViewController {
+    private let viewModel: HomeViewModel
+    private let disposeBag = DisposeBag()
+    
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
@@ -21,7 +26,7 @@ class HomeViewController: UIViewController {
         stackView.alignment = .center
         
         let label1 = UILabel()
-        label1.text = "안녕하세요, 진문장님!"
+        label1.text = "안녕하세요, 님!"
         label1.font = .systemFont(ofSize: 24, weight: .bold)
         label1.textColor = .white
         
@@ -44,8 +49,19 @@ class HomeViewController: UIViewController {
         return stackView
     }()
     
-    private let nowBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(title: "현재 체성분", weight: 72.53, skeletalMuscleMass: 32.932, bodyFatMass: 15.212312)
-    private let targetBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(title: "목표 체성분", weight: -2.6, skeletalMuscleMass: 1.5, bodyFatMass: -3.23, isTarget: true)
+    private lazy var nowBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(
+        title: "현재 체성분",
+        weight: 0,
+        smi: 0,
+        fatPercentage: 0
+    )
+    private lazy var targetBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(
+        title: "목표 체성분",
+        weight: 0,
+        smi: 0,
+        fatPercentage: 0,
+        isTarget: true
+    )
     
     private let todayCalorieView: TodayCalorieView = TodayCalorieView(
         currentCalorie: 1420,
@@ -123,8 +139,26 @@ class HomeViewController: UIViewController {
         return contentView
     }()
     
+    init() {
+        let repository = UserRepository()
+        let useCase = UserUseCase(repository: repository)
+        self.viewModel = HomeViewModel(userUseCase: useCase)
+        super.init(nibName: nil, bundle: nil)
+        setUpView()
+        getDatas()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+    }
+    
+    private func setUpView() {
         view.backgroundColor = .homeScreenBackground
         
         view.addSubview(scrollView)
@@ -184,6 +218,41 @@ class HomeViewController: UIViewController {
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)
         }
+    }
+    
+    private func getDatas() {
+        Task {
+            await viewModel.getUser()
+        }
+    }
+    
+    private func setBinding() {
+        viewModel.userResponseRelay
+            .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] user in
+                guard let self else { return }
+                print("userResponseRelay: \(user)")
+                self.updateUI(with: user)
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    private func updateUI(with user: UserResponseDTO) {
+        if let label = (welcomeLabelStackView.arrangedSubviews.first as? UILabel) {
+            label.text = "안녕하세요, \(user.name)님!"
+        }
+
+        nowBodyStatusCardView.update(
+            weight: user.weight,
+            smi: user.smi,
+            fatPercentage: user.fatPercentage
+        )
+        targetBodyStatusCardView.update(
+            weight: user.targetWeight - user.weight,
+            smi: user.targetSmi - user.smi,
+            fatPercentage: user.targetFatPercentage - user.fatPercentage
+        )
     }
 }
 

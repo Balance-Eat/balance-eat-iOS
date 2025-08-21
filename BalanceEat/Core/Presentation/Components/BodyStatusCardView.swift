@@ -9,9 +9,9 @@ import UIKit
 
 final class BodyStatusCardView: UIView {
     private let title: String
-    private let weight: Double
-    private let skeletalMuscleMass: Double
-    private let bodyFatMass: Double
+    private var weight: Double
+    private var smi: Double
+    private var fatPercentage: Double
     private let isTarget: Bool
     
     private let containerView: HomeMenuContentView = HomeMenuContentView()
@@ -42,14 +42,14 @@ final class BodyStatusCardView: UIView {
         return stackView
     }()
     
-    private lazy var skeletalView = createSubMetricView(title: "골격근량", value: skeletalMuscleMass, unit: "kg")
-    private lazy var fatView = createSubMetricView(title: "체지방율", value: bodyFatMass, unit: "%")
+    private lazy var smiView = createSubMetricView(title: "골격근량", value: smi, unit: "kg")
+    private lazy var fatView = createSubMetricView(title: "체지방율", value: fatPercentage, unit: "%")
     
-    init(title: String, weight: Double, skeletalMuscleMass: Double, bodyFatMass: Double, isTarget: Bool = false) {
+    init(title: String, weight: Double, smi: Double, fatPercentage: Double, isTarget: Bool = false) {
         self.title = title
         self.weight = weight
-        self.skeletalMuscleMass = skeletalMuscleMass
-        self.bodyFatMass = bodyFatMass
+        self.smi = smi
+        self.fatPercentage = fatPercentage
         self.isTarget = isTarget
         super.init(frame: .zero)
         
@@ -67,7 +67,7 @@ final class BodyStatusCardView: UIView {
             containerView.addSubview($0)
         }
         
-        subMetricsStackView.addArrangedSubview(skeletalView)
+        subMetricsStackView.addArrangedSubview(smiView)
         subMetricsStackView.addArrangedSubview(fatView)
         
         containerView.snp.makeConstraints { make in
@@ -111,10 +111,20 @@ final class BodyStatusCardView: UIView {
         stack.alignment = .center
         return stack
     }
+    
+    func update(weight: Double, smi: Double, fatPercentage: Double) {
+        self.weight = weight
+        self.smi = smi
+        self.fatPercentage = fatPercentage
+        
+        weightLabel.updateNumber(number: weight)
+        smiView = createSubMetricView(title: "골격근량", value: smi, unit: "kg")
+        fatView = createSubMetricView(title: "체지방율", value: fatPercentage, unit: "%")
+    }
 }
 
 final class StatusLabel: UILabel {
-    private let number: Double
+    private var number: Double
     private let unit: String
     private let isWeight: Bool
     private let isTarget: Bool
@@ -147,6 +157,11 @@ final class StatusLabel: UILabel {
     }
 
     private func setupLabel() {
+        if number == 0 {
+            self.text = "-\(unit)"
+            return
+        }
+        
         var prefix = ""
         if isTarget && number > 0 {
             prefix = "+"
@@ -171,6 +186,11 @@ final class StatusLabel: UILabel {
         ], range: NSRange(location: prefix.count + numberString.count, length: unit.count))
 
         self.attributedText = attributedText
+    }
+    
+    func updateNumber(number: Double) {
+        self.number = number
+        setupLabel()
     }
 }
 

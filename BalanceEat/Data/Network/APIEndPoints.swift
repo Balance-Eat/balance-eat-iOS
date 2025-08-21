@@ -12,16 +12,20 @@ protocol Endpoint {
     var path: String { get }
     var method: HTTPMethod { get }
     var parameters: [String: Any]? { get }
+    var queryParameters: [String: Any]? { get }
 }
 
 enum UserEndPoints: Endpoint {
 
     case createUser(createUserDTO: CreateUserDTO)
+    case getUser(uuid: String)
     
     var path: String {
         switch self {
         case .createUser:
             return "/v1/users"
+        case .getUser:
+            return "/v1/users/me"
         }
     }
     
@@ -29,6 +33,8 @@ enum UserEndPoints: Endpoint {
         switch self {
         case .createUser:
                 .post
+        case .getUser:
+                .get
         }
     }
     
@@ -53,6 +59,17 @@ enum UserEndPoints: Endpoint {
                 "providerId": createUserDTO.providerId,
                 "providerType": createUserDTO.providerType
             ]
+        case .getUser:
+            return nil
+        }
+    }
+    
+    var queryParameters: [String: Any]? {
+        switch self {
+        case .getUser(let uuid):
+            return ["uuid": uuid]
+        default:
+            return nil
         }
     }
 }

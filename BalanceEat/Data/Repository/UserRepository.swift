@@ -24,7 +24,7 @@ struct UserRepository: UserRepositoryProtocol {
     
     func createUser(createUserDTO: CreateUserDTO) async -> Result<Void, NetworkError> {
         let endpoint = UserEndPoints.createUser(createUserDTO: createUserDTO)
-        let result: Result<EmptyResponse, NetworkError> = await APIClient.shared.request(
+        let result = await APIClient.shared.request(
             endpoint: endpoint,
             responseType: EmptyResponse.self
         )
@@ -34,7 +34,24 @@ struct UserRepository: UserRepositoryProtocol {
             print("user created success")
             return .success(())
         case .failure(let error):
-            print("user created failed: \(error)")
+            print("user created failed: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
+    
+    func getUser(uuid: String) async -> Result<UserResponseDTO, NetworkError> {
+        let endpoint = UserEndPoints.getUser(uuid: uuid)
+        let result = await APIClient.shared.request(
+            endpoint: endpoint,
+            responseType: BaseResponse<UserResponseDTO>.self
+        )
+        
+        switch result {
+        case .success(let response):
+            print("get user success \(response)")
+            return .success(response.data)
+        case .failure(let error):
+            print("get user failed: \(error.localizedDescription)")
             return .failure(error)
         }
     }

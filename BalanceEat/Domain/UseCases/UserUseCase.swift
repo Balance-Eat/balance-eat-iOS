@@ -9,6 +9,7 @@ import Foundation
 
 protocol UserUseCaseProtocol {
     func createUser(createUserDTO: CreateUserDTO) async -> Result<Void, NetworkError>
+    func getUser(uuid: String) async -> Result<UserResponseDTO, NetworkError>
     func getUserUUID() -> Result<String, CoreDataError>
     func saveUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
     func deleteUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
@@ -21,8 +22,12 @@ struct UserUseCase: UserUseCaseProtocol {
         self.repository = repository
     }
     
-    public func createUser(createUserDTO: CreateUserDTO) async -> Result<Void, NetworkError> {
+    func createUser(createUserDTO: CreateUserDTO) async -> Result<Void, NetworkError> {
         await repository.createUser(createUserDTO: createUserDTO)
+    }
+    
+    func getUser(uuid: String) async -> Result<UserResponseDTO, NetworkError> {
+        await repository.getUser(uuid: uuid)
     }
     
     func getUserUUID() -> Result<String, CoreDataError> {
