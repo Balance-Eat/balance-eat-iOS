@@ -34,6 +34,8 @@ class TutorialContentViewController: UIViewController {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
+    private var bottomConstraint: Constraint?
+    
     private let disposeBag = DisposeBag()
         
     init() {
@@ -45,6 +47,8 @@ class TutorialContentViewController: UIViewController {
         setUpView()
         addTutorialPageViewController()
         bindBackButton()
+        setUpKeyboardDismissGesture()
+        observeKeyboard()
     }
     
     required init?(coder: NSCoder) {
@@ -57,7 +61,8 @@ class TutorialContentViewController: UIViewController {
         
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
+            make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            self.bottomConstraint = make.bottom.equalToSuperview().inset(16).constraint
         }
         
         scrollView.addSubview(contentView)
@@ -159,6 +164,46 @@ class TutorialContentViewController: UIViewController {
                 }
             })
             .disposed(by: disposeBag)
+    }
+    
+    private func setUpKeyboardDismissGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    private func observeKeyboard() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+    }
+
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let frame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let keyboardHeight = frame.height
+        
+        bottomConstraint?.update(inset: keyboardHeight + 16)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        bottomConstraint?.update(inset: 16)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
 }
 
