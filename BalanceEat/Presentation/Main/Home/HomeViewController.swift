@@ -232,7 +232,6 @@ class HomeViewController: UIViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] user in
                 guard let self else { return }
-                print("userResponseRelay: \(user)")
                 self.updateUI(with: user)
             })
             .disposed(by: disposeBag)

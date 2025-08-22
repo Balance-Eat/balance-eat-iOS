@@ -157,19 +157,18 @@ final class StatusLabel: UILabel {
     }
 
     private func setupLabel() {
-        if number == 0 {
-            self.text = "-\(unit)"
-            return
-        }
-        
         var prefix = ""
         if isTarget && number > 0 {
             prefix = "+"
         }
 
-        guard let numberString = numberFormatter.string(from: NSNumber(value: number)) else {
-            self.text = "\(prefix)\(number)\(unit)"
-            return
+        let numberString: String
+        if number == 0 {
+            numberString = "-"  
+        } else if let formatted = numberFormatter.string(from: NSNumber(value: number)) {
+            numberString = formatted
+        } else {
+            numberString = "\(number)"
         }
 
         let fullText = "\(prefix)\(numberString)\(unit)"
@@ -187,6 +186,7 @@ final class StatusLabel: UILabel {
 
         self.attributedText = attributedText
     }
+
     
     func updateNumber(number: Double) {
         self.number = number
