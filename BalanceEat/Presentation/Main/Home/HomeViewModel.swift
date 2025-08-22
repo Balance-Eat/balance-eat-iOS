@@ -11,10 +11,14 @@ import RxCocoa
 
 final class HomeViewModel {
     private let userUseCase: UserUseCaseProtocol
-    let userResponseRelay = BehaviorRelay<UserResponseDTO?>(value: nil)
+    private let dietUseCase: DietUseCaseProtocol
     
-    init(userUseCase: UserUseCaseProtocol) {
+    let userResponseRelay = BehaviorRelay<UserResponseDTO?>(value: nil)
+    let dietResponseRelay = BehaviorRelay<DailyDietResponseDTO?>(value: nil)
+    
+    init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {
         self.userUseCase = userUseCase
+        self.dietUseCase = dietUseCase
     }
     
     func getUser() async {
@@ -42,5 +46,17 @@ final class HomeViewModel {
             return ""
         }
         
+    }
+    
+    func getDailyDiet() async {
+        let getDailyDietResponse = await dietUseCase.getDailyDiet(date: Date())
+        
+        switch getDailyDietResponse {
+        case .success(let dailyDiet):
+            print("일일 식단 정보: \(dailyDiet)")
+            dietResponseRelay.accept(dailyDiet)
+        case .failure(let failure):
+            print("일일 식단 정보 불러오기 실패: \(failure.localizedDescription)")
+        }
     }
 }

@@ -78,7 +78,7 @@ final class CircleProgressView: UIView {
         progressLabel.numberOfLines = 2
     }
     
-    private func updateProgress() {
+    func updateProgress() {
         let percentage = currentValue / maxValue
         progressLayer.strokeEnd = percentage
         

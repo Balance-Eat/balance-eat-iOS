@@ -78,7 +78,9 @@ class TutorialPageViewController: UIViewController {
                     targetWeight: data.targetWeight ?? 0,
                     targetCalorie: viewModel.targetCaloriesRelay.value,
                     targetSmi: data.targetSmi ?? 0,
-                    targetFatPercentage: data.targetFatPercentage ?? 0
+                    targetFatPercentage: data.targetFatPercentage ?? 0,
+                    providerId: "",
+                    providerType: ""
                     
                 )
                 self.goToNextPageRelay.accept(createUserDTO)

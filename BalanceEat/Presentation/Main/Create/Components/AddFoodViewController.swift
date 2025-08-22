@@ -17,12 +17,12 @@ enum ServingUnitType: String {
 }
 
 class AddFoodViewController: UIViewController {
-    private let foodItem: FoodItem
+    private let foodItem: FooddddItem
     private let selectedServingUnitType = BehaviorRelay<ServingUnitType>(value: .serving)
     private let inputAmount = BehaviorRelay<Int>(value: 100)
     private let disposeBag = DisposeBag()
     
-    init(foodItem: FoodItem) {
+    init(foodItem: FooddddItem) {
         self.foodItem = foodItem
         super.init(nibName: nil, bundle: nil)
         

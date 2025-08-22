@@ -130,4 +130,19 @@ final class TodayCalorieView: UIView {
         
         return containerVIew
     }
+    
+    func update(currentCalorie: Int, targetCalorie: Int, currentCarbohydrate: Int, targetCarbohydrate: Int, currentProtein: Int, targetProtein: Int, currentFat: Int, targetFat: Int) {
+        circleProgressView.maxValue = CGFloat(targetCalorie)
+        circleProgressView.currentValue = CGFloat(currentCalorie)
+        circleProgressView.updateProgress()
+        
+        nutritionalValueStackView.arrangedSubviews.forEach { view in
+            nutritionalValueStackView.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+        
+        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "탄수화물", current: currentCarbohydrate, target: targetCarbohydrate))
+        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "단백질", current: currentProtein, target: targetProtein))
+        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "지방", current: currentFat, target: targetFat))
+    }
 }

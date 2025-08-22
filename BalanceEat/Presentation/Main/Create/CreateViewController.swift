@@ -152,7 +152,7 @@ final class CreateViewController: UIViewController {
                     print("선택된 food index: \(index)")
                     let favoriteFood = self.favoriteFoods[index]
                     let addFoodViewController = AddFoodViewController(
-                        foodItem: FoodItem(
+                        foodItem: FooddddItem(
                             id: UUID(),
                             name: favoriteFood.name,
                             amount: 200,

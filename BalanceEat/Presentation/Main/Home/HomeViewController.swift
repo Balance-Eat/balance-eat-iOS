@@ -140,9 +140,13 @@ class HomeViewController: UIViewController {
     }()
     
     init() {
-        let repository = UserRepository()
-        let useCase = UserUseCase(repository: repository)
-        self.viewModel = HomeViewModel(userUseCase: useCase)
+        let userRepository = UserRepository()
+        let userUseCase = UserUseCase(repository: userRepository)
+        
+        let dietRepository = DietRepository()
+        let dietUseCase = DietUseCase(repository: dietRepository)
+        
+        self.viewModel = HomeViewModel(userUseCase: userUseCase, dietUseCase: dietUseCase)
         super.init(nibName: nil, bundle: nil)
         setUpView()
         getDatas()
@@ -232,12 +236,21 @@ class HomeViewController: UIViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] user in
                 guard let self else { return }
-                self.updateUI(with: user)
+                self.updateUIForUserData(user: user)
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.dietResponseRelay
+            .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] dailyDiet in
+                guard let self else { return }
+                
             })
             .disposed(by: disposeBag)
     }
     
-    private func updateUI(with user: UserResponseDTO) {
+    private func updateUIForUserData(user: UserResponseDTO) {
         if let label = (welcomeLabelStackView.arrangedSubviews.first as? UILabel) {
             label.text = "안녕하세요, \(user.name)님!"
         }
@@ -252,6 +265,19 @@ class HomeViewController: UIViewController {
             smi: user.targetSmi - user.smi,
             fatPercentage: user.targetFatPercentage - user.fatPercentage
         )
+    }
+    
+    private func updateUIForDailyDietDate(dailyDiet: DailyDietResponseDTO) {
+//        todayCalorieView.update(
+//            currentCalorie: dailyDiet.dailyTotal.totalCalorie,
+//            targetCalorie: viewModel.userResponseRelay.value?.targetCalorie,
+//            currentCarbohydrate: dailyDiet.dailyTotal.totalCarbohydrates,
+//            targetCarbohydrate: viewModel.userResponseRelay.v,
+//            currentProtein: dailyDiet.dailyTotal.totalProtein,
+//            targetProtein: <#T##Int#>,
+//            currentFat: dailyDiet.dailyTotal.totalFat,
+//            targetFat: <#T##Int#>
+//        )
     }
 }
 

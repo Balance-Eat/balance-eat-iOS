@@ -24,57 +24,6 @@ struct CreateUserDTO: Codable {
     let targetFatPercentage: Double
     let providerId: String
     let providerType: String
-    
-    enum CodingKeys: String, CodingKey {
-        case uuid, name, gender, age, height, weight, email, activityLevel, smi, fatPercentage,
-             targetWeight, targetCalorie, targetSmi, targetFatPercentage, providerId, providerType
-    }
-    
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        
-        self.uuid = try c.decodeIfPresent(String.self, forKey: .uuid) ?? ""
-        self.name = try c.decodeIfPresent(String.self, forKey: .name) ?? ""
-        self.gender = (try? c.decode(Gender.self, forKey: .gender)) ?? .male
-        self.age = (try? c.decode(Int.self, forKey: .age)) ?? 0
-        self.height = (try? c.decode(Double.self, forKey: .height)) ?? 0
-        self.weight = (try? c.decode(Double.self, forKey: .weight)) ?? 0
-        self.email = try c.decodeIfPresent(String.self, forKey: .email) ?? ""
-        self.activityLevel = (try? c.decode(ActivityLevel.self, forKey: .activityLevel)) ?? .sedentary
-        self.smi = (try? c.decode(Double.self, forKey: .smi)) ?? 0
-        self.fatPercentage = (try? c.decode(Double.self, forKey: .fatPercentage)) ?? 0
-        self.targetWeight = (try? c.decode(Double.self, forKey: .targetWeight)) ?? 0
-        self.targetCalorie = (try? c.decode(Int.self, forKey: .targetCalorie)) ?? 0
-        self.targetSmi = (try? c.decode(Double.self, forKey: .targetSmi)) ?? 0
-        self.targetFatPercentage = (try? c.decode(Double.self, forKey: .targetFatPercentage)) ?? 0
-        self.providerId = try c.decodeIfPresent(String.self, forKey: .providerId) ?? ""
-        self.providerType = try c.decodeIfPresent(String.self, forKey: .providerType) ?? ""
-    }
-    
-    init(
-        uuid: String = "", name: String = "", gender: Gender = .male, age: Int = 0,
-        height: Double = 0, weight: Double = 0, email: String = "",
-        activityLevel: ActivityLevel = .sedentary, smi: Double = 0, fatPercentage: Double = 0,
-        targetWeight: Double = 0, targetCalorie: Int = 0, targetSmi: Double = 0,
-        targetFatPercentage: Double = 0, providerId: String = "", providerType: String = ""
-    ) {
-        self.uuid = uuid
-        self.name = name
-        self.gender = gender
-        self.age = age
-        self.height = height
-        self.weight = weight
-        self.email = email
-        self.activityLevel = activityLevel
-        self.smi = smi
-        self.fatPercentage = fatPercentage
-        self.targetWeight = targetWeight
-        self.targetCalorie = targetCalorie
-        self.targetSmi = targetSmi
-        self.targetFatPercentage = targetFatPercentage
-        self.providerId = providerId
-        self.providerType = providerType
-    }
 }
 
 
@@ -82,12 +31,6 @@ enum Gender: String, Codable {
     case male = "MALE"
     case female = "FEMALE"
     case none
-
-    // 혹시 서버가 예기치 않은 값을 내려주면 기본값으로 보정
-    init(from decoder: Decoder) throws {
-        let raw = try decoder.singleValueContainer().decode(String.self)
-        self = Gender(rawValue: raw.uppercased()) ?? .male
-    }
 }
 
 enum ActivityLevel: String, Codable {
@@ -96,11 +39,6 @@ enum ActivityLevel: String, Codable {
     case moderate = "MODERATE"
     case active = "ACTIVE"
     case none
-
-    init(from decoder: Decoder) throws {
-        let raw = try decoder.singleValueContainer().decode(String.self)
-        self = ActivityLevel(rawValue: raw.uppercased()) ?? .sedentary
-    }
     
     var emoji: String {
         switch self {

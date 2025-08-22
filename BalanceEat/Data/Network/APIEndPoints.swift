@@ -59,7 +59,7 @@ enum UserEndPoints: Endpoint {
                 "providerId": createUserDTO.providerId,
                 "providerType": createUserDTO.providerType
             ]
-        case .getUser:
+        default:
             return nil
         }
     }
@@ -72,4 +72,38 @@ enum UserEndPoints: Endpoint {
             return nil
         }
     }
+}
+
+enum DietEndPoints: Endpoint {
+    case daily(date: String)
+    
+    var path: String {
+        switch self {
+        case .daily:
+            return "/v1/diet/daily"
+        }
+    }
+    
+    var method: Alamofire.HTTPMethod {
+        switch self {
+        case .daily:
+            return .get
+        }
+    }
+    
+    var parameters: [String : Any]? {
+        switch self {
+        default:
+            return nil
+        }
+    }
+    
+    var queryParameters: [String : Any]? {
+        switch self {
+        case .daily(let date):
+            return ["date": date]
+        }
+    }
+    
+    
 }

@@ -24,7 +24,7 @@ struct UserRepository: UserRepositoryProtocol {
     
     func createUser(createUserDTO: CreateUserDTO) async -> Result<Void, NetworkError> {
         let endpoint = UserEndPoints.createUser(createUserDTO: createUserDTO)
-        let result = await APIClient.shared.request(
+        let result = await apiClient.request(
             endpoint: endpoint,
             responseType: EmptyResponse.self
         )
@@ -41,7 +41,7 @@ struct UserRepository: UserRepositoryProtocol {
     
     func getUser(uuid: String) async -> Result<UserResponseDTO, NetworkError> {
         let endpoint = UserEndPoints.getUser(uuid: uuid)
-        let result = await APIClient.shared.request(
+        let result = await apiClient.request(
             endpoint: endpoint,
             responseType: BaseResponse<UserResponseDTO>.self
         )
