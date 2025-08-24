@@ -87,15 +87,13 @@ class ActivityLevelViewController: UIViewController {
         
         estimatedDailyCalorieView.isHidden = true
         
-        TutorialPageViewModel.shared.targetCaloriesObservable
-            .bind(to: self.estimatedDailyCalorieView.calorieRelay)
-            .disposed(by: disposeBag)
+        
         
         
         let nextButton = TitledButton(
-            title: "설정 완료",
+            title: "다음",
             style: .init(
-                backgroundColor: .systemGreen,
+                backgroundColor: .systemBlue,
                 titleColor: .white,
                 borderColor: nil
             )
@@ -113,6 +111,12 @@ class ActivityLevelViewController: UIViewController {
         [activityLevelPickerView, estimatedDailyCalorieView, nextButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
+    }
+    
+    private func setUpBinding() {
+        TutorialPageViewModel.shared.targetCaloriesObservable
+            .bind(to: self.estimatedDailyCalorieView.calorieRelay)
+            .disposed(by: disposeBag)
         
         selectedActivityLevel
             .subscribe(onNext: { [weak self] level in
@@ -128,9 +132,6 @@ class ActivityLevelViewController: UIViewController {
                     .disposed(by: self.disposeBag)
             })
             .disposed(by: disposeBag)
-    }
-    
-    private func setUpBinding() {
     }
 }
 

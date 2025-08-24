@@ -63,33 +63,37 @@ class TutorialPageViewController: UIViewController {
         activityLevelViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
-                let data = self.viewModel.dataRelay.value
-                let createUserDTO = CreateUserDTO(
-                    uuid: UUID.uuidV7String(),
-                    name: viewModel.generateRandomNickname(),
-                    gender: data.gender,
-                    age: data.age ?? 0,
-                    height: data.height ?? 0,
-                    weight: data.weight ?? 0,
-                    email: "",
-                    activityLevel: data.activityLevel ?? .none,
-                    smi: data.smi ?? 0,
-                    fatPercentage: data.fatPercentage ?? 0,
-                    targetWeight: data.targetWeight ?? 0,
-                    targetCalorie: viewModel.targetCaloriesRelay.value,
-                    targetSmi: data.targetSmi ?? 0,
-                    targetFatPercentage: data.targetFatPercentage ?? 0,
-                    providerId: "",
-                    providerType: ""
-                    
-                )
-                self.goToNextPageRelay.accept(createUserDTO)
+//                let data = self.viewModel.dataRelay.value
+//                let createUserDTO = CreateUserDTO(
+//                    uuid: UUID.uuidV7String(),
+//                    name: viewModel.generateRandomNickname(),
+//                    gender: data.gender,
+//                    age: data.age ?? 0,
+//                    height: data.height ?? 0,
+//                    weight: data.weight ?? 0,
+//                    email: "",
+//                    activityLevel: data.activityLevel ?? .none,
+//                    smi: data.smi ?? 0,
+//                    fatPercentage: data.fatPercentage ?? 0,
+//                    targetWeight: data.targetWeight ?? 0,
+//                    targetCalorie: viewModel.targetCaloriesRelay.value,
+//                    targetSmi: data.targetSmi ?? 0,
+//                    targetFatPercentage: data.targetFatPercentage ?? 0,
+//                    providerId: "",
+//                    providerType: ""
+//                    
+//                )
+//                self.goToNextPageRelay.accept(createUserDTO)
+                self.goToNextPage()
             })
             .disposed(by: disposeBag)
+        
+        let macroSettingViewController = MacroSettingViewController()
         
         pages.append(basicInfoViewController)
         pages.append(targetInfoViewController)
         pages.append(activityLevelViewController)
+        pages.append(macroSettingViewController)
     }
     
     private func displayCurrentPage(animated: Bool) {

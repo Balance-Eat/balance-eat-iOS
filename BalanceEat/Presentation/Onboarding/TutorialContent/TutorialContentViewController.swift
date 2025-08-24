@@ -16,7 +16,8 @@ class TutorialContentViewController: UIViewController {
     private let pageTitle: [String] = [
         "기본 정보 입력",
         "목표 설정",
-        "활동량 선택"
+        "활동량 선택",
+        "영양소 목표 설정"
     ]
     
     private let backButton = BackButton()
@@ -86,7 +87,7 @@ class TutorialContentViewController: UIViewController {
         contentView.addSubview(tutorialIndicatorView)
         
         titleStackView.snp.makeConstraints { make in
-            make.top.equalToSuperview()
+            make.top.equalToSuperview().inset(16)
             make.leading.equalToSuperview().offset(16)
         }
         

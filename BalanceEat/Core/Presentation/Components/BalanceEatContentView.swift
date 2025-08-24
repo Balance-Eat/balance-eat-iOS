@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class HomeMenuContentView: UIView {
+final class BalanceEatContentView: UIView {
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
