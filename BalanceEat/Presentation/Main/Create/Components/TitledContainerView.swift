@@ -11,7 +11,7 @@ import SnapKit
 final class TitledContainerView: UIView {
     private let title: String
     private lazy var backgroundView: UIView = {
-            return isShadowBackground ? HomeMenuContentView() : UIView()
+            return isShadowBackground ? BalanceEatContentView() : UIView()
         }()
     private let contentView: UIView
     private let isSmall: Bool

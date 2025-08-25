@@ -136,7 +136,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
 
 final class AddedFoodCell: UITableViewCell {
     
-    private let containerView = HomeMenuContentView()
+    private let containerView = BalanceEatContentView()
     
     private let foodNameLabel: UILabel = {
         let label = UILabel()

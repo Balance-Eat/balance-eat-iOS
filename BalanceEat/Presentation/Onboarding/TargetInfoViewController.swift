@@ -63,7 +63,7 @@ class TargetInfoViewController: UIViewController {
     }
     
     private func setUpView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .homeScreenBackground
         
         view.addSubview(titleLabel)
         view.addSubview(subtitleLabel)
@@ -184,12 +184,16 @@ class TargetInfoViewController: UIViewController {
                 UIView.animate(withDuration: 0.3) {
                     if isOpen {
                         optionalTargetOpenButton.setImage(UIImage(systemName: "chevron.up"), for: .normal)
-                        SMIStackView.isHidden = false
-                        fatPercentageStackView.isHidden = false
+                        currentSMITitledInputView.isHidden = false
+                        targetSMITitledInputView.isHidden = false
+                        currentFatTitledInputView.isHidden = false
+                        targetFatTitledInputView.isHidden = false
                     } else {
                         optionalTargetOpenButton.setImage(UIImage(systemName: "chevron.down"), for: .normal)
-                        SMIStackView.isHidden = true
-                        fatPercentageStackView.isHidden = true
+                        currentSMITitledInputView.isHidden = true
+                        targetSMITitledInputView.isHidden = true
+                        currentFatTitledInputView.isHidden = true
+                        targetFatTitledInputView.isHidden = true
                     }
                 }
             })
@@ -238,7 +242,7 @@ class TargetInfoViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        [currentWeightView, weightInputView, goalPickerInputView, optionalTargetTitleStackView, SMIStackView, fatPercentageStackView, nextButton].forEach {
+        [currentWeightView, weightInputView, goalPickerInputView, optionalTargetTitleStackView, currentSMITitledInputView, targetSMITitledInputView, currentFatTitledInputView, targetFatTitledInputView, nextButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
@@ -333,6 +337,45 @@ enum GoalType {
             return "현재 체중 유지 ⚖️"
         case .none:
             return ""
+        }
+    }
+    
+    var recommendedCarbonRatio: Double {
+        switch self {
+        case .diet:
+            return 0.35
+        case .bulkUp:
+            return 0.5
+        case .maintain:
+            return 0.45
+        case .none:
+            return 0
+        }
+    }
+    
+    var recommendedProteinRatio: Double {
+        switch self {
+        case .diet:
+            return 0.4
+        case .bulkUp:
+            return 0.3
+        case .maintain:
+            return 0.3
+        case .none:
+            return 0
+        }
+    }
+    
+    var recommendedFatRatio: Double {
+        switch self {
+        case .diet:
+            return 0.25
+        case .bulkUp:
+            return 0.2
+        case .maintain:
+            return 0.25
+        case .none:
+            return 0
         }
     }
 }

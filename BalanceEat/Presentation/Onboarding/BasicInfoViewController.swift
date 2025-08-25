@@ -54,7 +54,7 @@ class BasicInfoViewController: UIViewController {
     }
     
     private func setUpView() {
-        view.backgroundColor = .white
+        view.backgroundColor = .homeScreenBackground
         
         view.addSubview(titleLabel)
         view.addSubview(subtitleLabel)

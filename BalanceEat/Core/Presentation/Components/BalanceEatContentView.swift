@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class BalanceEatContentView: UIView {
+class BalanceEatContentView: UIView {
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -22,6 +22,12 @@ final class BalanceEatContentView: UIView {
         return view
     }()
     
+    public let innerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        return view
+    }()
+    
     init() {
         super.init(frame: .zero)
         self.isUserInteractionEnabled = true
@@ -29,6 +35,11 @@ final class BalanceEatContentView: UIView {
         
         containerView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+        }
+        
+        containerView.addSubview(innerView)
+        innerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(20)
         }
     }
     

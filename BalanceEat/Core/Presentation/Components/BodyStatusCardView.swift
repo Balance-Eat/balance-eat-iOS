@@ -14,7 +14,7 @@ final class BodyStatusCardView: UIView {
     private var fatPercentage: Double
     private let isTarget: Bool
     
-    private let containerView: HomeMenuContentView = HomeMenuContentView()
+    private let containerView: BalanceEatContentView = BalanceEatContentView()
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
@@ -164,7 +164,7 @@ final class StatusLabel: UILabel {
 
         let numberString: String
         if number == 0 {
-            numberString = "-"  
+            numberString = "-"
         } else if let formatted = numberFormatter.string(from: NSNumber(value: number)) {
             numberString = formatted
         } else {

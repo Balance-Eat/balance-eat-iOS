@@ -77,7 +77,7 @@ class HomeViewController: UIViewController {
     private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date())!)
     
     private let todayAteMealLogListView: UIView = {
-        let contentView = HomeMenuContentView()
+        let contentView = BalanceEatContentView()
         
         let titleLabel: UILabel = {
             let titleLabel = UILabel()

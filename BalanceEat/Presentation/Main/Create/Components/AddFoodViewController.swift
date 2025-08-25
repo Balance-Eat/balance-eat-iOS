@@ -40,7 +40,7 @@ class AddFoodViewController: UIViewController {
     }
     
     private func setupPopupContent() {
-        let contentView = HomeMenuContentView()
+        let contentView = BalanceEatContentView()
         
         view.addSubview(contentView)
         

@@ -58,12 +58,12 @@ class TutorialContentViewController: UIViewController {
     
     override func loadView() {
         super.loadView()
-        view.backgroundColor = .white
+        view.backgroundColor = .homeScreenBackground
         
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints { make in
             make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
-            self.bottomConstraint = make.bottom.equalToSuperview().inset(16).constraint
+            self.bottomConstraint = make.bottom.equalToSuperview().inset(0).constraint
         }
         
         scrollView.addSubview(contentView)
@@ -125,7 +125,6 @@ class TutorialContentViewController: UIViewController {
         tutorialPageViewController.goToNextPageRelay
             .flatMapLatest { [weak self] createUserDTO -> Observable<Void> in
                 guard let self = self else { return .empty() }
-                
                 return Observable.create { observer in
                     Task {
                         await self.viewModel.createUser(createUserDTO: createUserDTO)
@@ -194,14 +193,14 @@ class TutorialContentViewController: UIViewController {
         
         let keyboardHeight = frame.height
         
-        bottomConstraint?.update(inset: keyboardHeight + 16)
+        bottomConstraint?.update(inset: keyboardHeight)
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
     }
 
     @objc private func keyboardWillHide(_ notification: Notification) {
-        bottomConstraint?.update(inset: 16)
+        bottomConstraint?.update(inset: 0)
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }

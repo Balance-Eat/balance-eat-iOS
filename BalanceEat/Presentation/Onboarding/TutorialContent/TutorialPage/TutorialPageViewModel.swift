@@ -35,6 +35,9 @@ final class TutorialPageViewModel {
             }
     }
     let targetCaloriesRelay = BehaviorRelay<Int>(value: 0)
+    let userCarbonRelay = BehaviorRelay<Float>(value: 0)
+    let userProteinRelay = BehaviorRelay<Float>(value: 0)
+    let userFatRelay = BehaviorRelay<Float>(value: 0)
     
     var targetCaloriesObservable: Observable<Int> {
         Observable.combineLatest(BMRObservable, goalTypeRelay, dataRelay) { bmr, goal, data -> Int in
@@ -43,11 +46,46 @@ final class TutorialPageViewModel {
         }
     }
     
+    /// 목표에 따른 탄단지 비율
+    /// - 1. 다이어트 : 탄 (35%), 단(40%), 지(25%)
+    /// - 2. 벌크업 : 탄 (50%), 단(30%), 지(20%)
+    /// - 3. 유지 : 탄(45%), 단(30%), 지(25%)
+    var userCarbonObservable: Observable<Int> {
+        Observable.combineLatest(targetCaloriesRelay, goalTypeRelay) { calory, goal -> Int in
+            return Int(Double(calory) * goal.recommendedCarbonRatio)
+        }
+    }
+    var userProteinObservable: Observable<Int> {
+        Observable.combineLatest(targetCaloriesRelay, goalTypeRelay) { calory, goal -> Int in
+            return Int(Double(calory) * goal.recommendedProteinRatio)
+        }
+    }
+    var userFatObservable: Observable<Int> {
+        Observable.combineLatest(targetCaloriesRelay, goalTypeRelay) { calory, goal -> Int in
+            return Int(Double(calory) * goal.recommendedFatRatio)
+        }
+    }
+    
     let disposeBag = DisposeBag()
     
     private init() {
         targetCaloriesObservable
             .bind(to: targetCaloriesRelay)
+            .disposed(by: disposeBag)
+        
+        userCarbonObservable
+            .map { Float($0) }
+            .bind(to: userCarbonRelay)
+            .disposed(by: disposeBag)
+        
+        userProteinObservable
+            .map { Float($0) }
+            .bind(to: userProteinRelay)
+            .disposed(by: disposeBag)
+        
+        userFatObservable
+            .map { Float($0) }
+            .bind(to: userFatRelay)
             .disposed(by: disposeBag)
     }
     

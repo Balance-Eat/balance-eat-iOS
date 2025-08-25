@@ -18,7 +18,7 @@ final class TodayCalorieView: UIView {
     private let currentFat: Int
     private let targetFat: Int
     
-    private let containerView: HomeMenuContentView = HomeMenuContentView()
+    private let containerView: BalanceEatContentView = BalanceEatContentView()
     
     private let titleLabel: UILabel = {
         let label = UILabel()

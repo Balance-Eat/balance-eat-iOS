@@ -12,7 +12,7 @@ final class TotalNutritionalInfoView: UIView {
     private let title: String
     private let foodItems: [AddedFoodItem]
     
-    private let contentView = HomeMenuContentView()
+    private let contentView = BalanceEatContentView()
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 17, weight: .bold)
