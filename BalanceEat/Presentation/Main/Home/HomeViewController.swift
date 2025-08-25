@@ -76,68 +76,73 @@ class HomeViewController: UIViewController {
     
     private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date())!)
     
-    private let todayAteMealLogListView: UIView = {
-        let contentView = BalanceEatContentView()
-        
-        let titleLabel: UILabel = {
-            let titleLabel = UILabel()
-            titleLabel.text = "최근 식사 기록"
-            titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
-            titleLabel.textColor = .bodyStatusCardNumber
-            return titleLabel
-        }()
-        
-        let mealLogs: [MealLogView] = [
-            MealLogView(icon: .chickenChest, title: "닭가슴살", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 120, consumedSugars: 0, consumedCarbohydrates: 0, consumedProteins: 23, consumedFats: 1),
-            MealLogView(icon: .salad, title: "샐러드", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 25, consumedSugars: 3, consumedCarbohydrates: 4, consumedProteins: 2, consumedFats: 0)
-        ]
-        
-        let stackView: UIStackView = {
-            let stackView = UIStackView()
-            stackView.axis = .vertical
-            stackView.distribution = .fill
-            stackView.spacing = 0 
-            return stackView
-        }()
-        
-        for (index, mealLog) in mealLogs.enumerated() {
-            if index > 0 {
-                let separator = UIView()
-                separator.backgroundColor = .systemGray5
-
-                separator.translatesAutoresizingMaskIntoConstraints = false
-                NSLayoutConstraint.activate([
-                    separator.heightAnchor.constraint(equalToConstant: 1)
-                ])
-                
-                let separatorContainer = UIView()
-                separatorContainer.addSubview(separator)
-                separator.snp.makeConstraints { make in
-                    make.top.bottom.equalToSuperview()
-                    make.leading.trailing.equalToSuperview().inset(20)
-                }
-
-                stackView.addArrangedSubview(separatorContainer)
-            }
-            
-            stackView.addArrangedSubview(mealLog)
-        }
-        
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(stackView)
-        
-        titleLabel.snp.makeConstraints { make in
-            make.top.leading.equalToSuperview().inset(20)
-        }
-        
-        stackView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview()
-            make.bottom.equalToSuperview()
-        }
-        
-        return contentView
+    private lazy var todayAteMealLogListView: MealLogListView = {
+        let mealLogs: [MealLogView] = []
+        return MealLogListView(mealLogs: mealLogs)
     }()
+    
+//    private let todayAteMealLogListView: UIView = {
+//        let contentView = BalanceEatContentView()
+//        
+//        let titleLabel: UILabel = {
+//            let titleLabel = UILabel()
+//            titleLabel.text = "최근 식사 기록"
+//            titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
+//            titleLabel.textColor = .bodyStatusCardNumber
+//            return titleLabel
+//        }()
+//        
+//        let mealLogs: [MealLogView] = [
+//            MealLogView(icon: .chickenChest, title: "닭가슴살", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 120, consumedSugars: 0, consumedCarbohydrates: 0, consumedProteins: 23, consumedFats: 1),
+//            MealLogView(icon: .salad, title: "샐러드", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 25, consumedSugars: 3, consumedCarbohydrates: 4, consumedProteins: 2, consumedFats: 0)
+//        ]
+//        
+//        let stackView: UIStackView = {
+//            let stackView = UIStackView()
+//            stackView.axis = .vertical
+//            stackView.distribution = .fill
+//            stackView.spacing = 0 
+//            return stackView
+//        }()
+//        
+//        for (index, mealLog) in mealLogs.enumerated() {
+//            if index > 0 {
+//                let separator = UIView()
+//                separator.backgroundColor = .systemGray5
+//
+//                separator.translatesAutoresizingMaskIntoConstraints = false
+//                NSLayoutConstraint.activate([
+//                    separator.heightAnchor.constraint(equalToConstant: 1)
+//                ])
+//                
+//                let separatorContainer = UIView()
+//                separatorContainer.addSubview(separator)
+//                separator.snp.makeConstraints { make in
+//                    make.top.bottom.equalToSuperview()
+//                    make.leading.trailing.equalToSuperview().inset(20)
+//                }
+//
+//                stackView.addArrangedSubview(separatorContainer)
+//            }
+//            
+//            stackView.addArrangedSubview(mealLog)
+//        }
+//        
+//        contentView.addSubview(titleLabel)
+//        contentView.addSubview(stackView)
+//        
+//        titleLabel.snp.makeConstraints { make in
+//            make.top.leading.equalToSuperview().inset(20)
+//        }
+//        
+//        stackView.snp.makeConstraints { make in
+//            make.top.equalTo(titleLabel.snp.bottom).offset(10)
+//            make.leading.trailing.equalToSuperview()
+//            make.bottom.equalToSuperview()
+//        }
+//        
+//        return contentView
+//    }()
     
     init() {
         let userRepository = UserRepository()
@@ -227,6 +232,7 @@ class HomeViewController: UIViewController {
     private func getDatas() {
         Task {
             await viewModel.getUser()
+            await viewModel.getDailyDiet()
         }
     }
     
@@ -245,7 +251,7 @@ class HomeViewController: UIViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] dailyDiet in
                 guard let self else { return }
-                
+                updateUIForDailyDietDate(dailyDiet: dailyDiet)
             })
             .disposed(by: disposeBag)
     }
@@ -268,51 +274,116 @@ class HomeViewController: UIViewController {
     }
     
     private func updateUIForDailyDietDate(dailyDiet: DailyDietResponseDTO) {
-//        todayCalorieView.update(
-//            currentCalorie: dailyDiet.dailyTotal.totalCalorie,
-//            targetCalorie: viewModel.userResponseRelay.value?.targetCalorie,
-//            currentCarbohydrate: dailyDiet.dailyTotal.totalCarbohydrates,
-//            targetCarbohydrate: viewModel.userResponseRelay.v,
-//            currentProtein: dailyDiet.dailyTotal.totalProtein,
-//            targetProtein: <#T##Int#>,
-//            currentFat: dailyDiet.dailyTotal.totalFat,
-//            targetFat: <#T##Int#>
-//        )
+        todayCalorieView.update(
+            currentCalorie: dailyDiet.dailyTotal.totalCalorie,
+            targetCalorie: viewModel.userResponseRelay.value?.targetCalorie ?? 0,
+            currentCarbohydrate: dailyDiet.dailyTotal.totalCarbohydrates,
+            targetCarbohydrate: 200,
+            currentProtein: dailyDiet.dailyTotal.totalProtein,
+            targetProtein: 100,
+            currentFat: dailyDiet.dailyTotal.totalFat,
+            targetFat: 100
+        )
+        
+        var mealLogs: [MealLogView] = []
+        dailyDiet.diets.forEach { diet in
+            diet.items.forEach { item in
+                let mealLogView = MealLogView(
+                    icon: .chickenChest,
+                    title: item.foodName,
+                    ateTime: diet.eatingAt.toDate() ?? Date(),
+                    consumedFoodAmount: item.intake,
+                    consumedCalories: item.calories,
+                    consumedSugars: 0,
+                    consumedCarbohydrates: item.carbohydrates,
+                    consumedProteins: item.protein,
+                    consumedFats: item.fat
+                )
+                mealLogs.append(mealLogView)
+            }
+        }
+        todayAteMealLogListView.updateMealLogs(mealLogs)
     }
 }
 
-class GradientView: UIView {
-    private let gradientLayer = CAGradientLayer()
+final class MealLogListView: UIView {
     
-    var colors: [UIColor] = [.clear, .clear] {
-        didSet {
-            updateGradientColors()
-        }
-    }
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "최근 식사 기록"
+        label.font = .systemFont(ofSize: 17, weight: .bold)
+        label.textColor = .bodyStatusCardNumber
+        return label
+    }()
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupGradient()
+    private let stackView: UIStackView = {
+        let sv = UIStackView()
+        sv.axis = .vertical
+        sv.spacing = 0
+        sv.distribution = .fill
+        return sv
+    }()
+    
+    private var mealLogs: [MealLogView] = []
+    
+    init(mealLogs: [MealLogView]) {
+        super.init(frame: .zero)
+        self.mealLogs = mealLogs
+        setupView()
+        configureStackView()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setupGradient()
+        setupView()
     }
     
-    private func setupGradient() {
-        gradientLayer.startPoint = CGPoint(x: 0, y: 0.5)
-        gradientLayer.endPoint = CGPoint(x: 1, y: 0.5)
-        layer.insertSublayer(gradientLayer, at: 0)
-        updateGradientColors()
+    private func setupView() {
+        let contentView = BalanceEatContentView()
+        addSubview(contentView)
+        contentView.addSubview(titleLabel)
+        contentView.addSubview(stackView)
+        
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview().inset(20)
+        }
+        
+        stackView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(10)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalToSuperview()
+        }
     }
     
-    private func updateGradientColors() {
-        gradientLayer.colors = colors.map { $0.cgColor }
+    private func configureStackView() {
+        for (index, mealLog) in mealLogs.enumerated() {
+            if index > 0 {
+                let separator = UIView()
+                separator.backgroundColor = .systemGray5
+                separator.snp.makeConstraints { make in
+                    make.height.equalTo(1)
+                }
+                
+                let separatorContainer = UIView()
+                separatorContainer.addSubview(separator)
+                separator.snp.makeConstraints { make in
+                    make.top.bottom.equalToSuperview()
+                    make.leading.trailing.equalToSuperview().inset(20)
+                }
+                
+                stackView.addArrangedSubview(separatorContainer)
+            }
+            stackView.addArrangedSubview(mealLog)
+        }
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        gradientLayer.frame = bounds
+    func updateMealLogs(_ logs: [MealLogView]) {
+        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        self.mealLogs = logs
+        configureStackView()
     }
 }

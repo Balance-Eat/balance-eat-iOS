@@ -80,7 +80,7 @@ enum DietEndPoints: Endpoint {
     var path: String {
         switch self {
         case .daily:
-            return "/v1/diet/daily"
+            return "/v1/diets/daily"
         }
     }
     
