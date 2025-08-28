@@ -42,7 +42,21 @@ final class TutorialPageViewModel {
     var targetCaloriesObservable: Observable<Int> {
         Observable.combineLatest(BMRObservable, goalTypeRelay, dataRelay) { bmr, goal, data -> Int in
             guard let activityCoef = data.activityLevel?.coefficient else { return 0 }
-            return Int(Double(bmr) * goal.coefficient * activityCoef)
+            var goalDiff = 0
+            
+            if data.activityLevel != ActivityLevel.none {
+                switch goal {
+                case .diet:
+                    goalDiff = -500
+                case .bulkUp:
+                    goalDiff = 300
+                case .maintain:
+                    goalDiff = 0
+                case .none:
+                    break
+                }
+            }
+            return Int(Double(bmr) * goal.coefficient * activityCoef) + goalDiff
         }
     }
     

@@ -131,13 +131,30 @@ class MacroSettingViewController: UIViewController {
         
         [carbonSlider, proteinSlider, fatSlider, estimatedDailyCalorieView, resetButton, nutritionGuideView, nextButton].forEach(mainStackView.addArrangedSubview)
         
-        Observable.combineLatest(viewModel.targetCaloriesRelay, viewModel.goalTypeRelay)
-            .subscribe(onNext: { [weak self] calories, goal in
+        Observable.combineLatest(viewModel.targetCaloriesRelay, viewModel.goalTypeRelay, viewModel.dataRelay)
+            .subscribe(onNext: { [weak self] calories, goal, data in
                 guard let self = self else { return }
                 
-                let carbon = Float(Double(calories) * goal.recommendedCarbonRatio)
-                let protein = Float(Double(calories) * goal.recommendedProteinRatio)
-                let fat = Float(Double(calories) * goal.recommendedFatRatio)
+                var carbon: Float = 4
+                var protein: Float = 4
+                var fat: Float = 9
+                
+                switch goal {
+                case .diet:
+                    protein = protein * Float(data.weight ?? 0) * 2
+                    fat = Float(calories) * 0.2
+                    carbon = Float(calories) - protein - fat
+                case .bulkUp:
+                    protein = protein * Float(data.weight ?? 0) * 2
+                    fat = Float(calories) * 0.2
+                    carbon = Float(calories) - protein - fat
+                case .maintain:
+                    protein = protein * Float(data.weight ?? 0) * 1.7
+                    fat = Float(calories) * 0.2
+                    carbon = Float(calories) - protein - fat
+                case .none:
+                    break
+                }
                 
                 self.initialCarbon = carbon
                 self.initialProtein = protein
