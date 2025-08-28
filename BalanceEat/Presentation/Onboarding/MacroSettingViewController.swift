@@ -39,9 +39,19 @@ class MacroSettingViewController: UIViewController {
     }()
     
     private let resetButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("추천 세팅으로 초기화", for: .normal)
+        var config = UIButton.Configuration.filled()
+        config.title = "추천 세팅으로 초기화"
+        config.image = UIImage(systemName: "arrow.counterclockwise")
+        config.imagePadding = 8 // 아이콘과 텍스트 간격
+        config.baseForegroundColor = .systemRed
+        config.baseBackgroundColor = UIColor.systemRed.withAlphaComponent(0.1)
+        config.cornerStyle = .medium
+        config.contentInsets = NSDirectionalEdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16) // 위아래 여백 확보
+        config.titleAlignment = .center
+
+        let button = UIButton(configuration: config, primaryAction: nil)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .bold)
+        button.imageView?.contentMode = .scaleAspectFit
         return button
     }()
     
