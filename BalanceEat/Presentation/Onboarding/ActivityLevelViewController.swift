@@ -108,6 +108,11 @@ class ActivityLevelViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
+        TutorialPageViewModel.shared.dataRelay
+            .map { $0.activityLevel != ActivityLevel.none }
+            .bind(to: nextButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
         [activityLevelPickerView, estimatedDailyCalorieView, nextButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
@@ -132,6 +137,8 @@ class ActivityLevelViewController: UIViewController {
                     .disposed(by: self.disposeBag)
             })
             .disposed(by: disposeBag)
+        
+        
     }
 }
 
