@@ -11,19 +11,49 @@ import RxSwift
 import RxCocoa
 
 class MenuViewController: UIViewController {
-    private let profileInfoView = ProfileInfoView()
-    private let editTargetMenuItemView = MenuItemView(
-        icon: UIImage(systemName: "person.crop.circle") ?? UIImage(),
+    private let viewModel: MenuViewModel
+    private let disposeBag = DisposeBag()
+    
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+    
+    private let mainStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 20
+        return stackView
+    }()
+    private let profileInfoView = ProfileInfoView(name: "", goal: "", currentWeight: 0, goalWeight: 0)
+    private let basicInfoMenuItemView = MenuItemView(
+        icon: UIImage(systemName: "person.fill") ?? UIImage(),
         iconTintColor: .systemBlue,
         iconBackgroundColor: .systemBlue.withAlphaComponent(0.15),
+        title: "기본 정보 수정",
+        subtitle: "이름, 성별, 나이 키 변경"
+    )
+    private let editTargetMenuItemView = MenuItemView(
+        icon: UIImage(systemName: "person.crop.circle") ?? UIImage(),
+        iconTintColor: .systemGreen,
+        iconBackgroundColor: .systemGreen.withAlphaComponent(0.15),
         title: "목표 수치 편집",
         subtitle: "체중, 골격근량, 체지방률 목표 조정"
     )
+    private let activityLevelMenuItemView = MenuItemView(
+        icon: UIImage(systemName: "flame.fill") ?? UIImage(),
+        iconTintColor: .red,
+        iconBackgroundColor: .red.withAlphaComponent(0.15),
+        title: "활동량 설정",
+        subtitle: "일상 활동량 조정"
+    )
     
     init() {
+        let userRepository = UserRepository()
+        let userUseCase = UserUseCase(repository: userRepository)
+        self.viewModel = MenuViewModel(userUseCase: userUseCase)
         super.init(nibName: nil, bundle: nil)
         
         setUpView()
+        getDatas()
         setBinding()
     }
     
@@ -37,27 +67,91 @@ class MenuViewController: UIViewController {
     
     private func setUpView() {
         view.backgroundColor = .homeScreenBackground
-        view.addSubview(profileInfoView)
-        view.addSubview(editTargetMenuItemView)
+        
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(mainStackView)
+        contentView.addSubview(profileInfoView)
+        
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalTo(scrollView.snp.width)
+        }
         
         profileInfoView.snp.makeConstraints { make in
-            make.leading.top.trailing.equalToSuperview()
+            make.top.leading.trailing.equalToSuperview()
         }
         
-        editTargetMenuItemView.snp.makeConstraints { make in
+        mainStackView.snp.makeConstraints { make in
             make.top.equalTo(profileInfoView.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
+            make.leading.trailing.bottom.equalToSuperview().inset(16)
         }
+        
+        let personalInfoMenuStackView = createMenuStackView(title: "개인 정보", views: [
+            basicInfoMenuItemView,
+            editTargetMenuItemView,
+            activityLevelMenuItemView
+        ])
+        
+        [personalInfoMenuStackView].forEach(mainStackView.addArrangedSubview)
+        
     }
     
     private func setBinding() {
+        viewModel.userResponseRelay
+            .compactMap { $0 }
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] user in
+                guard let self else { return }
+                self.updateUIForUserData(user: user)
+            })
+            .disposed(by: disposeBag)
+        
         editTargetMenuItemView.onTap = {
             self.navigationController?.pushViewController(EditTargetViewController(), animated: true)
         }
     }
+    
+    private func getDatas() {
+        Task {
+            await viewModel.getUser()
+        }
+    }
+    
+    private func updateUIForUserData(user: UserResponseDTO) {
+        profileInfoView.updateView(name: user.name, goal: "다이어트", currentWeight: user.weight, targetWeight: user.targetWeight)
+    }
+    
+    private func createMenuStackView(title: String, views: [UIView]) -> UIStackView {
+        let titleLabel = UILabel()
+        titleLabel.font = .systemFont(ofSize: 12, weight: .semibold)
+        titleLabel.textColor = .gray
+        titleLabel.text = title
+        
+        let stackView = UIStackView(arrangedSubviews: [
+            titleLabel
+        ])
+        stackView.axis = .vertical
+        stackView.spacing = 20
+        
+        views.forEach {
+            stackView.addArrangedSubview($0)
+        }
+        
+        return stackView
+    }
 }
 
 final class ProfileInfoView: UIView {
+    private let name: String
+    private let goal: String
+    private let currentWeight: Double
+    private let targetWeight: Double
+    
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(systemName: "person.crop.circle")
@@ -68,30 +162,27 @@ final class ProfileInfoView: UIView {
     
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.text = "진문짱"
         label.font = .systemFont(ofSize: 18, weight: .bold)
-        label.textColor = .white
-        return label
-    }()
-    
-    private let subTitleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "다이어트 🔥"
-        label.font = .systemFont(ofSize: 14)
         label.textColor = .white
         return label
     }()
     
     private let goalLabel: UILabel = {
         let label = UILabel()
-        label.text = "⚖️ 70kg → 65kg"
+        label.font = .systemFont(ofSize: 14)
+        label.textColor = .white
+        return label
+    }()
+    
+    private let targetWeightDiffLabel: UILabel = {
+        let label = UILabel()
         label.font = .systemFont(ofSize: 13)
         label.textColor = .white.withAlphaComponent(0.8)
         return label
     }()
     
     private lazy var textStack: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [nameLabel, subTitleLabel, goalLabel])
+        let stack = UIStackView(arrangedSubviews: [nameLabel, goalLabel, targetWeightDiffLabel])
         stack.axis = .vertical
         stack.spacing = 8
         stack.alignment = .leading
@@ -106,16 +197,18 @@ final class ProfileInfoView: UIView {
         return stack
     }()
     
-    init() {
+    init(name: String, goal: String, currentWeight: Double, goalWeight: Double) {
+        self.name = name
+        self.goal = goal
+        self.currentWeight = currentWeight
+        self.targetWeight = goalWeight
         super.init(frame: .zero)
         setupGradient()
-        setupLayout()
+        setUpView()
     }
     
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupGradient()
-        setupLayout()
+        fatalError("init(coder:) has not been implemented")
     }
     
     private func setupGradient() {
@@ -126,7 +219,11 @@ final class ProfileInfoView: UIView {
         layer.insertSublayer(gradient, at: 0)
     }
     
-    private func setupLayout() {
+    private func setUpView() {
+        nameLabel.text = name
+        goalLabel.text = goal
+        targetWeightDiffLabel.text = "\(String(format: "%.1f", currentWeight))kg → \(String(format: "%.1f", targetWeight))kg"
+        
         addSubview(mainStack)
         
         profileImageView.snp.makeConstraints { make in
@@ -137,6 +234,12 @@ final class ProfileInfoView: UIView {
             make.leading.equalToSuperview().inset(16)
             make.top.bottom.equalToSuperview().inset(32)
         }
+    }
+    
+    func updateView(name: String, goal: String, currentWeight: Double, targetWeight: Double) {
+        nameLabel.text = name
+        goalLabel.text = goal
+        targetWeightDiffLabel.text = "\(String(format: "%.1f", currentWeight))kg → \(String(format: "%.1f", targetWeight))kg"
     }
     
     override func layoutSubviews() {
