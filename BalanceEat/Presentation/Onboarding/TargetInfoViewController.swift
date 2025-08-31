@@ -257,10 +257,10 @@ class TargetInfoViewController: UIViewController {
             .subscribe(onNext: { weight, goal, currentSMI, targetSMI, currentFatPercentage, targetFatPercentage in
                 var data = TutorialPageViewModel.shared.dataRelay.value
                 data.targetWeight = Double(weight ?? "") ?? 0
-                data.smi = Double(currentSMI ?? "") ?? 0
-                data.targetSmi = Double(targetSMI ?? "") ?? 0
-                data.fatPercentage = Double(currentFatPercentage ?? "") ?? 0
-                data.targetFatPercentage = Double(targetFatPercentage ?? "") ?? 0
+                data.smi = currentSMI == "" ? nil : Double(currentSMI ?? "") ?? 0
+                data.targetSmi = targetSMI == "" ? nil : Double(targetSMI ?? "") ?? 0
+                data.fatPercentage = currentFatPercentage == "" ? nil : Double(currentFatPercentage ?? "") ?? 0
+                data.targetFatPercentage = targetFatPercentage == "" ? nil : Double(targetFatPercentage ?? "") ?? 0
                 
                 TutorialPageViewModel.shared.goalTypeRelay.accept(goal ?? .none)
                 TutorialPageViewModel.shared.dataRelay.accept(data)

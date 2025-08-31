@@ -52,14 +52,14 @@ class HomeViewController: UIViewController {
     private lazy var nowBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(
         title: "현재 체성분",
         weight: 0,
-        smi: 0,
-        fatPercentage: 0
+        smi: nil,
+        fatPercentage: nil
     )
     private lazy var targetBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(
         title: "목표 체성분",
         weight: 0,
-        smi: 0,
-        fatPercentage: 0,
+        smi: nil,
+        fatPercentage: nil,
         isTarget: true
     )
     
@@ -266,11 +266,27 @@ class HomeViewController: UIViewController {
             smi: user.smi,
             fatPercentage: user.fatPercentage
         )
+
+        let smiDiff: Double? = {
+            if let target = user.targetSmi, let current = user.smi {
+                return target - current
+            }
+            return nil
+        }()
+
+        let fatDiff: Double? = {
+            if let target = user.targetFatPercentage, let current = user.fatPercentage {
+                return target - current
+            }
+            return nil
+        }()
+
         targetBodyStatusCardView.update(
             weight: user.targetWeight - user.weight,
-            smi: user.targetSmi - user.smi,
-            fatPercentage: user.targetFatPercentage - user.fatPercentage
+            smi: smiDiff,
+            fatPercentage: fatDiff
         )
+
     }
     
     private func updateUIForDailyDietDate(dailyDiet: DailyDietResponseDTO) {
@@ -278,11 +294,11 @@ class HomeViewController: UIViewController {
             currentCalorie: dailyDiet.dailyTotal.totalCalorie,
             targetCalorie: viewModel.userResponseRelay.value?.targetCalorie ?? 0,
             currentCarbohydrate: dailyDiet.dailyTotal.totalCarbohydrates,
-            targetCarbohydrate: 200,
+            targetCarbohydrate: Int(viewModel.userResponseRelay.value?.targetCarbohydrates ?? 0),
             currentProtein: dailyDiet.dailyTotal.totalProtein,
-            targetProtein: 100,
+            targetProtein: Int(viewModel.userResponseRelay.value?.targetProtein ?? 0),
             currentFat: dailyDiet.dailyTotal.totalFat,
-            targetFat: 100
+            targetFat: Int(viewModel.userResponseRelay.value?.targetFat ?? 0)
         )
         
         var mealLogs: [MealLogView] = []

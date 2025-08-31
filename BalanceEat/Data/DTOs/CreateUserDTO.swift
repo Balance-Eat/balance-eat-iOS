@@ -14,16 +14,19 @@ struct CreateUserDTO: Codable {
     let age: Int
     let height: Double
     let weight: Double
-    let email: String
-    let activityLevel: ActivityLevel
-    let smi: Double
-    let fatPercentage: Double
-    let targetWeight: Double
-    let targetCalorie: Int
-    let targetSmi: Double
-    let targetFatPercentage: Double
-    let providerId: String
-    let providerType: String
+    let email: String?
+    let activityLevel: ActivityLevel?
+    let smi: Double?
+    let fatPercentage: Double?
+    let targetWeight: Double?
+    let targetCalorie: Int?
+    let targetSmi: Double?
+    let targetFatPercentage: Double?
+    let targetCarbohydrates: Int?
+    let targetProtein: Int?
+    let targetFat: Int?
+    let providerId: String?
+    let providerType: String?
 }
 
 

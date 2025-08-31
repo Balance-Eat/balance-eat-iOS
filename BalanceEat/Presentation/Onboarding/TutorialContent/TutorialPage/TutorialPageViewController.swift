@@ -80,16 +80,19 @@ class TutorialPageViewController: UIViewController {
                     age: data.age ?? 0,
                     height: data.height ?? 0,
                     weight: data.weight ?? 0,
-                    email: "",
-                    activityLevel: data.activityLevel ?? .none,
-                    smi: data.smi ?? 0,
-                    fatPercentage: data.fatPercentage ?? 0,
-                    targetWeight: data.targetWeight ?? 0,
+                    email: nil,
+                    activityLevel: data.activityLevel,
+                    smi: data.smi,
+                    fatPercentage: data.fatPercentage,
+                    targetWeight: data.targetWeight,
                     targetCalorie: viewModel.targetCaloriesRelay.value,
-                    targetSmi: data.targetSmi ?? 0,
-                    targetFatPercentage: data.targetFatPercentage ?? 0,
-                    providerId: "",
-                    providerType: ""
+                    targetSmi: data.targetSmi,
+                    targetFatPercentage: data.targetFatPercentage,
+                    targetCarbohydrates: Int(Double(viewModel.userCarbonRelay.value) / 4),
+                    targetProtein: Int(Double(viewModel.userProteinRelay.value) / 4),
+                    targetFat: Int(Double(viewModel.userFatRelay.value) / 9),
+                    providerId: nil,
+                    providerType: nil
                 )
                 self.goToNextPageRelay.accept(createUserDTO)
             })

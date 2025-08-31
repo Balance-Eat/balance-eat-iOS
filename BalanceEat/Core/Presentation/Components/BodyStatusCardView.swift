@@ -10,8 +10,8 @@ import UIKit
 final class BodyStatusCardView: UIView {
     private let title: String
     private var weight: Double
-    private var smi: Double
-    private var fatPercentage: Double
+    private var smi: Double?
+    private var fatPercentage: Double?
     private let isTarget: Bool
     
     private let containerView: BalanceEatContentView = BalanceEatContentView()
@@ -23,6 +23,7 @@ final class BodyStatusCardView: UIView {
         label.textColor = .bodyStatusCardTitle
         return label
     }()
+    
     private lazy var weightLabel: StatusLabel = {
         let label = StatusLabel(number: weight, unit: "kg", isWeight: true)
         return label
@@ -42,10 +43,34 @@ final class BodyStatusCardView: UIView {
         return stackView
     }()
     
-    private lazy var smiView = createSubMetricView(title: "골격근량", value: smi, unit: "kg")
-    private lazy var fatView = createSubMetricView(title: "체지방율", value: fatPercentage, unit: "%")
+    private lazy var smiLabel = StatusLabel(number: smi, unit: "kg", isTarget: isTarget)
+    private lazy var fatLabel = StatusLabel(number: fatPercentage, unit: "%", isTarget: isTarget)
     
-    init(title: String, weight: Double, smi: Double, fatPercentage: Double, isTarget: Bool = false) {
+    private lazy var smiView: UIStackView = {
+        let titleLabel = UILabel()
+        titleLabel.text = "골격근량"
+        titleLabel.font = .systemFont(ofSize: 12, weight: .regular)
+        titleLabel.textColor = .bodyStatusCartSubtitle
+        
+        let stack = UIStackView(arrangedSubviews: [titleLabel, smiLabel])
+        stack.axis = .vertical
+        stack.alignment = .center
+        return stack
+    }()
+    
+    private lazy var fatView: UIStackView = {
+        let titleLabel = UILabel()
+        titleLabel.text = "체지방율"
+        titleLabel.font = .systemFont(ofSize: 12, weight: .regular)
+        titleLabel.textColor = .bodyStatusCartSubtitle
+        
+        let stack = UIStackView(arrangedSubviews: [titleLabel, fatLabel])
+        stack.axis = .vertical
+        stack.alignment = .center
+        return stack
+    }()
+    
+    init(title: String, weight: Double, smi: Double?, fatPercentage: Double?, isTarget: Bool = false) {
         self.title = title
         self.weight = weight
         self.smi = smi
@@ -95,36 +120,21 @@ final class BodyStatusCardView: UIView {
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)
         }
-        
     }
     
-    private func createSubMetricView(title: String, value: Double, unit: String) -> UIStackView {
-        let titleLabel = UILabel()
-        titleLabel.text = title
-        titleLabel.font = .systemFont(ofSize: 12, weight: .regular)
-        titleLabel.textColor = .bodyStatusCartSubtitle
-
-        let valueLabel = StatusLabel(number: value, unit: unit, isTarget: isTarget)
-
-        let stack = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
-        stack.axis = .vertical
-        stack.alignment = .center
-        return stack
-    }
-    
-    func update(weight: Double, smi: Double, fatPercentage: Double) {
+    func update(weight: Double, smi: Double?, fatPercentage: Double?) {
         self.weight = weight
         self.smi = smi
         self.fatPercentage = fatPercentage
-        
+
         weightLabel.updateNumber(number: weight)
-        smiView = createSubMetricView(title: "골격근량", value: smi, unit: "kg")
-        fatView = createSubMetricView(title: "체지방율", value: fatPercentage, unit: "%")
+        smiLabel.updateNumber(number: smi ?? 0)
+        fatLabel.updateNumber(number: fatPercentage ?? 0)
     }
 }
 
 final class StatusLabel: UILabel {
-    private var number: Double
+    private var number: Double?
     private let unit: String
     private let isWeight: Bool
     private let isTarget: Bool
@@ -143,7 +153,7 @@ final class StatusLabel: UILabel {
         return formatter
     }()
 
-    init(number: Double, unit: String, isWeight: Bool = false, isTarget: Bool = false) {
+    init(number: Double?, unit: String, isWeight: Bool = false, isTarget: Bool = false) {
         self.number = number
         self.unit = unit
         self.isWeight = isWeight
@@ -158,17 +168,16 @@ final class StatusLabel: UILabel {
 
     private func setupLabel() {
         var prefix = ""
-        if isTarget && number > 0 {
+        if isTarget && number ?? 0 > 0 {
             prefix = "+"
         }
-
         let numberString: String
-        if number == 0 {
+        if number == nil {
             numberString = "-"
-        } else if let formatted = numberFormatter.string(from: NSNumber(value: number)) {
+        } else if let formatted = numberFormatter.string(from: NSNumber(value: number ?? 0)) {
             numberString = formatted
         } else {
-            numberString = "\(number)"
+            numberString = "\(number ?? 0)"
         }
 
         let fullText = "\(prefix)\(numberString)\(unit)"
@@ -187,10 +196,8 @@ final class StatusLabel: UILabel {
         self.attributedText = attributedText
     }
 
-    
     func updateNumber(number: Double) {
         self.number = number
         setupLabel()
     }
 }
-

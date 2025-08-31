@@ -125,22 +125,46 @@ class TutorialContentViewController: UIViewController {
         tutorialPageViewController.goToNextPageRelay
             .flatMapLatest { [weak self] createUserDTO -> Observable<Void> in
                 guard let self = self else { return .empty() }
+
                 return Observable.create { observer in
+                    let successDisposable = self.viewModel.onCreateUserSuccessRelay
+                        .take(1)
+                        .subscribe(onNext: {
+                            observer.onNext(())
+                            observer.onCompleted()
+                        })
+
+                    let failureDisposable = self.viewModel.onCreateUserFailureRelay
+                        .take(1)
+                        .subscribe(onNext: { errorMessage in
+                            observer.onError(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
+                        })
+
                     Task {
+                        print("createUserDTO: \(createUserDTO)")
                         await self.viewModel.createUser(createUserDTO: createUserDTO)
-                        observer.onNext(())
-                        observer.onCompleted()
                     }
-                    return Disposables.create()
+
+                    return Disposables.create {
+                        successDisposable.dispose()
+                        failureDisposable.dispose()
+                    }
                 }
             }
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                let mainVC = MainViewController(uuid: viewModel.getUserUUID())
-                self.navigationController?.setViewControllers([mainVC], animated: true)
-            })
+            .subscribe(
+                onNext: { [weak self] in
+                    guard let self = self else { return }
+                    let mainVC = MainViewController(uuid: self.viewModel.getUserUUID())
+                    self.navigationController?.setViewControllers([mainVC], animated: true)
+                },
+                onError: { error in
+                    print("유저 생성 실패: \(error.localizedDescription)")
+                }
+            )
             .disposed(by: disposeBag)
+
+
                 
         
         contentView.addSubview(tutorialPageViewController.view)

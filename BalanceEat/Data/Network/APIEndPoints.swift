@@ -11,7 +11,7 @@ import Alamofire
 protocol Endpoint {
     var path: String { get }
     var method: HTTPMethod { get }
-    var parameters: [String: Any]? { get }
+    var parameters: [String: Any?]? { get }
     var queryParameters: [String: Any]? { get }
 }
 
@@ -38,7 +38,7 @@ enum UserEndPoints: Endpoint {
         }
     }
     
-    var parameters: [String: Any]? {
+    var parameters: [String: Any?]? {
         switch self {
         case .createUser(let createUserDTO):
             return [
@@ -49,7 +49,7 @@ enum UserEndPoints: Endpoint {
                 "height": createUserDTO.height,
                 "weight": createUserDTO.weight,
                 "email": createUserDTO.email,
-                "activityLevel": createUserDTO.activityLevel.rawValue,
+                "activityLevel": createUserDTO.activityLevel?.rawValue,
                 "smi": createUserDTO.smi,
                 "fatPercentage": createUserDTO.fatPercentage,
                 "targetWeight": createUserDTO.targetWeight,
@@ -91,7 +91,7 @@ enum DietEndPoints: Endpoint {
         }
     }
     
-    var parameters: [String : Any]? {
+    var parameters: [String : Any?]? {
         switch self {
         default:
             return nil

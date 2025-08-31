@@ -6,9 +6,9 @@
 //
 import Foundation
 
-struct EmptyData: Decodable {} 
+struct EmptyData: Codable {}
 
-struct EmptyResponse: Decodable {
+struct EmptyResponse: Codable {
     let data: EmptyData?
     let status: String
     let message: String
