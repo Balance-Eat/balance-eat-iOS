@@ -64,14 +64,14 @@ class HomeViewController: UIViewController {
     )
     
     private let todayCalorieView: TodayCalorieView = TodayCalorieView(
-        currentCalorie: 1420,
-        targetCalorie: 2000,
-        currentCarbohydrate: 178,
-        targetCarbohydrate: 250,
-        currentProtein: 95,
-        targetProtein: 120,
-        currentFat: 45,
-        targetFat: 67
+        currentCalorie: 0,
+        targetCalorie: 0,
+        currentCarbohydrate: 0,
+        targetCarbohydrate: 0,
+        currentProtein: 0,
+        targetProtein: 0,
+        currentFat: 0,
+        targetFat: 0
     )
     
     private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date())!)
