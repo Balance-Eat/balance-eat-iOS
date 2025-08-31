@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 
 final class MealLogView: UIView {
-    private let icon: UIImage
+    private let icon: UIImage?
     private let title: String
     private let ateTime: Date
     private let consumedFoodAmount: Int
@@ -54,12 +54,12 @@ final class MealLogView: UIView {
         stackView.alignment = .center
         return stackView
     }()
-    private lazy var consumedSugarView = ConsumedNutirientItemView(consumedNutrientItemType: .sugar, consumedStatistics: consumedSugars)
+//    private lazy var consumedSugarView = ConsumedNutirientItemView(consumedNutrientItemType: .sugar, consumedStatistics: consumedSugars)
     private lazy var consumedCarbohydratesView = ConsumedNutirientItemView(consumedNutrientItemType: .carbohydrate, consumedStatistics: consumedCarbohydrates)
     private lazy var consumedProteinsView = ConsumedNutirientItemView(consumedNutrientItemType: .protein, consumedStatistics: consumedProteins)
     private lazy var consumedFatsView = ConsumedNutirientItemView(consumedNutrientItemType: .fat, consumedStatistics: consumedFats)
     
-    init(icon: UIImage, title: String, ateTime: Date, consumedFoodAmount: Int, consumedCalories: Int, consumedSugars: Int, consumedCarbohydrates: Int, consumedProteins: Int, consumedFats: Int) {
+    init(icon: UIImage? = nil, title: String, ateTime: Date, consumedFoodAmount: Int, consumedCalories: Int, consumedSugars: Int, consumedCarbohydrates: Int, consumedProteins: Int, consumedFats: Int) {
         self.icon = icon
         self.title = title
         self.ateTime = ateTime
@@ -95,18 +95,18 @@ final class MealLogView: UIView {
             make.edges.equalToSuperview().inset(20)
         }
         
-        iconImageView.snp.makeConstraints { make in
-            make.top.leading.equalToSuperview()
-            make.width.height.equalTo(30)
-        }
+//        iconImageView.snp.makeConstraints { make in
+//            make.top.leading.equalToSuperview()
+//            make.width.height.equalTo(30)
+//        }
         
         titleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(iconImageView.snp.trailing).inset(-16)
+            make.leading.equalToSuperview()
             make.top.equalToSuperview()
         }
         
         ateTimeLabel.snp.makeConstraints { make in
-            make.leading.equalTo(iconImageView.snp.trailing).inset(-16)
+            make.leading.equalToSuperview()
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
         }
         
@@ -124,7 +124,7 @@ final class MealLogView: UIView {
             make.leading.trailing.bottom.equalToSuperview()
         }
         
-        nutrientStackView.addArrangedSubview(consumedSugarView)
+//        nutrientStackView.addArrangedSubview(consumedSugarView)
         nutrientStackView.addArrangedSubview(consumedCarbohydratesView)
         nutrientStackView.addArrangedSubview(consumedProteinsView)
         nutrientStackView.addArrangedSubview(consumedFatsView)

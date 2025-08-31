@@ -305,7 +305,6 @@ class HomeViewController: UIViewController {
         dailyDiet.diets.forEach { diet in
             diet.items.forEach { item in
                 let mealLogView = MealLogView(
-                    icon: .chickenChest,
                     title: item.foodName,
                     ateTime: diet.eatingAt.toDate() ?? Date(),
                     consumedFoodAmount: item.intake,
