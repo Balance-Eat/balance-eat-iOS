@@ -9,7 +9,7 @@
 
 - **사용자 상태 관리**
   - 체중, 골격근량, 체지방률 기록 및 목표 설정
-  - SwiftData 기반 로컬 데이터 관리
+  - CoreData 기반 로컬 데이터 관리
 
 - **식단 관리**
   - 하루 식단 기록 및 영양 정보 확인
@@ -29,7 +29,7 @@
 ## 🏗️ 기술 스택
 
 - **언어:** Swift  
-- **아키텍처:** MVVM  
+- **아키텍처:** MVVM, Clean Architecture  
 - **UI:** UIKit, SnapKit
 - **네트워크 통신**: Alamofire   
 - **리액티브 프로그래밍:** RxSwift  
