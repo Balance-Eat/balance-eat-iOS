@@ -13,6 +13,7 @@ import RxCocoa
 class EditTargetViewController: UIViewController {
     private let viewModel: MenuViewModel
     private let scrollView = UIScrollView()
+    private let contentView = UIView()
     private let mainStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -44,17 +45,21 @@ class EditTargetViewController: UIViewController {
         
         view.backgroundColor = .homeScreenBackground
         view.addSubview(scrollView)
-        
-        scrollView.addSubview(mainStackView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(mainStackView)
         
         scrollView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).inset(20)
-            make.leading.trailing.bottom.equalToSuperview().inset(20)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+        
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalTo(scrollView.snp.width)
         }
         
         mainStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width)
+            make.edges.equalToSuperview().inset(20)
         }
         
         if let currentWeightValue = viewModel.userResponseRelay.value?.weight {
@@ -181,7 +186,7 @@ enum EditTargetItemType {
     }
 }
 
-final class EditTargetItemView: UIView {
+final class EditTargetItemView: BalanceEatContentView {
     private let editTargetItemType: EditTargetItemType
     
     private let currentField = InputFieldWithIcon(placeholder: "", unit: "kg")
@@ -218,8 +223,8 @@ final class EditTargetItemView: UIView {
     
     init(editTargetItemType: EditTargetItemType) {
         self.editTargetItemType = editTargetItemType
-        super.init(frame: .zero)
-        
+    
+        super.init()
         setUpView()
     }
     
@@ -228,13 +233,6 @@ final class EditTargetItemView: UIView {
     }
     
     private func setUpView() {
-        self.backgroundColor = .white
-        self.layer.cornerRadius = 8
-        self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOpacity = 0.1
-        self.layer.shadowOffset = CGSize(width: 0, height: 2)
-        self.layer.shadowRadius = 4
-        self.layer.masksToBounds = false
         
         let mainStackView: UIStackView = {
             let stackView = UIStackView(arrangedSubviews: [])
