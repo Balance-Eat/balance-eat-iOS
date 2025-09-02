@@ -183,7 +183,7 @@ final class InputFieldWithIcon: UIView {
         textField.autocapitalizationType = .none
         textField.borderStyle = .none
         textField.font = .systemFont(ofSize: 16, weight: .medium)
-        textField.textAlignment = .right
+        textField.textAlignment = .center
         textField.keyboardType = .numberPad
         return textField
     }()
