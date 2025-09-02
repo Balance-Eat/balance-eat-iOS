@@ -15,7 +15,7 @@ class BalanceEatContentView: UIView {
         view.layer.cornerRadius = 16
         view.clipsToBounds = true
         view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.1
+        view.layer.shadowOpacity = 0.3
         view.layer.shadowOffset = CGSize(width: 0, height: 2)
         view.layer.shadowRadius = 4
         view.layer.masksToBounds = false
