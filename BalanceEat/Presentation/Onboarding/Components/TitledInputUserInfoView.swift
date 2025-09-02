@@ -8,7 +8,8 @@
 import UIKit
 import SnapKit
 
-final class TitledInputUserInfoView: BalanceEatContentView {
+final class TitledInputUserInfoView: UIView {
+    private let containerView: UIView
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .medium)
@@ -25,12 +26,13 @@ final class TitledInputUserInfoView: BalanceEatContentView {
         return stackView
     }()
     
-    init(title: String, inputView: UIView) {
+    init(title: String, inputView: UIView, useBalanceEatWrapper: Bool = true) {
         self.contentView = inputView
-        super.init()
+        self.containerView = useBalanceEatWrapper ? BalanceEatContentView() : UIView()
+        super.init(frame: .zero)
+        
         titleLabel.text = title
         setUpView()
-        wrapBalanceEatContentView()
     }
     
     required init?(coder: NSCoder) {
@@ -38,15 +40,18 @@ final class TitledInputUserInfoView: BalanceEatContentView {
     }
     
     private func setUpView() {
-        innerView.addSubview(stackView)
+        addSubview(containerView)
+        containerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
         
+        containerView.addSubview(stackView)
         stackView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
         
         stackView.addArrangedSubview(titleLabel)
         stackView.addArrangedSubview(contentView)
-        
-
     }
 }
+
