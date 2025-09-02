@@ -56,26 +56,49 @@ class EditTargetViewController: UIViewController {
             make.edges.equalToSuperview()
             make.width.equalTo(scrollView.snp.width)
         }
+        
         if let currentWeightValue = viewModel.userResponseRelay.value?.weight {
-            weightEditTargetItemView.setCurrentText(String(currentWeightValue))
+            let text = currentWeightValue.truncatingRemainder(dividingBy: 1) == 0
+                ? String(Int(currentWeightValue))
+                : String(currentWeightValue)
+            weightEditTargetItemView.setCurrentText(text)
         }
+
         if let targetWeightValue = viewModel.userResponseRelay.value?.targetWeight {
-            weightEditTargetItemView.setTargetText(String(targetWeightValue))
+            let text = targetWeightValue.truncatingRemainder(dividingBy: 1) == 0
+                ? String(Int(targetWeightValue))
+                : String(targetWeightValue)
+            weightEditTargetItemView.setTargetText(text)
         }
 
         if let currentSmiValue = viewModel.userResponseRelay.value?.smi {
-            smiEditTargetItemView.setCurrentText(String(currentSmiValue))
+            let text = currentSmiValue.truncatingRemainder(dividingBy: 1) == 0
+                ? String(Int(currentSmiValue))
+                : String(currentSmiValue)
+            smiEditTargetItemView.setCurrentText(text)
         }
+
         if let targetSmiValue = viewModel.userResponseRelay.value?.targetSmi {
-            smiEditTargetItemView.setTargetText(String(targetSmiValue))
+            let text = targetSmiValue.truncatingRemainder(dividingBy: 1) == 0
+                ? String(Int(targetSmiValue))
+                : String(targetSmiValue)
+            smiEditTargetItemView.setTargetText(text)
         }
 
         if let currentFatPercentageValue = viewModel.userResponseRelay.value?.fatPercentage {
-            fatPercentageEditTargetItemView.setCurrentText(String(currentFatPercentageValue))
+            let text = currentFatPercentageValue.truncatingRemainder(dividingBy: 1) == 0
+                ? String(Int(currentFatPercentageValue))
+                : String(currentFatPercentageValue)
+            fatPercentageEditTargetItemView.setCurrentText(text)
         }
+
         if let targetFatPercentageValue = viewModel.userResponseRelay.value?.targetFatPercentage {
-            fatPercentageEditTargetItemView.setTargetText(String(targetFatPercentageValue))
+            let text = targetFatPercentageValue.truncatingRemainder(dividingBy: 1) == 0
+                ? String(Int(targetFatPercentageValue))
+                : String(targetFatPercentageValue)
+            fatPercentageEditTargetItemView.setTargetText(text)
         }
+
 
         
         [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView].forEach {
@@ -93,7 +116,7 @@ class EditTargetViewController: UIViewController {
     
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
-        dismiss(animated: true) // present 방식으로 열렸을 때
+        dismiss(animated: true)
     }
 }
 
@@ -293,15 +316,29 @@ final class EditTargetItemView: UIView {
             guard let self = self else { return }
             
             if let diff = diff {
-                diffLabel.text = String(format: "%.1f%@ %@", diff, self.editTargetItemType.unit, diff > 0 ? "증가" : "감소")
-                diffLabel.textColor = diff > 0 ? .systemBlue : (diff < 0 ? .systemRed : .systemGray)
-                diffLabel.backgroundColor = diff > 0 ? UIColor.systemBlue.withAlphaComponent(0.1) :
-                (diff < 0 ? UIColor.systemRed.withAlphaComponent(0.1) : UIColor.clear)
+                if diff > 0 {
+                    diffLabel.text = String(format: "%.1f%@ 증가", diff, self.editTargetItemType.unit)
+                    diffLabel.textColor = .systemBlue
+                    diffLabel.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+                } else if diff < 0 {
+                    diffLabel.text = String(format: "%.1f%@ 감소", abs(diff), self.editTargetItemType.unit)
+                    diffLabel.textColor = .systemRed
+                    diffLabel.backgroundColor = UIColor.systemRed.withAlphaComponent(0.1)
+                } else {
+                    diffLabel.text = "변화 없음"
+                    diffLabel.textColor = .systemGray
+                    diffLabel.backgroundColor = UIColor.systemGray.withAlphaComponent(0.1)
+                }
             } else {
-                diffLabel.text = ""
+                let currentString = currentText.value ?? ""
+                let targetString = targetText.value ?? ""
+                let title = self.editTargetItemType.title
+                let labelText = (currentString.isEmpty && targetString.isEmpty) ? "\(title)을 입력해주세요." : currentString.isEmpty ? "현재 \(title)을 입력해주세요." : "목표 \(title)을 입력해주세요."
+                diffLabel.text = labelText
                 diffLabel.textColor = .systemGray
-                diffLabel.backgroundColor = .clear
+                diffLabel.backgroundColor = UIColor.systemGray.withAlphaComponent(0.1)
             }
+
         })
         .disposed(by: disposeBag)
         
