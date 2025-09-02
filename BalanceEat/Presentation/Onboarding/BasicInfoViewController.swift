@@ -166,7 +166,7 @@ class BasicInfoViewController: UIViewController {
 }
 
 final class InputFieldWithIcon: UIView {
-    private let icon: UIImage
+    private let icon: UIImage?
     private let placeholder: String = ""
     private let unit: String?
     private var isAge: Bool = false
@@ -199,7 +199,7 @@ final class InputFieldWithIcon: UIView {
         textField.rx.text.asObservable()
     }
     
-    init(icon: UIImage = UIImage(), placeholder: String, unit: String? = nil, isAge: Bool = false, isFat: Bool = false) {
+    init(icon: UIImage? = nil, placeholder: String, unit: String? = nil, isAge: Bool = false, isFat: Bool = false) {
         self.icon = icon
 //        self.placeholder = placeholder
         self.unit = unit
@@ -231,14 +231,14 @@ final class InputFieldWithIcon: UIView {
         
         iconImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(16)
-            make.top.bottom.equalToSuperview().inset(16)
-            make.width.height.equalTo(20)
+            make.centerY.equalToSuperview()
+            make.width.height.equalTo(icon == nil ? 0 : 20)
         }
         
         textField.snp.makeConstraints { make in
             make.leading.equalTo(iconImageView.snp.trailing).offset(8)
             make.trailing.equalTo(unitLabel.snp.leading).offset(-8)
-            make.centerY.equalToSuperview()
+            make.top.bottom.equalToSuperview().inset(12)
         }
         textField.clipsToBounds = true
         
@@ -287,5 +287,9 @@ final class InputFieldWithIcon: UIView {
             .bind(to: textField.rx.text)
             .disposed(by: disposeBag)
 
+    }
+    
+    func setText(_ text: String?) {
+        textField.text = text
     }
 }

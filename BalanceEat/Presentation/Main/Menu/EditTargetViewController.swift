@@ -11,9 +11,21 @@ import RxSwift
 import RxCocoa
 
 class EditTargetViewController: UIViewController {
-    private let weightEditTargetItemView = EditTargetItemView(editTargetItemType: .weight)
+    private let viewModel: MenuViewModel
+    private let scrollView = UIScrollView()
+    private let mainStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 20
+        return stackView
+    }()
     
-    init() {
+    private let weightEditTargetItemView = EditTargetItemView(editTargetItemType: .weight)
+    private let smiEditTargetItemView = EditTargetItemView(editTargetItemType: .smi)
+    private let fatPercentageEditTargetItemView = EditTargetItemView(editTargetItemType: .fatPercentage)
+    
+    init(viewModel: MenuViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         
         setUpView()
@@ -23,16 +35,65 @@ class EditTargetViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+    
     private func setUpView() {
         
-        view.backgroundColor = .white
-        view.addSubview(weightEditTargetItemView)
+        view.backgroundColor = .homeScreenBackground
+        view.addSubview(scrollView)
         
+        scrollView.addSubview(mainStackView)
         
-        weightEditTargetItemView.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(20)
+        scrollView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).inset(20)
+            make.leading.trailing.bottom.equalToSuperview().inset(20)
         }
+        
+        mainStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalTo(scrollView.snp.width)
+        }
+        if let currentWeightValue = viewModel.userResponseRelay.value?.weight {
+            weightEditTargetItemView.setCurrentText(String(currentWeightValue))
+        }
+        if let targetWeightValue = viewModel.userResponseRelay.value?.targetWeight {
+            weightEditTargetItemView.setTargetText(String(targetWeightValue))
+        }
+
+        if let currentSmiValue = viewModel.userResponseRelay.value?.smi {
+            smiEditTargetItemView.setCurrentText(String(currentSmiValue))
+        }
+        if let targetSmiValue = viewModel.userResponseRelay.value?.targetSmi {
+            smiEditTargetItemView.setTargetText(String(targetSmiValue))
+        }
+
+        if let currentFatPercentageValue = viewModel.userResponseRelay.value?.fatPercentage {
+            fatPercentageEditTargetItemView.setCurrentText(String(currentFatPercentageValue))
+        }
+        if let targetFatPercentageValue = viewModel.userResponseRelay.value?.targetFatPercentage {
+            fatPercentageEditTargetItemView.setTargetText(String(targetFatPercentageValue))
+        }
+
+        
+        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView].forEach {
+            mainStackView.addArrangedSubview($0)
+        }
+        
+        navigationItem.title = "목표 설정"
+            navigationItem.leftBarButtonItem = UIBarButtonItem(
+                image: UIImage(systemName: "chevron.backward"),
+                style: .plain,
+                target: self,
+                action: #selector(backButtonTapped)
+            )
+    }
+    
+    @objc private func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
+        dismiss(animated: true) // present 방식으로 열렸을 때
     }
 }
 
@@ -52,6 +113,17 @@ enum EditTargetItemType {
         }
     }
     
+    var subtitle: String {
+        switch self {
+            case .weight:
+            return "현재 체중과 목표 체중을 설정하세요"
+        case .smi:
+            return "근육량 목표를 설정하세요"
+        case .fatPercentage:
+            return "체지방률 목표를 설정하세요"
+        }
+    }
+    
     var unit: String {
         switch self {
         case .weight:
@@ -68,9 +140,20 @@ enum EditTargetItemType {
         case .weight:
             return "scalemass"
         case .smi:
-            return "arrowtriangle.up.fill"
+            return "figure.walk"
         case .fatPercentage:
-            return "chart.bar.fill"
+            return "drop.fill"
+        }
+    }
+    
+    var color: UIColor {
+        switch self {
+        case .weight:
+            return .weight
+        case .smi:
+            return .SMI
+        case .fatPercentage:
+            return .fatPercentage
         }
     }
 }
@@ -78,21 +161,36 @@ enum EditTargetItemType {
 final class EditTargetItemView: UIView {
     private let editTargetItemType: EditTargetItemType
     
+    private let currentField = InputFieldWithIcon(placeholder: "", unit: "kg")
+    private let targetField = InputFieldWithIcon(placeholder: "", unit: "kg")
+    
     private let titleIconImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage())
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .systemGray
+        imageView.tintColor = .white
         return imageView
+    }()
+    private let imageBackgroundView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 16
+        return view
     }()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 20, weight: .bold)
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.textColor = .black
+        return label
+    }()
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .black
         return label
     }()
     
-    private var currentText: Observable<String?> = Observable.just(nil)
-    private var targetText: Observable<String?> = Observable.just(nil)
+    var currentText: BehaviorRelay<String?> = BehaviorRelay(value: nil)
+    var targetText: BehaviorRelay<String?> = BehaviorRelay(value: nil)
     private let disposeBag = DisposeBag()
     
     init(editTargetItemType: EditTargetItemType) {
@@ -118,27 +216,48 @@ final class EditTargetItemView: UIView {
         let mainStackView: UIStackView = {
             let stackView = UIStackView(arrangedSubviews: [])
             stackView.axis = .vertical
-            stackView.spacing = 8
+            stackView.spacing = 16
             return stackView
         }()
         titleIconImageView.image = UIImage(systemName: editTargetItemType.systemImage)
+        
+        imageBackgroundView.backgroundColor = editTargetItemType.color
+        imageBackgroundView.clipsToBounds = true
+        imageBackgroundView.addSubview(titleIconImageView)
+        
         titleIconImageView.snp.makeConstraints { make in
             make.width.height.equalTo(24)
+            make.edges.equalToSuperview().inset(10)
         }
+        
         titleLabel.text = editTargetItemType.title
         
-        let titleStackView = UIStackView(arrangedSubviews: [titleIconImageView, titleLabel])
+        subtitleLabel.text = editTargetItemType.subtitle
+        subtitleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+
+        let labelStackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+        labelStackView.axis = .vertical
+        labelStackView.spacing = 4
+        
+        let titleStackView = UIStackView(arrangedSubviews: [imageBackgroundView, labelStackView])
         titleStackView.axis = .horizontal
-        titleStackView.spacing = 8
+        titleStackView.spacing = 12
+        
+        
         mainStackView.addArrangedSubview(titleStackView)
         
-        let currentField = InputFieldWithIcon(placeholder: "", unit: "kg")
-        let currentTitledInputUserInfoView = TitledInputUserInfoView(title: "현재 \(editTargetItemType.title)", inputView: currentField)
-        currentText = currentField.textObservable
         
-        let targetField = InputFieldWithIcon(placeholder: "", unit: "kg")
-        let targetTitledInputUserInfoView = TitledInputUserInfoView(title: "목표 \(editTargetItemType.title)", inputView: targetField)
-        targetText = targetField.textObservable
+        let currentTitledInputUserInfoView = TitledInputUserInfoView(title: "현재 \(editTargetItemType.title)", inputView: currentField, useBalanceEatWrapper: false)
+        
+        currentField.textObservable
+            .bind(to: currentText)
+            .disposed(by: disposeBag)
+        
+        let targetTitledInputUserInfoView = TitledInputUserInfoView(title: "목표 \(editTargetItemType.title)", inputView: targetField, useBalanceEatWrapper: false)
+        
+        targetField.textObservable
+            .bind(to: targetText)
+            .disposed(by: disposeBag)
         
         let fieldStackView: UIStackView = {
             let stackView = UIStackView(arrangedSubviews: [currentTitledInputUserInfoView, targetTitledInputUserInfoView])
@@ -156,6 +275,7 @@ final class EditTargetItemView: UIView {
             label.textColor = .systemGray
             label.textAlignment = .center
             label.layer.cornerRadius = 8
+            label.layer.masksToBounds = true
             return label
         }()
         diffLabel.snp.makeConstraints { make in
@@ -178,7 +298,7 @@ final class EditTargetItemView: UIView {
                 diffLabel.backgroundColor = diff > 0 ? UIColor.systemBlue.withAlphaComponent(0.1) :
                 (diff < 0 ? UIColor.systemRed.withAlphaComponent(0.1) : UIColor.clear)
             } else {
-                diffLabel.text = "-"
+                diffLabel.text = ""
                 diffLabel.textColor = .systemGray
                 diffLabel.backgroundColor = .clear
             }
@@ -189,7 +309,17 @@ final class EditTargetItemView: UIView {
         addSubview(mainStackView)
         
         mainStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(12)
+            make.edges.equalToSuperview().inset(16)
         }
+    }
+    
+    func setCurrentText(_ text: String) {
+        currentText.accept(text)
+        currentField.setText(text)
+    }
+
+    func setTargetText(_ text: String) {
+        targetText.accept(text)
+        targetField.setText(text)
     }
 }

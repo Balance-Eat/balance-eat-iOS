@@ -112,7 +112,7 @@ class MenuViewController: UIViewController {
             .disposed(by: disposeBag)
         
         editTargetMenuItemView.onTap = {
-            self.navigationController?.pushViewController(EditTargetViewController(), animated: true)
+            self.navigationController?.pushViewController(EditTargetViewController(viewModel: self.viewModel), animated: true)
         }
     }
     
