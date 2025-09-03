@@ -56,6 +56,9 @@ enum UserEndPoints: Endpoint {
                 "targetCalorie": createUserDTO.targetCalorie,
                 "targetSmi": createUserDTO.targetSmi,
                 "targetFatPercentage": createUserDTO.targetFatPercentage,
+                "targetCarbohydrates": createUserDTO.targetCarbohydrates,
+                "targetProtein": createUserDTO.targetProtein,
+                "targetFat": createUserDTO.targetFat,
                 "providerId": createUserDTO.providerId,
                 "providerType": createUserDTO.providerType
             ]
