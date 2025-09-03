@@ -25,6 +25,7 @@ class EditTargetViewController: UIViewController {
     private let smiEditTargetItemView = EditTargetItemView(editTargetItemType: .smi)
     private let fatPercentageEditTargetItemView = EditTargetItemView(editTargetItemType: .fatPercentage)
     
+    
     private let currentWeightRelay = PublishRelay<String?>()
     private let targetWeightRelay = PublishRelay<String?>()
     private let currentSMIRelay = PublishRelay<String?>()
@@ -59,7 +60,7 @@ class EditTargetViewController: UIViewController {
         contentView.addSubview(mainStackView)
         
         scrollView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide)
             make.leading.trailing.bottom.equalToSuperview()
         }
         
@@ -123,7 +124,21 @@ class EditTargetViewController: UIViewController {
             targetFatPercentageRelay: targetFatPercentageRelay
         )
         
-        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView].forEach {
+        let saveButton = TitledButton(
+            title: "변경사항 저장",
+            image: UIImage(systemName: "square.and.arrow.down"),
+            style: .init(
+                backgroundColor: .systemBlue,
+                titleColor: .white,
+                borderColor: nil
+            )
+        )
+        
+        saveButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
+        
+        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
