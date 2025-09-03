@@ -25,7 +25,7 @@ final class BodyStatusCardView: UIView {
     }()
     
     private lazy var weightLabel: StatusLabel = {
-        let label = StatusLabel(number: weight, unit: "kg", isWeight: true)
+        let label = StatusLabel(number: weight, unit: "kg", isWeight: true, isTarget: isTarget)
         return label
     }()
     
