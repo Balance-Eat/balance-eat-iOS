@@ -25,11 +25,21 @@ class EditTargetViewController: UIViewController {
     private let smiEditTargetItemView = EditTargetItemView(editTargetItemType: .smi)
     private let fatPercentageEditTargetItemView = EditTargetItemView(editTargetItemType: .fatPercentage)
     
+    private let currentWeightRelay = PublishRelay<String?>()
+    private let targetWeightRelay = PublishRelay<String?>()
+    private let currentSMIRelay = PublishRelay<String?>()
+    private let targetSMIRelay = PublishRelay<String?>()
+    private let currentFatPercentageRelay = PublishRelay<String?>()
+    private let targetFatPercentageRelay = PublishRelay<String?>()
+    
+    private let disposeBag = DisposeBag()
+    
     init(viewModel: MenuViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         
         setUpView()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -103,10 +113,17 @@ class EditTargetViewController: UIViewController {
                 : String(targetFatPercentageValue)
             fatPercentageEditTargetItemView.setTargetText(text)
         }
-
-
         
-        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView].forEach {
+        let goalSummaryView = GoalSummaryView(
+            currentWeightRelay: currentWeightRelay,
+            targetWeightRelay: targetWeightRelay,
+            currentSMIRelay: currentSMIRelay,
+            targetSMIRelay: targetSMIRelay,
+            currentFatPercentageRelay: currentFatPercentageRelay,
+            targetFatPercentageRelay: targetFatPercentageRelay
+        )
+        
+        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
@@ -117,6 +134,32 @@ class EditTargetViewController: UIViewController {
                 target: self,
                 action: #selector(backButtonTapped)
             )
+    }
+    
+    private func setBinding() {
+        weightEditTargetItemView.currentText
+            .bind(to: currentWeightRelay)
+            .disposed(by: disposeBag)
+        
+        weightEditTargetItemView.targetText
+            .bind(to: targetWeightRelay)
+            .disposed(by: disposeBag)
+        
+        smiEditTargetItemView.currentText
+            .bind(to: currentSMIRelay)
+            .disposed(by: disposeBag)
+        
+        smiEditTargetItemView.targetText
+            .bind(to: targetSMIRelay)
+            .disposed(by: disposeBag)
+        
+        fatPercentageEditTargetItemView.currentText
+            .bind(to: currentFatPercentageRelay)
+            .disposed(by: disposeBag)
+        
+        fatPercentageEditTargetItemView.targetText
+            .bind(to: targetFatPercentageRelay)
+            .disposed(by: disposeBag)
     }
     
     @objc private func backButtonTapped() {
@@ -367,7 +410,7 @@ final class GoalSummaryView: UIView {
         
         let titleLabel = UILabel()
         titleLabel.text = "목표 요약"
-        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        titleLabel.font = .systemFont(ofSize: 18, weight: .bold)
         titleLabel.textColor = .black
         
         let stackView = UIStackView(arrangedSubviews: [imageView, titleLabel])
@@ -377,8 +420,171 @@ final class GoalSummaryView: UIView {
         
         return stackView
     }()
+    private lazy var targetsStackView: UIStackView = {
+        let weightGoalSummaryContentView = GoalSummaryContentView(
+            editTargetItemType: .weight,
+            currentRelay: currentWeightRelay,
+            targetRelay: targetWeightRelay
+        )
+        let smiGoalSummaryContentView = GoalSummaryContentView(
+            editTargetItemType: .smi,
+            currentRelay: currentSMIRelay,
+            targetRelay: targetSMIRelay
+        )
+        let fatPercentageGoalSummaryContentView = GoalSummaryContentView(
+            editTargetItemType: .fatPercentage,
+            currentRelay: currentFatPercentageRelay,
+            targetRelay: targetFatPercentageRelay
+        )
+        let stackView = UIStackView(arrangedSubviews: [
+            weightGoalSummaryContentView,
+            smiGoalSummaryContentView,
+            fatPercentageGoalSummaryContentView
+        ])
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        return stackView
+    }()
+    
+    private let currentWeightRelay: PublishRelay<String?>
+    private let targetWeightRelay: PublishRelay<String?>
+    private let currentSMIRelay: PublishRelay<String?>
+    private let targetSMIRelay: PublishRelay<String?>
+    private let currentFatPercentageRelay: PublishRelay<String?>
+    private let targetFatPercentageRelay: PublishRelay<String?>
+    
+    init(currentWeightRelay: PublishRelay<String?>, targetWeightRelay: PublishRelay<String?>, currentSMIRelay: PublishRelay<String?>, targetSMIRelay: PublishRelay<String?>, currentFatPercentageRelay: PublishRelay<String?>, targetFatPercentageRelay: PublishRelay<String?>) {
+        self.currentWeightRelay = currentWeightRelay
+        self.targetWeightRelay = targetWeightRelay
+        self.currentSMIRelay = currentSMIRelay
+        self.targetSMIRelay = targetSMIRelay
+        self.currentFatPercentageRelay = currentFatPercentageRelay
+        self.targetFatPercentageRelay = targetFatPercentageRelay
+        super.init(frame: .zero)
+        
+        self.backgroundColor = .systemBlue.withAlphaComponent(0.05)
+        self.layer.cornerRadius = 8
+        self.layer.borderWidth = 2
+        self.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.4).cgColor
+        
+        [titleStackView, targetsStackView].forEach { addSubview($0) }
+        
+        titleStackView.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(16)
+            make.top.equalToSuperview().offset(24)
+        }
+        
+        targetsStackView.snp.makeConstraints { make in
+            make.top.equalTo(titleStackView.snp.bottom).offset(16)
+            make.leading.trailing.bottom.equalToSuperview().inset(16)
+        }
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 final class GoalSummaryContentView: UIView {
+    private let iconImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .medium)
+        label.textColor = .black
+        return label
+    }()
+    private let changeLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .bold)
+        label.textColor = .black
+        return label
+    }()
+    private let differenceLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 11, weight: .semibold)
+        return label
+    }()
+    private let differenceContainerView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 12
+        view.layer.masksToBounds = true
+        return view
+    }()
     
+    private let disposeBag = DisposeBag()
+    
+    init(editTargetItemType: EditTargetItemType, currentRelay: PublishRelay<String?>, targetRelay: PublishRelay<String?>) {
+        super.init(frame: .zero)
+        
+        self.backgroundColor = .white
+        self.layer.cornerRadius = 8
+        
+        iconImageView.image = UIImage(systemName: editTargetItemType.systemImage)
+        iconImageView.tintColor = editTargetItemType.color
+        titleLabel.text = editTargetItemType.title
+        
+        Observable.combineLatest(currentRelay, targetRelay)
+            .subscribe(onNext: { [weak self] current, target in
+                guard let self else { return }
+
+                let currentValue = Double(current ?? "0") ?? 0
+                let targetValue = Double(target ?? "0") ?? 0
+                let diff = targetValue - currentValue
+
+                self.changeLabel.text = "\(currentValue.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", currentValue) : String(currentValue))\(editTargetItemType.unit) → \(targetValue.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", targetValue) : String(targetValue))\(editTargetItemType.unit)"
+
+
+                if diff > 0 {
+                    self.differenceLabel.text = String(format: "%.1f%@ 증가", diff, editTargetItemType.unit)
+                    self.differenceLabel.textColor = .systemBlue
+                    self.differenceContainerView.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+                } else if diff < 0 {
+                    self.differenceLabel.text = String(format: "%.1f%@ 감소", abs(diff), editTargetItemType.unit)
+                    self.differenceLabel.textColor = .systemRed
+                    self.differenceContainerView.backgroundColor = UIColor.systemRed.withAlphaComponent(0.1)
+                } else {
+                    self.differenceLabel.text = "변화 없음"
+                    self.differenceLabel.textColor = .systemGray
+                    self.differenceContainerView.backgroundColor = UIColor.systemGray.withAlphaComponent(0.1)
+                }
+            })
+            .disposed(by: disposeBag)
+
+        differenceContainerView.addSubview(differenceLabel)
+        
+        [iconImageView, titleLabel, changeLabel, differenceContainerView].forEach { addSubview($0) }
+        
+        iconImageView.snp.makeConstraints { make in
+            make.leading.equalToSuperview().inset(8)
+            make.top.bottom.equalToSuperview().inset(12)
+            make.width.height.equalTo(16)
+        }
+        
+        titleLabel.snp.makeConstraints { make in
+            make.leading.equalTo(iconImageView.snp.trailing).offset(8)
+            make.centerY.equalToSuperview()
+        }
+        
+        changeLabel.snp.makeConstraints { make in
+            make.trailing.equalTo(differenceLabel.snp.leading).offset(-16)
+            make.centerY.equalToSuperview()
+        }
+        
+        differenceLabel.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(6)
+        }
+        
+        differenceContainerView.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(8)
+            make.centerY.equalToSuperview()
+        }
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
