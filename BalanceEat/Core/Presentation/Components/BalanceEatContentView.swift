@@ -1,5 +1,5 @@
 //
-//  HomeMenuContentView.swift
+//  BalanceEatContentView.swift
 //  BalanceEat
 //
 //  Created by 김견 on 7/13/25.

@@ -358,3 +358,27 @@ final class EditTargetItemView: BalanceEatContentView {
         targetField.setText(text)
     }
 }
+
+final class GoalSummaryView: UIView {
+    private let titleStackView: UIStackView = {
+        let imageView = UIImageView(image: UIImage(systemName: "checkmark.circle"))
+        imageView.tintColor = .systemBlue
+        imageView.contentMode = .scaleAspectFit
+        
+        let titleLabel = UILabel()
+        titleLabel.text = "목표 요약"
+        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        titleLabel.textColor = .black
+        
+        let stackView = UIStackView(arrangedSubviews: [imageView, titleLabel])
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.distribution = .fill
+        
+        return stackView
+    }()
+}
+
+final class GoalSummaryContentView: UIView {
+    
+}

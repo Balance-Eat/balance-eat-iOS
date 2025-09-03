@@ -45,13 +45,19 @@ final class TitledInputUserInfoView: UIView {
             make.edges.equalToSuperview()
         }
         
-        containerView.addSubview(stackView)
-        stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+        if let balanceEatContainer = containerView as? BalanceEatContentView {
+            balanceEatContainer.innerView.addSubview(stackView)
+            stackView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+        } else {
+            containerView.addSubview(stackView)
+            stackView.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
         }
         
         stackView.addArrangedSubview(titleLabel)
         stackView.addArrangedSubview(contentView)
     }
 }
-
