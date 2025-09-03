@@ -14,7 +14,6 @@ final class EstimatedDailyCalorieView: UIView {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .bold)
         label.textColor = .estimatedDailyCalorie
-        label.text = "예상 일일 소모 칼로리"
         return label
     }()
     private let calorieLabel: UILabel = {
@@ -34,8 +33,9 @@ final class EstimatedDailyCalorieView: UIView {
     let calorieRelay: PublishRelay<Int> = PublishRelay<Int>()
     let disposeBag = DisposeBag()
     
-    init() {
+    init(title: String) {
         super.init(frame: .zero)
+        titleLabel.text = title
         
         setUpView()
         setUpBinding()

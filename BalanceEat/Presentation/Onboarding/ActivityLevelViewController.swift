@@ -35,7 +35,7 @@ class ActivityLevelViewController: UIViewController {
         label.font = .systemFont(ofSize: 16)
         return label
     }()
-    private let estimatedDailyCalorieView = EstimatedDailyCalorieView()
+    private let estimatedDailyCalorieView = EstimatedDailyCalorieView(title: "예상 일일 소모 칼로리")
     
     private var selectedActivityLevel: BehaviorRelay<ActivityLevel> = BehaviorRelay(value: .none)
     let inputCompleted = PublishRelay<Void>()

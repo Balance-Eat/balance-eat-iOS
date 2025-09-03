@@ -117,7 +117,7 @@ class MacroSettingViewController: UIViewController {
             maximumValueRelay: targetCaloriesRelayForFat
         )
         
-        let estimatedDailyCalorieView = EstimatedDailyCalorieView()
+        let estimatedDailyCalorieView = EstimatedDailyCalorieView(title: "하루 권장 섭취 칼로리")
         
         let nutritionGuideView = NutritionGuideView()
         
