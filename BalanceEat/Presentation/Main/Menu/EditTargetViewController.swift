@@ -138,7 +138,21 @@ class EditTargetViewController: UIViewController {
             make.height.equalTo(44)
         }
         
-        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton].forEach {
+        let resetButton = TitledButton(
+            title: "원래 값으로 되돌리기",
+            image: UIImage(systemName: "arrow.clockwise"),
+            style: .init(
+                backgroundColor: .white,
+                titleColor: .black,
+                borderColor: .lightGray
+            )
+        )
+        
+        resetButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
+        
+        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton, resetButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
