@@ -43,7 +43,12 @@ final class TitledButton: UIButton {
         
         tintColor = .white
         layer.cornerRadius = 12
-        clipsToBounds = true
+        clipsToBounds = false
+        
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.2
+        layer.shadowOffset = CGSize(width: 0, height: 2) 
+        layer.shadowRadius = 4
     }
     
     override var isHighlighted: Bool {
