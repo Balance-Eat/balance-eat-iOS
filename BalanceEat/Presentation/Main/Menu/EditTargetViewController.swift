@@ -25,6 +25,26 @@ class EditTargetViewController: UIViewController {
     private let smiEditTargetItemView = EditTargetItemView(editTargetItemType: .smi)
     private let fatPercentageEditTargetItemView = EditTargetItemView(editTargetItemType: .fatPercentage)
     
+    private let saveButton = TitledButton(
+        title: "변경사항 저장",
+        image: UIImage(systemName: "square.and.arrow.down"),
+        style: .init(
+            backgroundColor: .systemBlue,
+            titleColor: .white,
+            borderColor: nil
+        )
+    )
+    
+    private let resetButton = TitledButton(
+        title: "원래 값으로 되돌리기",
+        image: UIImage(systemName: "arrow.clockwise"),
+        style: .init(
+            backgroundColor: .white,
+            titleColor: .black,
+            borderColor: .lightGray
+        )
+    )
+    
     private let warningContainerView: UIView = {
         let uiView = UIView()
         uiView.isHidden = true
@@ -142,29 +162,9 @@ class EditTargetViewController: UIViewController {
             targetFatPercentageRelay: targetFatPercentageRelay
         )
         
-        let saveButton = TitledButton(
-            title: "변경사항 저장",
-            image: UIImage(systemName: "square.and.arrow.down"),
-            style: .init(
-                backgroundColor: .systemBlue,
-                titleColor: .white,
-                borderColor: nil
-            )
-        )
-        
         saveButton.snp.makeConstraints { make in
             make.height.equalTo(44)
         }
-        
-        let resetButton = TitledButton(
-            title: "원래 값으로 되돌리기",
-            image: UIImage(systemName: "arrow.clockwise"),
-            style: .init(
-                backgroundColor: .white,
-                titleColor: .black,
-                borderColor: .lightGray
-            )
-        )
         
         resetButton.snp.makeConstraints { make in
             make.height.equalTo(44)
@@ -207,8 +207,6 @@ class EditTargetViewController: UIViewController {
             make.leading.trailing.equalToSuperview()
         }
         
-        
-        
         navigationItem.title = "목표 설정"
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.backward"),
@@ -242,6 +240,42 @@ class EditTargetViewController: UIViewController {
         
         fatPercentageEditTargetItemView.targetText
             .bind(to: targetFatPercentageRelay)
+            .disposed(by: disposeBag)
+        
+        saveButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                
+            })
+            .disposed(by: disposeBag)
+        
+        resetButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                // 체중
+                if let originCurrentWeight = self.originCurrentWeight {
+                    self.weightEditTargetItemView.setCurrentText(originCurrentWeight)
+                }
+                if let originTargetWeight = self.originTargetWeight {
+                    self.weightEditTargetItemView.setTargetText(originTargetWeight)
+                }
+                
+                // SMI
+                if let originCurrentSMI = self.originCurrentSMI {
+                    self.smiEditTargetItemView.setCurrentText(originCurrentSMI)
+                }
+                if let originTargetSMI = self.originTargetSMI {
+                    self.smiEditTargetItemView.setTargetText(originTargetSMI)
+                }
+                
+                // 체지방률
+                if let originCurrentFatPercentage = self.originCurrentFatPercentage {
+                    self.fatPercentageEditTargetItemView.setCurrentText(originCurrentFatPercentage)
+                }
+                if let originTargetFatPercentage = self.originTargetFatPercentage {
+                    self.fatPercentageEditTargetItemView.setTargetText(originTargetFatPercentage)
+                }
+            })
             .disposed(by: disposeBag)
         
         Observable.combineLatest(
