@@ -25,13 +25,25 @@ class EditTargetViewController: UIViewController {
     private let smiEditTargetItemView = EditTargetItemView(editTargetItemType: .smi)
     private let fatPercentageEditTargetItemView = EditTargetItemView(editTargetItemType: .fatPercentage)
     
+    private let warningContainerView: UIView = {
+        let uiView = UIView()
+        uiView.isHidden = true
+        return uiView
+    }()
     
-    private let currentWeightRelay = PublishRelay<String?>()
-    private let targetWeightRelay = PublishRelay<String?>()
-    private let currentSMIRelay = PublishRelay<String?>()
-    private let targetSMIRelay = PublishRelay<String?>()
-    private let currentFatPercentageRelay = PublishRelay<String?>()
-    private let targetFatPercentageRelay = PublishRelay<String?>()
+    private let currentWeightRelay = BehaviorRelay<String?>(value: nil)
+    private let targetWeightRelay = BehaviorRelay<String?>(value: nil)
+    private let currentSMIRelay = BehaviorRelay<String?>(value: nil)
+    private let targetSMIRelay = BehaviorRelay<String?>(value: nil)
+    private let currentFatPercentageRelay = BehaviorRelay<String?>(value: nil)
+    private let targetFatPercentageRelay = BehaviorRelay<String?>(value: nil)
+    
+    private var originCurrentWeight: String?
+    private var originTargetWeight: String?
+    private var originCurrentSMI: String?
+    private var originTargetSMI: String?
+    private var originCurrentFatPercentage: String?
+    private var originTargetFatPercentage: String?
     
     private let disposeBag = DisposeBag()
     
@@ -78,6 +90,7 @@ class EditTargetViewController: UIViewController {
                 ? String(Int(currentWeightValue))
                 : String(currentWeightValue)
             weightEditTargetItemView.setCurrentText(text)
+            self.originCurrentWeight = text
         }
 
         if let targetWeightValue = viewModel.userResponseRelay.value?.targetWeight {
@@ -85,6 +98,7 @@ class EditTargetViewController: UIViewController {
                 ? String(Int(targetWeightValue))
                 : String(targetWeightValue)
             weightEditTargetItemView.setTargetText(text)
+            self.originTargetWeight = text
         }
 
         if let currentSmiValue = viewModel.userResponseRelay.value?.smi {
@@ -92,6 +106,7 @@ class EditTargetViewController: UIViewController {
                 ? String(Int(currentSmiValue))
                 : String(currentSmiValue)
             smiEditTargetItemView.setCurrentText(text)
+            self.originCurrentSMI = text
         }
 
         if let targetSmiValue = viewModel.userResponseRelay.value?.targetSmi {
@@ -99,6 +114,7 @@ class EditTargetViewController: UIViewController {
                 ? String(Int(targetSmiValue))
                 : String(targetSmiValue)
             smiEditTargetItemView.setTargetText(text)
+            self.originTargetSMI = text
         }
 
         if let currentFatPercentageValue = viewModel.userResponseRelay.value?.fatPercentage {
@@ -106,6 +122,7 @@ class EditTargetViewController: UIViewController {
                 ? String(Int(currentFatPercentageValue))
                 : String(currentFatPercentageValue)
             fatPercentageEditTargetItemView.setCurrentText(text)
+            self.originCurrentFatPercentage = text
         }
 
         if let targetFatPercentageValue = viewModel.userResponseRelay.value?.targetFatPercentage {
@@ -113,6 +130,7 @@ class EditTargetViewController: UIViewController {
                 ? String(Int(targetFatPercentageValue))
                 : String(targetFatPercentageValue)
             fatPercentageEditTargetItemView.setTargetText(text)
+            self.originTargetFatPercentage = text
         }
         
         let goalSummaryView = GoalSummaryView(
@@ -152,17 +170,53 @@ class EditTargetViewController: UIViewController {
             make.height.equalTo(44)
         }
         
-        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton, resetButton].forEach {
+        let warningImageView = UIImageView(image: UIImage(systemName: "exclamationmark.circle"))
+        warningImageView.tintColor = .systemRed
+        
+        warningImageView.snp.makeConstraints { make in
+            make.width.height.equalTo(16)
+        }
+        
+        let warningLabel: UILabel = {
+            let label = UILabel()
+            label.font = .systemFont(ofSize: 13, weight: .regular)
+            label.textColor = .systemRed
+            label.numberOfLines = 0
+            label.text = "변경사항이 있습니다. 저장하시겠습니까?"
+            return label
+        }()
+        
+        let warningStackView: UIStackView = {
+            let stackView = UIStackView(arrangedSubviews: [warningImageView, warningLabel])
+            stackView.axis = .horizontal
+            stackView.spacing = 8
+            return stackView
+        }()
+        
+        warningContainerView.addSubview(warningStackView)
+        
+        warningStackView.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+        }
+        
+        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton, resetButton, warningContainerView].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
+        warningContainerView.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+        }
+        
+        
+        
         navigationItem.title = "목표 설정"
-            navigationItem.leftBarButtonItem = UIBarButtonItem(
-                image: UIImage(systemName: "chevron.backward"),
-                style: .plain,
-                target: self,
-                action: #selector(backButtonTapped)
-            )
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "chevron.backward"),
+            style: .plain,
+            target: self,
+            action: #selector(backButtonTapped)
+        )
+        
     }
     
     private func setBinding() {
@@ -189,6 +243,29 @@ class EditTargetViewController: UIViewController {
         fatPercentageEditTargetItemView.targetText
             .bind(to: targetFatPercentageRelay)
             .disposed(by: disposeBag)
+        
+        Observable.combineLatest(
+            currentWeightRelay,
+            targetWeightRelay,
+            currentSMIRelay,
+            targetSMIRelay,
+            currentFatPercentageRelay,
+            targetFatPercentageRelay
+        ) { [weak self] currentWeight, targetWeight, currentSMI, targetSMI, currentFatPercentage, targetFatPercentage -> Bool in
+            
+            guard let self else { return false }
+            
+            let isCurrentWeightMaintained = currentWeight == originCurrentWeight
+            let isTargetWeightMaintained = targetWeight == originTargetWeight
+            let isCurrentSMIMaintained = currentSMI == originCurrentSMI
+            let isTargetSMIMaintained = targetSMI == originTargetSMI
+            let isCurrentFatPercentageMaintained = currentFatPercentage == originCurrentFatPercentage
+            let isTargetFatPercentageMaintained = targetFatPercentage == originTargetFatPercentage
+            
+            return isCurrentWeightMaintained && isTargetWeightMaintained && isCurrentSMIMaintained && isTargetSMIMaintained && isCurrentFatPercentageMaintained && isTargetFatPercentageMaintained
+        }
+        .bind(to: warningContainerView.rx.isHidden)
+        .disposed(by: disposeBag)
     }
     
     @objc private func backButtonTapped() {
@@ -475,14 +552,14 @@ final class GoalSummaryView: UIView {
         return stackView
     }()
     
-    private let currentWeightRelay: PublishRelay<String?>
-    private let targetWeightRelay: PublishRelay<String?>
-    private let currentSMIRelay: PublishRelay<String?>
-    private let targetSMIRelay: PublishRelay<String?>
-    private let currentFatPercentageRelay: PublishRelay<String?>
-    private let targetFatPercentageRelay: PublishRelay<String?>
+    private let currentWeightRelay: BehaviorRelay<String?>
+    private let targetWeightRelay: BehaviorRelay<String?>
+    private let currentSMIRelay: BehaviorRelay<String?>
+    private let targetSMIRelay: BehaviorRelay<String?>
+    private let currentFatPercentageRelay: BehaviorRelay<String?>
+    private let targetFatPercentageRelay: BehaviorRelay<String?>
     
-    init(currentWeightRelay: PublishRelay<String?>, targetWeightRelay: PublishRelay<String?>, currentSMIRelay: PublishRelay<String?>, targetSMIRelay: PublishRelay<String?>, currentFatPercentageRelay: PublishRelay<String?>, targetFatPercentageRelay: PublishRelay<String?>) {
+    init(currentWeightRelay: BehaviorRelay<String?>, targetWeightRelay: BehaviorRelay<String?>, currentSMIRelay: BehaviorRelay<String?>, targetSMIRelay: BehaviorRelay<String?>, currentFatPercentageRelay: BehaviorRelay<String?>, targetFatPercentageRelay: BehaviorRelay<String?>) {
         self.currentWeightRelay = currentWeightRelay
         self.targetWeightRelay = targetWeightRelay
         self.currentSMIRelay = currentSMIRelay
@@ -546,7 +623,7 @@ final class GoalSummaryContentView: UIView {
     
     private let disposeBag = DisposeBag()
     
-    init(editTargetItemType: EditTargetItemType, currentRelay: PublishRelay<String?>, targetRelay: PublishRelay<String?>) {
+    init(editTargetItemType: EditTargetItemType, currentRelay: BehaviorRelay<String?>, targetRelay: BehaviorRelay<String?>) {
         super.init(frame: .zero)
         
         self.backgroundColor = .white
