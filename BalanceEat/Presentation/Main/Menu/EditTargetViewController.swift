@@ -51,6 +51,14 @@ class EditTargetViewController: UIViewController {
         return uiView
     }()
     
+    private let showTargetGuideButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(" 건강한 목표 설정 가이드 보기", for: .normal)
+        button.setImage(UIImage(systemName: "info.circle"), for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        return button
+    }()
+    
     private let currentWeightRelay = BehaviorRelay<String?>(value: nil)
     private let targetWeightRelay = BehaviorRelay<String?>(value: nil)
     private let currentSMIRelay = BehaviorRelay<String?>(value: nil)
@@ -199,7 +207,7 @@ class EditTargetViewController: UIViewController {
             make.centerX.equalToSuperview()
         }
         
-        [weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton, resetButton, warningContainerView].forEach {
+        [showTargetGuideButton, weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton, resetButton, warningContainerView].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
@@ -252,7 +260,6 @@ class EditTargetViewController: UIViewController {
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 
-                // 체중
                 if let originCurrentWeight = self.originCurrentWeight {
                     self.weightEditTargetItemView.setCurrentText(originCurrentWeight)
                 }
@@ -260,7 +267,6 @@ class EditTargetViewController: UIViewController {
                     self.weightEditTargetItemView.setTargetText(originTargetWeight)
                 }
                 
-                // SMI
                 if let originCurrentSMI = self.originCurrentSMI {
                     self.smiEditTargetItemView.setCurrentText(originCurrentSMI)
                 }
@@ -268,13 +274,25 @@ class EditTargetViewController: UIViewController {
                     self.smiEditTargetItemView.setTargetText(originTargetSMI)
                 }
                 
-                // 체지방률
                 if let originCurrentFatPercentage = self.originCurrentFatPercentage {
                     self.fatPercentageEditTargetItemView.setCurrentText(originCurrentFatPercentage)
                 }
                 if let originTargetFatPercentage = self.originTargetFatPercentage {
                     self.fatPercentageEditTargetItemView.setTargetText(originTargetFatPercentage)
                 }
+            })
+            .disposed(by: disposeBag)
+        
+        showTargetGuideButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                let targetGuideViewController = TargetGuideViewController()
+                
+                targetGuideViewController.modalPresentationStyle = .overCurrentContext
+                targetGuideViewController.modalTransitionStyle = .crossDissolve
+                
+                present(targetGuideViewController, animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
         
