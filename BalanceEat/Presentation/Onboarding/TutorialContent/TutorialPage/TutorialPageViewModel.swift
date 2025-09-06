@@ -56,7 +56,7 @@ final class TutorialPageViewModel {
                     break
                 }
             }
-            return Int(Double(bmr) * goal.coefficient * activityCoef) + goalDiff
+            return Int(Double(bmr) * activityCoef) + goalDiff
         }
     }
     

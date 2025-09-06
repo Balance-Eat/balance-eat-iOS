@@ -201,7 +201,9 @@ class EditTargetViewController: UIViewController {
             make.centerX.equalToSuperview()
         }
         
-        [showTargetGuideButton, weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton, resetButton, warningContainerView].forEach {
+        let measurementTipsView = MeasurementTipsView()
+        
+        [showTargetGuideButton, weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton, resetButton, warningContainerView, measurementTipsView].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
@@ -738,5 +740,136 @@ final class GoalSummaryContentView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+final class MeasurementTipsView: UIView {
+    
+    private let contentView = BalanceEatContentView()
+    
+    private let titleImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(systemName: "info.circle"))
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .black
+        return imageView
+    }()
+    
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "측정 및 업데이트 팁"
+        label.font = .boldSystemFont(ofSize: 16)
+        return label
+    }()
+    
+    private lazy var titleStackView: UIStackView = {
+        let stackView = UIStackView(arrangedSubviews: [titleImageView, titleLabel])
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        return stackView
+    }()
+    
+    private let measurementSectionView = UIView()
+    private let measurementTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "📅 측정 주기:"
+        label.font = .boldSystemFont(ofSize: 14)
+        return label
+    }()
+    private let measurementBodyLabel: UILabel = {
+        let label = UILabel()
+        label.text = """
+        • 체중: 매일 (같은 시간)
+        • 골격근량: 월 1-2회
+        • 체지방률: 월 1-2회
+        """
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 12)
+        return label
+    }()
+    
+    private let goalSectionView = UIView()
+    private let goalTitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "🎯 목표 수정:"
+        label.font = .boldSystemFont(ofSize: 14)
+        return label
+    }()
+    private let goalBodyLabel: UILabel = {
+        let label = UILabel()
+        label.text = """
+        • 진행 상황에 맞춰 조정
+        • 급격한 변화는 피하기
+        • 전문가 상담 권장
+        """
+        label.numberOfLines = 0
+        label.font = .systemFont(ofSize: 12)
+        return label
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+        setupConstraints()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupViews() {
+        backgroundColor = .white
+        
+        addSubview(contentView)
+        
+        contentView.addSubview(titleStackView)
+        
+        contentView.addSubview(measurementSectionView)
+        measurementSectionView.addSubview(measurementTitleLabel)
+        measurementSectionView.addSubview(measurementBodyLabel)
+        
+        contentView.addSubview(goalSectionView)
+        goalSectionView.addSubview(goalTitleLabel)
+        goalSectionView.addSubview(goalBodyLabel)
+    }
+    
+    private func setupConstraints() {
+        
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        titleStackView.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(20)
+            make.leading.equalToSuperview().inset(16)
+        }
+        
+        measurementSectionView.snp.makeConstraints { make in
+            make.top.equalTo(titleStackView.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(16)
+        }
+        
+        measurementTitleLabel.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+        }
+        
+        measurementBodyLabel.snp.makeConstraints { make in
+            make.top.equalTo(measurementTitleLabel.snp.bottom).offset(8)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+        
+        goalSectionView.snp.makeConstraints { make in
+            make.top.equalTo(measurementSectionView.snp.bottom).offset(20)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().offset(-20)
+        }
+        
+        goalTitleLabel.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+        }
+        
+        goalBodyLabel.snp.makeConstraints { make in
+            make.top.equalTo(goalTitleLabel.snp.bottom).offset(8)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
     }
 }
