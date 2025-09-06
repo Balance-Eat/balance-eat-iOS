@@ -172,7 +172,6 @@
 				49BF00B02E1E309400876EC3 /* RxCocoa */,
 				49BF00B22E1E309400876EC3 /* RxRelay */,
 				49BF00B42E1E309400876EC3 /* RxSwift */,
-				49BF00B62E1E309400876EC3 /* RxTest */,
 				49BF00B92E1E323B00876EC3 /* RealmSwift */,
 				49BF011B2E1F4CE500876EC3 /* SnapKit */,
 				490295E02E51F79200BE288B /* Alamofire */,
@@ -731,11 +730,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */;
 			productName = RxSwift;
-		};
-		49BF00B62E1E309400876EC3 /* RxTest */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */;
-			productName = RxTest;
 		};
 		49BF00B92E1E323B00876EC3 /* RealmSwift */ = {
 			isa = XCSwiftPackageProductDependency;
