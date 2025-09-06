@@ -30,7 +30,7 @@ final class TargetGuideButton: UIButton {
 
     private func configureButton() {
         var config = UIButton.Configuration.plain()
-        config.title = " 건강한 목표 설정 가이드 보기"
+        config.title = "건강한 목표 설정 가이드 보기"
         config.image = UIImage(systemName: "info.circle")
         config.baseForegroundColor = .systemBlue
         config.imagePadding = 8

@@ -129,6 +129,21 @@ class TargetInfoViewController: UIViewController {
             return stackView
         }()
         
+        let showTargetGuideButton = TargetGuideButton()
+        
+        showTargetGuideButton.tapObservable
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                let targetGuideViewController = TargetGuideViewController()
+                
+                targetGuideViewController.modalPresentationStyle = .overFullScreen
+                targetGuideViewController.modalTransitionStyle = .crossDissolve
+                
+                present(targetGuideViewController, animated: true, completion: nil)
+            })
+            .disposed(by: disposeBag)
+        
         let currentSMIInputView = InputFieldWithIcon(
             icon: UIImage(systemName: "figure.walk") ?? UIImage(),
             placeholder: "",
@@ -145,13 +160,13 @@ class TargetInfoViewController: UIViewController {
         let targetSMITitledInputView = TitledInputUserInfoView(title: "목표 골격근량", inputView: targetSMIInputView)
         self.targetSMIText = targetSMIInputView.textObservable
         
-        let SMIStackView: UIStackView = {
-            let stackView = UIStackView(arrangedSubviews: [currentSMITitledInputView, targetSMITitledInputView])
-            stackView.axis = .horizontal
-            stackView.distribution = .fillEqually
-            stackView.spacing = 8
-            return stackView
-        }()
+//        let SMIStackView: UIStackView = {
+//            let stackView = UIStackView(arrangedSubviews: [currentSMITitledInputView, targetSMITitledInputView])
+//            stackView.axis = .horizontal
+//            stackView.distribution = .fillEqually
+//            stackView.spacing = 8
+//            return stackView
+//        }()
         
         let currentFatPercentageInputView = InputFieldWithIcon(
             icon: UIImage(systemName: "drop.fill") ?? UIImage(),
@@ -171,25 +186,27 @@ class TargetInfoViewController: UIViewController {
         let targetFatTitledInputView = TitledInputUserInfoView(title: "목표 체지방률", inputView: targetFatPercentageInputView)
         self.targetFatPercentageText = targetFatPercentageInputView.textObservable
         
-        let fatPercentageStackView: UIStackView = {
-            let stackView = UIStackView(arrangedSubviews: [currentFatTitledInputView, targetFatTitledInputView])
-            stackView.axis = .horizontal
-            stackView.distribution = .fillEqually
-            stackView.spacing = 8
-            return stackView
-        }()
+//        let fatPercentageStackView: UIStackView = {
+//            let stackView = UIStackView(arrangedSubviews: [currentFatTitledInputView, targetFatTitledInputView])
+//            stackView.axis = .horizontal
+//            stackView.distribution = .fillEqually
+//            stackView.spacing = 8
+//            return stackView
+//        }()
         
         optionalIsOpen
             .subscribe(onNext: { isOpen in
                 UIView.animate(withDuration: 0.3) {
                     if isOpen {
                         optionalTargetOpenButton.setImage(UIImage(systemName: "chevron.up"), for: .normal)
+                        showTargetGuideButton.isHidden = false
                         currentSMITitledInputView.isHidden = false
                         targetSMITitledInputView.isHidden = false
                         currentFatTitledInputView.isHidden = false
                         targetFatTitledInputView.isHidden = false
                     } else {
                         optionalTargetOpenButton.setImage(UIImage(systemName: "chevron.down"), for: .normal)
+                        showTargetGuideButton.isHidden = true
                         currentSMITitledInputView.isHidden = true
                         targetSMITitledInputView.isHidden = true
                         currentFatTitledInputView.isHidden = true
@@ -242,7 +259,7 @@ class TargetInfoViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        [currentWeightView, weightInputView, goalPickerInputView, optionalTargetTitleStackView, currentSMITitledInputView, targetSMITitledInputView, currentFatTitledInputView, targetFatTitledInputView, nextButton].forEach {
+        [currentWeightView, weightInputView, goalPickerInputView, optionalTargetTitleStackView, showTargetGuideButton, currentSMITitledInputView, targetSMITitledInputView, currentFatTitledInputView, targetFatTitledInputView, nextButton].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
