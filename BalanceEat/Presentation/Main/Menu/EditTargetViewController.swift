@@ -51,13 +51,7 @@ class EditTargetViewController: UIViewController {
         return uiView
     }()
     
-    private let showTargetGuideButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle(" 건강한 목표 설정 가이드 보기", for: .normal)
-        button.setImage(UIImage(systemName: "info.circle"), for: .normal)
-        button.setTitleColor(.systemBlue, for: .normal)
-        return button
-    }()
+    private let showTargetGuideButton = TargetGuideButton()
     
     private let currentWeightRelay = BehaviorRelay<String?>(value: nil)
     private let targetWeightRelay = BehaviorRelay<String?>(value: nil)
@@ -283,7 +277,7 @@ class EditTargetViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        showTargetGuideButton.rx.tap
+        showTargetGuideButton.tapObservable
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 
