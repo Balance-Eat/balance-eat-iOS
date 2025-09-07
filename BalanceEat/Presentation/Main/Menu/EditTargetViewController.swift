@@ -198,7 +198,7 @@ class EditTargetViewController: UIViewController {
         warningContainerView.addSubview(warningStackView)
         
         warningStackView.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
+            make.center.equalToSuperview()
         }
         
         let measurementTipsView = MeasurementTipsView()
