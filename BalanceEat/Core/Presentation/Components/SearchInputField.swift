@@ -13,7 +13,7 @@ import RxCocoa
 final class SearchInputField: UIView {
     private let placeholder: String
     
-    private let textField: UITextField = {
+    let textField: UITextField = {
         let textField = UITextField()
         textField.borderStyle = .none
         textField.clearButtonMode = .whileEditing

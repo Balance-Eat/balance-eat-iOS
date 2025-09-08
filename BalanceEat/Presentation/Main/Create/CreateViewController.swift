@@ -130,17 +130,25 @@ final class CreateViewController: UIViewController {
     }
     
     private func setBinding() {
-        searchInputField.textObservable
-            .compactMap { $0 }
-            .distinctUntilChanged()
-            .bind { text in
-                print("📝 입력된 텍스트: \(text)")
-            }
-            .disposed(by: disposeBag)
-        
-        searchInputField.searchTap
-            .bind {
-                print("🔍 돋보기 아이콘 눌림!")
+//        searchInputField.textObservable
+//            .compactMap { $0 }
+//            .distinctUntilChanged()
+//            .bind { text in
+//                print("📝 입력된 텍스트: \(text)")
+//            }
+//            .disposed(by: disposeBag)
+//        
+//        searchInputField.searchTap
+//            .bind {
+//                print("🔍 돋보기 아이콘 눌림!")
+//            }
+//            .disposed(by: disposeBag)
+//
+        searchInputField.textField.rx.controlEvent(.editingDidBegin)
+            .bind { [weak self] in
+                guard let self = self else { return }
+                let searchFoodViewController = SearchFoodViewController()
+                self.navigationController?.pushViewController(searchFoodViewController, animated: true)
             }
             .disposed(by: disposeBag)
         
