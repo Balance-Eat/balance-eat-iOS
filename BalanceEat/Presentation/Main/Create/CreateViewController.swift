@@ -56,9 +56,10 @@ final class CreateViewController: UIViewController {
     private let saveButton = TitledButton(
         title: "저장",
         style: .init(
-            backgroundColor: .systemBlue,
+            backgroundColor: nil,
             titleColor: .white,
-            borderColor: nil
+            borderColor: nil,
+            gradientColors: [.systemBlue, .systemBlue.withAlphaComponent(0.5)]
         )
     )
     

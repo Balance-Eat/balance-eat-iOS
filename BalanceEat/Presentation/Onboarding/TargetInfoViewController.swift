@@ -219,9 +219,10 @@ class TargetInfoViewController: UIViewController {
         let nextButton = TitledButton(
             title: "다음",
             style: .init(
-                backgroundColor: .systemBlue,
+                backgroundColor: nil,
                 titleColor: .white,
-                borderColor: nil
+                borderColor: nil,
+                gradientColors: [.systemBlue, .systemBlue.withAlphaComponent(0.5)]
             )
         )
         nextButton.snp.makeConstraints { make in

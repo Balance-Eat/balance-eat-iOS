@@ -29,9 +29,10 @@ class EditTargetViewController: UIViewController {
         title: "변경사항 저장",
         image: UIImage(systemName: "square.and.arrow.down"),
         style: .init(
-            backgroundColor: .systemBlue,
+            backgroundColor: nil,
             titleColor: .white,
-            borderColor: nil
+            borderColor: nil,
+            gradientColors: [.systemBlue, .systemBlue.withAlphaComponent(0.5)]
         )
     )
     
@@ -41,7 +42,8 @@ class EditTargetViewController: UIViewController {
         style: .init(
             backgroundColor: .white,
             titleColor: .black,
-            borderColor: .lightGray
+            borderColor: .lightGray.withAlphaComponent(0.6),
+            gradientColors: nil
         )
     )
     

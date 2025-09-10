@@ -9,14 +9,16 @@ import UIKit
 import SnapKit
 
 struct TitledButtonStyle {
-    let backgroundColor: UIColor
+    let backgroundColor: UIColor?
     let titleColor: UIColor
     let borderColor: UIColor?
+    let gradientColors: [UIColor]?
 }
 
 final class TitledButton: UIButton {
     
     private var style: TitledButtonStyle?
+    private var gradientLayer: CAGradientLayer?
     
     init(title: String, image: UIImage? = nil, style: TitledButtonStyle) {
         super.init(frame: .zero)
@@ -34,16 +36,28 @@ final class TitledButton: UIButton {
         config.image = image?.withRenderingMode(.alwaysTemplate)
         config.imagePlacement = .leading
         config.imagePadding = 8
-        config.baseBackgroundColor = style.backgroundColor
         config.baseForegroundColor = style.titleColor
-        
-        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(
+            pointSize: 14,
+            weight: .medium
+        )
+        config.background.backgroundColor = .clear
         
         configuration = config
-        
-        tintColor = .white
+        tintColor = style.titleColor
         layer.cornerRadius = 12
-        clipsToBounds = false
+        clipsToBounds = true
+        
+        if let colors = style.gradientColors {
+            applyGradient(colors: colors)
+        } else if let bgColor = style.backgroundColor {
+            backgroundColor = bgColor
+        }
+        
+        if let borderColor = style.borderColor {
+            layer.borderColor = borderColor.cgColor
+            layer.borderWidth = 1
+        }
         
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = 0.2
@@ -51,30 +65,34 @@ final class TitledButton: UIButton {
         layer.shadowRadius = 4
     }
     
+    private func applyGradient(colors: [UIColor]) {
+        gradientLayer?.removeFromSuperlayer()
+        
+        let gradient = CAGradientLayer()
+        gradient.colors = colors.map { $0.cgColor }
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint = CGPoint(x: 1, y: 0.5)
+        gradient.frame = bounds
+        gradient.cornerRadius = layer.cornerRadius
+        
+        layer.insertSublayer(gradient, at: 0)
+        gradientLayer = gradient
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradientLayer?.frame = bounds
+    }
+    
     override var isHighlighted: Bool {
         didSet {
-            guard let style = style else { return }
-            backgroundColor = isHighlighted
-            ? style.backgroundColor.withAlphaComponent(0.6)
-            : style.backgroundColor
-            setTitleColor(isHighlighted
-                          ? style.titleColor.withAlphaComponent(0.6)
-                          : style.titleColor, for: .normal)
+            alpha = isHighlighted ? 0.7 : 1.0
         }
     }
     
     override var isEnabled: Bool {
         didSet {
-            guard let style = style else { return }
-            
-            if isEnabled {
-                backgroundColor = style.backgroundColor
-                setTitleColor(style.titleColor, for: .normal)
-            } else {
-                backgroundColor = .lightGray.withAlphaComponent(0.6)
-                setTitleColor(.white, for: .disabled)
-            }
+            alpha = isEnabled ? 1.0 : 0.5
         }
     }
 }
-

@@ -124,9 +124,10 @@ class MacroSettingViewController: UIViewController {
         let nextButton = TitledButton(
             title: "입력 완료",
             style: .init(
-                backgroundColor: .systemGreen,
+                backgroundColor: nil,
                 titleColor: .white,
-                borderColor: nil
+                borderColor: nil,
+                gradientColors: [.systemGreen, .systemGreen.withAlphaComponent(0.5)]
             )
         )
         nextButton.snp.makeConstraints { make in

@@ -78,11 +78,21 @@ class BasicInfoViewController: UIViewController {
         
         let maleButton = SelectableTitledButton(
             title: "남성",
-            style: .init(backgroundColor: .white, titleColor: .black, borderColor: .lightGray.withAlphaComponent(0.4))
+            style: .init(
+                backgroundColor: .white,
+                titleColor: .black,
+                borderColor: .lightGray.withAlphaComponent(0.4),
+                gradientColors: nil
+            )
         )
         let femaleButton = SelectableTitledButton(
             title: "여성",
-            style: .init(backgroundColor: .white, titleColor: .black, borderColor: .lightGray.withAlphaComponent(0.4))
+            style: .init(
+                backgroundColor: .white,
+                titleColor: .black,
+                borderColor: .lightGray.withAlphaComponent(0.4),
+                gradientColors: nil
+            )
         )
         let genderButtons = [maleButton, femaleButton]
         
@@ -123,9 +133,10 @@ class BasicInfoViewController: UIViewController {
         let nextButton = TitledButton(
             title: "다음",
             style: .init(
-                backgroundColor: .systemBlue,
+                backgroundColor: nil,
                 titleColor: .white,
-                borderColor: nil
+                borderColor: nil,
+                gradientColors: [.systemBlue, .systemBlue.withAlphaComponent(0.5)]
             )
         )
         nextButton.snp.makeConstraints { make in

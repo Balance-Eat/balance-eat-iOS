@@ -53,13 +53,14 @@ class OnboardingStartViewController: UIViewController {
         return view
     }()
     
-    private let startButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setTitle("시작하기", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.setTitleColor(UIColor.white.withAlphaComponent(0.6), for: .highlighted)
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
-        button.backgroundColor = .clear
+    private let startButton: TitledButton = {
+        let style = TitledButtonStyle(
+            backgroundColor: nil,
+            titleColor: .white,
+            borderColor: nil,
+            gradientColors: [.proteinTimeCardStartBackground, .proteinTimeCardEndBackground]
+        )
+        let button = TitledButton(title: "시작하기", style: style)
         return button
     }()
     
@@ -78,17 +79,12 @@ class OnboardingStartViewController: UIViewController {
     
     private func setUpView() {
         view.backgroundColor = .white
-        
         view.addSubview(stackView)
-        
-        gradientBackgroundView.addSubview(startButton)
-        
-        let descriptions = ["정확한 칼로리 및 영양소 추적", "개인별 맞춤 통계 및 분석", "스마트 알림으로 규칙적인 식사"]
-        
+
         [logoImageVIew, titleLabel, subtitleLabel].forEach {
             stackView.addArrangedSubview($0)
         }
-        
+
         let firstIconAndTitleHorizontalView = IconAndTitleHorizontalView(
             iconImage: UIImage(systemName: "checkmark.circle") ?? UIImage(),
             title: "정확한 칼로리 및 영양소 추적",
@@ -96,7 +92,7 @@ class OnboardingStartViewController: UIViewController {
             allBackgroundColor: .startFirstDescriptionBackground,
             borderColor: .startFirstDescriptionBorder
         )
-        
+
         let secondIconAndTitleHorizontalView = IconAndTitleHorizontalView(
             iconImage: UIImage(systemName: "chart.bar") ?? UIImage(),
             title: "개인별 맞춤 통계 및 분석",
@@ -104,7 +100,7 @@ class OnboardingStartViewController: UIViewController {
             allBackgroundColor: .startSecondDescriptionBackground,
             borderColor: .startSecondDescriptionBorder
         )
-        
+
         let thirdIconAndTitleHorizontalView = IconAndTitleHorizontalView(
             iconImage: UIImage(systemName: "clock") ?? UIImage(),
             title: "스마트 알림으로 규칙적인 식사",
@@ -112,7 +108,7 @@ class OnboardingStartViewController: UIViewController {
             allBackgroundColor: .startThirdDescriptionBackground,
             borderColor: .startThirdDescriptionBorder
         )
-        
+
         [firstIconAndTitleHorizontalView, secondIconAndTitleHorizontalView, thirdIconAndTitleHorizontalView].forEach {
             stackView.addArrangedSubview($0)
             $0.snp.makeConstraints { make in
@@ -120,47 +116,41 @@ class OnboardingStartViewController: UIViewController {
                 make.width.equalToSuperview()
             }
         }
-        
-        stackView.addArrangedSubview(gradientBackgroundView)
-        
+
+        stackView.addArrangedSubview(startButton)
+
         stackView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(24)
             make.centerY.equalToSuperview()
         }
-        
+
         logoImageVIew.snp.makeConstraints { make in
             make.width.height.equalTo(240)
         }
-        
-        gradientBackgroundView.snp.makeConstraints { make in
+
+        startButton.snp.makeConstraints { make in
             make.height.equalTo(50)
             make.width.equalToSuperview()
         }
-        
-        startButton.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
+
         stackView.setCustomSpacing(-40, after: logoImageVIew)
         stackView.setCustomSpacing(12, after: titleLabel)
         stackView.setCustomSpacing(40, after: subtitleLabel)
         stackView.setCustomSpacing(40, after: thirdIconAndTitleHorizontalView)
     }
+
     
     private func setUpEvent() {
-        startButton.addTarget(self, action: #selector(buttonTouchDown), for: .touchDown)
-        startButton.addTarget(self, action: #selector(buttonTouchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel])
-        
         startButton.rx.tap
             .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
             .bind { [weak self] in
                 guard let self = self else { return }
                 let nextVC = TutorialContentViewController()
                 self.navigationController?.setViewControllers([nextVC], animated: true)
-                
             }
             .disposed(by: disposeBag)
     }
+
     
     @objc private func buttonTouchDown() {
         gradientBackgroundView.alpha = 0.7
