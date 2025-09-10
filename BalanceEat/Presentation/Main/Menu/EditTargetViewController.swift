@@ -386,8 +386,8 @@ enum EditTargetItemType {
 final class EditTargetItemView: BalanceEatContentView {
     private let editTargetItemType: EditTargetItemType
     
-    private let currentField = InputFieldWithIcon(placeholder: "", unit: "kg")
-    private let targetField = InputFieldWithIcon(placeholder: "", unit: "kg")
+    private lazy var currentField = InputFieldWithIcon(placeholder: "", unit: editTargetItemType == .fatPercentage ? "%" : "kg", isFat: editTargetItemType == .fatPercentage)
+    private lazy var targetField = InputFieldWithIcon(placeholder: "", unit: editTargetItemType == .fatPercentage ? "%" : "kg", isFat: editTargetItemType == .fatPercentage)
     
     private let titleIconImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage())
