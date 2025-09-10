@@ -745,7 +745,7 @@ final class GoalSummaryContentView: UIView {
 
 final class MeasurementTipsView: UIView {
     
-    private let contentView = BalanceEatContentView()
+    private let contentView = UIView()
     
     private let titleImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "info.circle"))
@@ -817,9 +817,10 @@ final class MeasurementTipsView: UIView {
     }
     
     private func setupViews() {
-        backgroundColor = .white
         
         addSubview(contentView)
+        contentView.backgroundColor = .white
+        contentView.layer.cornerRadius = 8
         
         contentView.addSubview(titleStackView)
         
