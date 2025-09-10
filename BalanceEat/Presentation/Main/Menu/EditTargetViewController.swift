@@ -62,6 +62,8 @@ class EditTargetViewController: UIViewController {
     private let currentFatPercentageRelay = BehaviorRelay<String?>(value: nil)
     private let targetFatPercentageRelay = BehaviorRelay<String?>(value: nil)
     
+    private let valueChangedRelay = BehaviorRelay<Bool>(value: false)
+    
     private var originCurrentWeight: String?
     private var originTargetWeight: String?
     private var originCurrentSMI: String?
@@ -314,8 +316,18 @@ class EditTargetViewController: UIViewController {
             
             return isCurrentWeightMaintained && isTargetWeightMaintained && isCurrentSMIMaintained && isTargetSMIMaintained && isCurrentFatPercentageMaintained && isTargetFatPercentageMaintained
         }
-        .bind(to: warningContainerView.rx.isHidden)
+        .bind(to: valueChangedRelay)
         .disposed(by: disposeBag)
+        
+        valueChangedRelay
+            .map { $0 }
+            .bind(to: warningContainerView.rx.isHidden)
+            .disposed(by: disposeBag)
+        
+        valueChangedRelay
+            .map { $0 }
+            .bind(to: resetButton.rx.isHidden)
+            .disposed(by: disposeBag)
     }
     
     @objc private func backButtonTapped() {
