@@ -324,12 +324,12 @@ class EditTargetViewController: UIViewController {
             
             guard let self else { return false }
             
-            let isCurrentWeightMaintained = currentWeight == String(userData.weight)
-            let isTargetWeightMaintained = targetWeight == String(userData.targetWeight)
-            let isCurrentSMIMaintained = currentSMI == String(userData.smi ?? 0)
-            let isTargetSMIMaintained = targetSMI == String(userData.targetSmi ?? 0)
-            let isCurrentFatPercentageMaintained = currentFatPercentage == String(userData.fatPercentage ?? 0)
-            let isTargetFatPercentageMaintained = targetFatPercentage == String(userData.targetFatPercentage ?? 0)
+            let isCurrentWeightMaintained = Double(currentWeight ?? "0") == userData.weight
+            let isTargetWeightMaintained = Double(targetWeight ?? "0") == userData.targetWeight
+            let isCurrentSMIMaintained = Double(currentSMI ?? "0") == userData.smi
+            let isTargetSMIMaintained = Double(targetSMI ?? "0") == userData.targetSmi
+            let isCurrentFatPercentageMaintained = Double(currentFatPercentage ?? "0") == userData.fatPercentage
+            let isTargetFatPercentageMaintained = Double(targetFatPercentage ?? "0") == userData.targetFatPercentage
             
             return isCurrentWeightMaintained && isTargetWeightMaintained && isCurrentSMIMaintained && isTargetSMIMaintained && isCurrentFatPercentageMaintained && isTargetFatPercentageMaintained
         }
@@ -337,14 +337,18 @@ class EditTargetViewController: UIViewController {
         .disposed(by: disposeBag)
         
         valueChangedRelay
-            .map { $0 }
+            .map { !$0 }
+            .bind(to: saveButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
+        valueChangedRelay
             .bind(to: warningContainerView.rx.isHidden)
             .disposed(by: disposeBag)
         
         valueChangedRelay
-            .map { $0 }
             .bind(to: resetButton.rx.isHidden)
             .disposed(by: disposeBag)
+        
     }
     
     @objc private func backButtonTapped() {
