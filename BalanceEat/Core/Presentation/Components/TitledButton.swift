@@ -92,7 +92,18 @@ final class TitledButton: UIButton {
     
     override var isEnabled: Bool {
         didSet {
-            alpha = isEnabled ? 1.0 : 0.5
+            if isEnabled {
+                alpha = 1.0
+                if let colors = style?.gradientColors {
+                    applyGradient(colors: colors)
+                } else {
+                    backgroundColor = style?.backgroundColor
+                }
+            } else {
+                alpha = 1.0
+                gradientLayer?.removeFromSuperlayer()
+                backgroundColor = .lightGray.withAlphaComponent(0.2)
+            }
         }
     }
 }
