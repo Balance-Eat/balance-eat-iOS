@@ -12,7 +12,12 @@ import RxCocoa
 final class MenuViewModel {
     private let userUseCase: UserUseCaseProtocol
     
-    let userResponseRelay = BehaviorRelay<UserResponseDTO?>(value: nil)
+    let loadingRelay = BehaviorRelay<Bool>(value: false)
+    let errorRelay = PublishRelay<String>()
+    
+    let userRelay = BehaviorRelay<UserData?>(value: nil)
+    let updateUserResultRelay = PublishRelay<Bool>()
+    
     
     init(userUseCase: UserUseCaseProtocol) {
         self.userUseCase = userUseCase
@@ -21,14 +26,19 @@ final class MenuViewModel {
     func getUser() async {
         let uuid = getUserUUID()
         
+        loadingRelay.accept(true)
+        
         let getUserResponse = await userUseCase.getUser(uuid: uuid)
         
         switch getUserResponse {
         case .success(let user):
             print("사용자 정보: \(user)")
-            userResponseRelay.accept(user)
+            userRelay.accept(user)
+            loadingRelay.accept(false)
         case .failure(let failure):
             print("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
+            errorRelay.accept(failure.localizedDescription)
+            loadingRelay.accept(false)
         }
     }
     
@@ -40,6 +50,7 @@ final class MenuViewModel {
             return uuid
         case .failure(let failure):
             print("UUID 불러오기 실패: \(failure.localizedDescription)")
+            errorRelay.accept(failure.localizedDescription)
             return ""
         }
         

@@ -17,13 +17,16 @@ protocol Endpoint {
 
 enum UserEndPoints: Endpoint {
 
-    case createUser(createUserDTO: CreateUserDTO)
+    case createUser(userDTO: UserDTO)
+    case updateUser(userDTO: UserDTO)
     case getUser(uuid: String)
     
     var path: String {
         switch self {
         case .createUser:
             return "/v1/users"
+        case .updateUser(let userDTO):
+            return "/v1/users/\(userDTO.id ?? 0)"
         case .getUser:
             return "/v1/users/me"
         }
@@ -33,6 +36,8 @@ enum UserEndPoints: Endpoint {
         switch self {
         case .createUser:
                 .post
+        case .updateUser:
+                .put
         case .getUser:
                 .get
         }
@@ -40,27 +45,46 @@ enum UserEndPoints: Endpoint {
     
     var parameters: [String: Any?]? {
         switch self {
-        case .createUser(let createUserDTO):
+        case .createUser(let userDTO):
             return [
-                "uuid": createUserDTO.uuid,
-                "name": createUserDTO.name,
-                "gender": createUserDTO.gender.rawValue,
-                "age": createUserDTO.age,
-                "height": createUserDTO.height,
-                "weight": createUserDTO.weight,
-                "email": createUserDTO.email,
-                "activityLevel": createUserDTO.activityLevel?.rawValue,
-                "smi": createUserDTO.smi,
-                "fatPercentage": createUserDTO.fatPercentage,
-                "targetWeight": createUserDTO.targetWeight,
-                "targetCalorie": createUserDTO.targetCalorie,
-                "targetSmi": createUserDTO.targetSmi,
-                "targetFatPercentage": createUserDTO.targetFatPercentage,
-                "targetCarbohydrates": createUserDTO.targetCarbohydrates,
-                "targetProtein": createUserDTO.targetProtein,
-                "targetFat": createUserDTO.targetFat,
-                "providerId": createUserDTO.providerId,
-                "providerType": createUserDTO.providerType
+                "uuid": userDTO.uuid,
+                "name": userDTO.name,
+                "gender": userDTO.gender.rawValue,
+                "age": userDTO.age,
+                "height": userDTO.height,
+                "weight": userDTO.weight,
+                "email": userDTO.email,
+                "activityLevel": userDTO.activityLevel?.rawValue,
+                "smi": userDTO.smi,
+                "fatPercentage": userDTO.fatPercentage,
+                "targetWeight": userDTO.targetWeight,
+                "targetCalorie": userDTO.targetCalorie,
+                "targetSmi": userDTO.targetSmi,
+                "targetFatPercentage": userDTO.targetFatPercentage,
+                "targetCarbohydrates": userDTO.targetCarbohydrates,
+                "targetProtein": userDTO.targetProtein,
+                "targetFat": userDTO.targetFat,
+                "providerId": userDTO.providerId,
+                "providerType": userDTO.providerType
+            ]
+        case .updateUser(let userDTO):
+            return [
+                "name": userDTO.name,
+                "email": userDTO.email,
+                "gender": userDTO.gender.rawValue,
+                "age": userDTO.age,
+                "height": userDTO.height,
+                "weight": userDTO.weight,
+                "activityLevel": userDTO.activityLevel?.rawValue,
+                "smi": userDTO.smi,
+                "fatPercentage": userDTO.fatPercentage,
+                "targetWeight": userDTO.targetWeight,
+                "targetCalorie": userDTO.targetCalorie,
+                "targetSmi": userDTO.targetSmi,
+                "targetFatPercentage": userDTO.targetFatPercentage,
+                "targetCarbohydrates": userDTO.targetCarbohydrates,
+                "targetProtein": userDTO.targetProtein,
+                "targetFat": userDTO.targetFat
             ]
         default:
             return nil

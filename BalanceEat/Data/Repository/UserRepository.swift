@@ -24,8 +24,8 @@ struct UserRepository: UserRepositoryProtocol {
         UserCoreData(viewContext: context)
     }
     
-    func createUser(createUserDTO: CreateUserDTO) async -> Result<Void, NetworkError> {
-        let endpoint = UserEndPoints.createUser(createUserDTO: createUserDTO)
+    func createUser(userDTO: UserDTO) async -> Result<Void, NetworkError> {
+        let endpoint = UserEndPoints.createUser(userDTO: userDTO)
         let result = await apiClient.request(
             endpoint: endpoint,
             responseType: EmptyResponse.self
@@ -37,6 +37,23 @@ struct UserRepository: UserRepositoryProtocol {
             return .success(())
         case .failure(let error):
             print("user created failed: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
+    
+    func updateUser(userDTO: UserDTO) async -> Result<Void, NetworkError> {
+        let endpoint = UserEndPoints.updateUser(userDTO: userDTO)
+        let result = await apiClient.request(
+            endpoint: endpoint,
+            responseType: EmptyResponse.self
+        )
+        
+        switch result {
+        case .success:
+            print("user updated success")
+            return .success(())
+        case .failure(let error):
+            print("user updated failed: \(error.localizedDescription)")
             return .failure(error)
         }
     }

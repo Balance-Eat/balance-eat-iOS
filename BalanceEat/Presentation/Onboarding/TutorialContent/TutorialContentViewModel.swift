@@ -19,8 +19,8 @@ final class TutorialContentViewModel {
         self.userUseCase = userUseCase
     }
     
-    func createUser(createUserDTO: CreateUserDTO) async {
-        let createUserResponse = await userUseCase.createUser(createUserDTO: createUserDTO)
+    func createUser(createUserDTO: UserDTO) async {
+        let createUserResponse = await userUseCase.createUser(userDTO: createUserDTO)
         
         switch createUserResponse {
         case .success():

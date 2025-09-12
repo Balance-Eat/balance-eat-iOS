@@ -13,7 +13,7 @@ final class HomeViewModel {
     private let userUseCase: UserUseCaseProtocol
     private let dietUseCase: DietUseCaseProtocol
     
-    let userResponseRelay = BehaviorRelay<UserResponseDTO?>(value: nil)
+    let userResponseRelay = BehaviorRelay<UserData?>(value: nil)
     let dietResponseRelay = BehaviorRelay<DailyDietResponseDTO?>(value: nil)
     
     init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {

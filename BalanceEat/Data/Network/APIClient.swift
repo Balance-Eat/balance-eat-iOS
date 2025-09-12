@@ -20,6 +20,7 @@ final class APIClient {
     ) async -> Result<T, NetworkError> {
         let url = baseURL + endpoint.path
         
+        
         return await withCheckedContinuation { continuation in
             AF.request(url,
                        method: endpoint.method,

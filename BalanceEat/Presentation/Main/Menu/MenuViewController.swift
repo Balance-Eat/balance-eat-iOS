@@ -102,7 +102,7 @@ class MenuViewController: UIViewController {
     }
     
     private func setBinding() {
-        viewModel.userResponseRelay
+        viewModel.userRelay
             .compactMap { $0 }
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] user in
@@ -111,8 +111,11 @@ class MenuViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        editTargetMenuItemView.onTap = {
-            self.navigationController?.pushViewController(EditTargetViewController(viewModel: self.viewModel), animated: true)
+        editTargetMenuItemView.onTap = { [weak self] in
+            guard let self else { return }
+            guard let userData = viewModel.userRelay.value else { return }
+            
+            navigationController?.pushViewController(EditTargetViewController(userData: userData), animated: true)
         }
     }
     
@@ -122,7 +125,7 @@ class MenuViewController: UIViewController {
         }
     }
     
-    private func updateUIForUserData(user: UserResponseDTO) {
+    private func updateUIForUserData(user: UserData) {
         profileInfoView.updateView(name: user.name, goal: "다이어트", currentWeight: user.weight, targetWeight: user.targetWeight)
     }
     

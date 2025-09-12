@@ -7,7 +7,8 @@
 
 import UIKit
 
-struct CreateUserDTO: Codable {
+struct UserDTO: Codable {
+    let id: Int?
     let uuid: String
     let name: String
     let gender: Gender
@@ -22,11 +23,34 @@ struct CreateUserDTO: Codable {
     let targetCalorie: Int?
     let targetSmi: Double?
     let targetFatPercentage: Double?
-    let targetCarbohydrates: Int?
-    let targetProtein: Int?
-    let targetFat: Int?
+    let targetCarbohydrates: Double?
+    let targetProtein: Double?
+    let targetFat: Double?
     let providerId: String?
     let providerType: String?
+    
+    init(id: Int? = nil, uuid: String, name: String, gender: Gender, age: Int, height: Double, weight: Double, email: String?, activityLevel: ActivityLevel?, smi: Double?, fatPercentage: Double?, targetWeight: Double?, targetCalorie: Int?, targetSmi: Double?, targetFatPercentage: Double?, targetCarbohydrates: Double?, targetProtein: Double?, targetFat: Double?, providerId: String?, providerType: String?) {
+        self.id = id
+        self.uuid = uuid
+        self.name = name
+        self.gender = gender
+        self.age = age
+        self.height = height
+        self.weight = weight
+        self.email = email
+        self.activityLevel = activityLevel
+        self.smi = smi
+        self.fatPercentage = fatPercentage
+        self.targetWeight = targetWeight
+        self.targetCalorie = targetCalorie
+        self.targetSmi = targetSmi
+        self.targetFatPercentage = targetFatPercentage
+        self.targetCarbohydrates = targetCarbohydrates
+        self.targetProtein = targetProtein
+        self.targetFat = targetFat
+        self.providerId = providerId
+        self.providerType = providerType
+    }
 }
 
 

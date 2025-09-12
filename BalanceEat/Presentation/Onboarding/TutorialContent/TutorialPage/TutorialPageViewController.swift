@@ -15,7 +15,7 @@ class TutorialPageViewController: UIViewController {
     private let viewModel: TutorialPageViewModel
     
     let currentPageRelay = PublishRelay<(currentIndex: Int, totalPages: Int)>()
-    let goToNextPageRelay = PublishRelay<CreateUserDTO>()
+    let goToNextPageRelay = PublishRelay<UserDTO>()
     
     private var pages: [UIViewController] = []
     private(set) var currentIndex: Int = 0
@@ -73,7 +73,7 @@ class TutorialPageViewController: UIViewController {
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
                 let data = self.viewModel.dataRelay.value
-                let createUserDTO = CreateUserDTO(
+                let createUserDTO = UserDTO(
                     uuid: UUID.uuidV7String(),
                     name: viewModel.generateRandomNickname(),
                     gender: data.gender,
@@ -88,9 +88,9 @@ class TutorialPageViewController: UIViewController {
                     targetCalorie: viewModel.targetCaloriesRelay.value,
                     targetSmi: data.targetSmi,
                     targetFatPercentage: data.targetFatPercentage,
-                    targetCarbohydrates: Int(Double(viewModel.userCarbonRelay.value) / 4),
-                    targetProtein: Int(Double(viewModel.userProteinRelay.value) / 4),
-                    targetFat: Int(Double(viewModel.userFatRelay.value) / 9),
+                    targetCarbohydrates: (Double(viewModel.userCarbonRelay.value) / 4),
+                    targetProtein: (Double(viewModel.userProteinRelay.value) / 4),
+                    targetFat: (Double(viewModel.userFatRelay.value) / 9),
                     providerId: nil,
                     providerType: nil
                 )

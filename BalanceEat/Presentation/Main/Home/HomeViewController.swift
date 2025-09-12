@@ -256,7 +256,7 @@ class HomeViewController: UIViewController {
             .disposed(by: disposeBag)
     }
     
-    private func updateUIForUserData(user: UserResponseDTO) {
+    private func updateUIForUserData(user: UserData) {
         if let label = (welcomeLabelStackView.arrangedSubviews.first as? UILabel) {
             label.text = "안녕하세요, \(user.name)님!"
         }

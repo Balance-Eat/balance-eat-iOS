@@ -8,7 +8,8 @@
 import Foundation
 
 protocol UserRepositoryProtocol {
-    func createUser(createUserDTO: CreateUserDTO) async -> Result<Void, NetworkError>
+    func createUser(userDTO: UserDTO) async -> Result<Void, NetworkError>
+    func updateUser(userDTO: UserDTO) async -> Result<Void, NetworkError> 
     func getUser(uuid: String) async -> Result<UserResponseDTO, NetworkError>
     func getUserUUID() -> Result<String, CoreDataError>
     func saveUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
