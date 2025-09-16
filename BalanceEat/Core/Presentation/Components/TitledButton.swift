@@ -32,7 +32,8 @@ final class TitledButton: UIButton {
     
     private func configure(title: String, image: UIImage?, style: TitledButtonStyle) {
         var config = UIButton.Configuration.filled()
-        config.title = title
+        let font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        config.attributedTitle = AttributedString(title, attributes: AttributeContainer([.font: font, .foregroundColor: style.titleColor]))
         config.image = image?.withRenderingMode(.alwaysTemplate)
         config.imagePlacement = .leading
         config.imagePadding = 8
