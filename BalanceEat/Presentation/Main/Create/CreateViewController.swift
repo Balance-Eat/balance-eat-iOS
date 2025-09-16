@@ -45,10 +45,40 @@ final class CreateViewController: UIViewController {
         title: "언제 드셨나요?",
         contentView: mealTimePickerView
     )
-    private var foodItems: [AddedFoodItem] = [
-        AddedFoodItem(foodName: "닭가슴살", amount: "1인분 (100g)", calorie: 165, carbon: 0, protein: 31, fat: 3.6),
-        AddedFoodItem(foodName: "샐러드", amount: "1인분 (150g)", calorie: 35, carbon: 3, protein: 40, fat: 5.6),
-        AddedFoodItem(foodName: "피자", amount: "1인분 (200g)", calorie: 400, carbon: 50, protein: 31, fat: 18.6)
+    private var foodItems: [FoodData] = [
+        FoodData(
+            id: 1,
+            uuid: "123",
+            name: "닭가슴살",
+            perCapitaIntake: 100,
+            unit: "g",
+            carbohydrates: 0,
+            protein: 31,
+            fat: 3.6,
+            createdAt: "2025-09-25T14:30:00Z"
+        ),
+        FoodData(
+            id: 2,
+            uuid: "1234",
+            name: "샐러드",
+            perCapitaIntake: 150,
+            unit: "g",
+            carbohydrates: 3,
+            protein: 40,
+            fat: 5.6,
+            createdAt: "2025-09-25T14:30:00Z"
+        ),
+        FoodData(
+            id: 3,
+            uuid: "12e21",
+            name: "피자",
+            perCapitaIntake: 200,
+            unit: "g",
+            carbohydrates: 50,
+            protein: 31,
+            fat: 19,
+            createdAt: "2025"
+        )
     ]
     
     private lazy var addedFoodListView = AddedFoodListView(foodItems: foodItems)
@@ -181,7 +211,7 @@ final class CreateViewController: UIViewController {
             .subscribe(onNext: { [weak self] item in
                 guard let self = self else { return }
                 
-                if let index = self.foodItems.firstIndex(where: { $0.foodName == item.foodName }) {
+                if let index = self.foodItems.firstIndex(where: { $0.name == item.name }) {
                     self.foodItems.remove(at: index)
                     self.addedFoodListView.deleteItem(at: IndexPath(row: index, section: 0))
                 }

@@ -28,7 +28,7 @@ struct AddedFoodItem {
 
 final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSource {
     
-    private var foodItems: [AddedFoodItem] = []
+    private var foodItems: [FoodData] = []
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -41,16 +41,17 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     private let tableView = UITableView()
     private var tableViewHeightConstraint: Constraint?
     
-    private lazy var totalNutritionInfo = TotalNutritionalInfoView(title: "총 영양정보", foodItems: foodItems)
+    private lazy var totalNutritionInfo = TotalNutritionalInfoView(title: "총 영양정보")
     
-    let deletedFoodItem = PublishRelay<AddedFoodItem>()
+    let deletedFoodItem = PublishRelay<FoodData>()
     private let disposeBag = DisposeBag()
     
-    init(foodItems: [AddedFoodItem]) {
+    init(foodItems: [FoodData]) {
         self.foodItems = foodItems
         super.init(frame: .zero)
         
         setUpView()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -61,7 +62,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(AddedFoodCell.self, forCellReuseIdentifier: "AddedFoodCell")
-        tableView.rowHeight = 100
+        tableView.rowHeight = 210
         tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
         
@@ -89,6 +90,10 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         updateTableViewHeight()
     }
     
+    private func setBinding() {
+        
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         foodItems.count
     }
@@ -100,9 +105,8 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         
         let foodItem = foodItems[indexPath.row]
         cell.configure(
-            foodName: foodItem.foodName,
-            amount: foodItem.amount,
-            nutrition: "\(foodItem.calorie)kcal (탄 \(foodItem.carbon)g, 단 \(foodItem.protein)g, 지 \(foodItem.fat)g)"
+            servingSize: foodItem.perCapitaIntake,
+            foodData: foodItem
         )
         
         cell.closeButtonTapped
@@ -124,19 +128,21 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
 
         tableView.beginUpdates()
         foodItems.remove(at: indexPath.row)
-        tableView.deleteRows(at: [indexPath], with: .automatic)
+        tableView.deleteRows(at: [indexPath], with: .none)
         tableView.endUpdates()
 
-        UIView.animate(withDuration: 0.25) {
+        
             self.updateTableViewHeight()
             self.layoutIfNeeded()
-        }
+        
     }
 }
 
 final class AddedFoodCell: UITableViewCell {
+    private var foodData: FoodData?
+    private var servingSize: Double = 0
     
-    private let containerView = BalanceEatContentView()
+    private let containerView = UIView()
     
     private let foodNameLabel: UILabel = {
         let label = UILabel()
@@ -151,6 +157,12 @@ final class AddedFoodCell: UITableViewCell {
         button.tintColor = .systemGray
         return button
     }()
+    
+    private let twoOptionPickerView = TwoOptionPickerView(firstText: "1인분", secondText: "단위")
+    
+    private let stepperView = StepperView(stepValue: 1, servingSize: 100)
+    
+    private let totalNutritionalInfoView: TotalNutritionalInfoView
     
     private let foodAmountLabel: UILabel = {
         let label = UILabel()
@@ -179,12 +191,13 @@ final class AddedFoodCell: UITableViewCell {
     private let disposeBag = DisposeBag()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        self.totalNutritionalInfoView = TotalNutritionalInfoView(title: "영양정보")
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         selectionStyle = .none
         setupView()
         setupConstraints()
-        setEvent()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -194,53 +207,127 @@ final class AddedFoodCell: UITableViewCell {
     private func setupView() {
         self.backgroundColor = .clear
         contentView.addSubview(containerView)
-        containerView.setBackgroundColor(.favoriteFoodBackground)
+        
+        containerView.backgroundColor = .white
+        containerView.layer.cornerRadius = 8
+        containerView.layer.borderWidth = 2
+        containerView.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.1).cgColor
         
         containerView.addSubview(foodNameLabel)
+        containerView.addSubview(twoOptionPickerView)
+        containerView.addSubview(stepperView)
         containerView.addSubview(closeButton)
         containerView.addSubview(bottomInfoStackView)
+        containerView.addSubview(totalNutritionalInfoView)
     }
     
     private func setupConstraints() {
         containerView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4))
+            make.top.bottom.equalToSuperview().inset(8)
+            make.leading.trailing.equalToSuperview()
         }
         
         foodNameLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(16)
-            make.leading.equalToSuperview().inset(12)
+            make.leading.equalToSuperview().inset(16)
         }
         
         closeButton.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(16)
-            make.trailing.equalToSuperview().inset(12)
+            make.trailing.equalToSuperview().inset(16)
             make.width.height.equalTo(24)
         }
         
-        bottomInfoStackView.snp.makeConstraints { make in
-            make.top.equalTo(foodNameLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(12)
+        let inputStackView = UIStackView(arrangedSubviews: [twoOptionPickerView, stepperView])
+        inputStackView.axis = .horizontal
+        inputStackView.distribution = .equalSpacing
+        inputStackView.spacing = 8
+        
+        addSubview(inputStackView)
+        
+        inputStackView.snp.makeConstraints { make in
+            make.top.equalTo(foodNameLabel.snp.bottom).offset(8)
+            make.leading.trailing.equalToSuperview().inset(16)
+        }
+        
+        totalNutritionalInfoView.snp.makeConstraints { make in
+            make.top.equalTo(twoOptionPickerView.snp.bottom).offset(8)
+            make.leading.trailing.equalToSuperview().inset(16)
             make.bottom.equalToSuperview().inset(16)
         }
+
+//        bottomInfoStackView.snp.makeConstraints { make in
+//            make.top.equalTo(twoOptionPickerView.snp.bottom).offset(16)
+//            make.leading.trailing.equalToSuperview().inset(12)
+//            make.bottom.equalToSuperview().inset(16)
+//        }
     }
     
-    private func setEvent() {
+    private func setBinding() {
+        twoOptionPickerView.selectedOption
+            .subscribe(onNext: { [weak self] selectedOption in
+                guard let self else { return }
+                
+                switch selectedOption {
+                case .first:
+                    stepperView.stepValue = 1
+                    stepperView.stepperModeRelay.accept(.servingSize)
+                case .second:
+                    stepperView.stepValue = 1
+                    stepperView.stepperModeRelay.accept(.amountSize)
+                }
+            })
+            .disposed(by: disposeBag)
+        
         closeButton.rx.tap
             .bind(to: closeButtonTapped)
             .disposed(by: disposeBag)
+        
+        stepperView.amountSizeRelay
+            .subscribe(onNext: { [weak self] amount in
+                guard let self else { return }
+                guard let foodData = self.foodData else {
+                    print("foodData is Nil")
+                    return
+                }
+                
+                let ratio = amount / servingSize
+                print("ratio: \(ratio)")
+                
+                totalNutritionalInfoView.carbonRelay.accept(foodData.carbohydrates * ratio)
+                totalNutritionalInfoView.proteinRelay.accept(foodData.protein * ratio)
+                totalNutritionalInfoView.fatRelay.accept(foodData.fat * ratio)
+            })
+            .disposed(by: disposeBag)
+        
+        Observable.combineLatest(
+            totalNutritionalInfoView.carbonRelay,
+            totalNutritionalInfoView.proteinRelay,
+            totalNutritionalInfoView.fatRelay
+        ).subscribe(onNext: { [weak self] (carbon, protein, fat) in
+            guard let self else { return }
+            let calorieRelayValue = 4 * carbon + 4 * protein + 9 * fat
+            
+            totalNutritionalInfoView.calorieRelay.accept(calorieRelayValue)
+        })
+        .disposed(by: disposeBag)
     }
     
-    func configure(foodName: String, amount: String, nutrition: String) {
-        foodNameLabel.text = foodName
-        foodAmountLabel.text = amount
-        foodNutritionLabel.text = nutrition
+    func configure(servingSize: Double, foodData: FoodData) {
+        foodNameLabel.text = foodData.name
+        self.servingSize = servingSize
+        stepperView.servingSize = servingSize
+        self.foodData = foodData
+        
+        totalNutritionalInfoView.carbonRelay.accept(foodData.carbohydrates)
+        totalNutritionalInfoView.proteinRelay.accept(foodData.protein)
+        totalNutritionalInfoView.fatRelay.accept(foodData.fat)
     }
     
 }
 
 final class NutritionInfoView: UIView {
     private let nutritionType: NutritionType
-    private let value: Double
     
     private lazy var textColor: UIColor = {
         switch nutritionType {
@@ -269,12 +356,7 @@ final class NutritionInfoView: UIView {
     
     private lazy var valueLabel: UILabel = {
         let label = UILabel()
-        if value.truncatingRemainder(dividingBy: 1) == 0 {
-            label.text = String(format: "%.0f", value) + (nutritionType == .calorie ? "" : "g")
-        } else {
-            label.text = String(format: "%.1f", value) + (nutritionType == .calorie ? "" : "g")
-        }
-        label.font = .systemFont(ofSize: 20, weight: .bold)
+        label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textColor = textColor
         label.textAlignment = .center
         return label
@@ -285,17 +367,20 @@ final class NutritionInfoView: UIView {
         let label = UILabel()
         label.text = titleString
         label.font = .systemFont(ofSize: 12, weight: .regular)
-        label.textColor = textColor
+        label.textColor = .black
         label.textAlignment = .center
         return label
     }()
     
-    init(nutritionType: NutritionType, value: Double) {
+    let valueRelay = BehaviorRelay<Double>(value: 0)
+    private let disposeBag = DisposeBag()
+    
+    init(nutritionType: NutritionType) {
         self.nutritionType = nutritionType
-        self.value = value
         super.init(frame: .zero)
         
         setUpView()
+        setBinding()
     }
     
     
@@ -316,5 +401,18 @@ final class NutritionInfoView: UIView {
         stackView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+    }
+    
+    private func setBinding() {
+        valueRelay
+            .map { value -> String in
+                if value.truncatingRemainder(dividingBy: 1) == 0 {
+                    return String(format: "%.0f", value) + (self.nutritionType == .calorie ? "" : "g")
+                } else {
+                    return String(format: "%.1f", value) + (self.nutritionType == .calorie ? "" : "g")
+                }
+            }
+            .bind(to: valueLabel.rx.text)
+            .disposed(by: disposeBag)
     }
 }

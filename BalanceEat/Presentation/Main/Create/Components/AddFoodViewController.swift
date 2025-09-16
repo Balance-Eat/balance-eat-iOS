@@ -122,9 +122,12 @@ class AddFoodViewController: UIViewController {
             make.leading.trailing.equalToSuperview().inset(8)
         }
         
-        let totalNutritionalInfoView = TotalNutritionalInfoView(title: "예상 영양정보", foodItems: [
-            AddedFoodItem(foodName: foodItem.name, amount: String(foodItem.amount), calorie: foodItem.nutritionalInfo.calories, carbon: foodItem.nutritionalInfo.carbs, protein: foodItem.nutritionalInfo.protein, fat: foodItem.nutritionalInfo.fat)
-        ])
+        let totalNutritionalInfoView = TotalNutritionalInfoView(
+            title: "예상 영양정보"
+//            foodItems: [
+//                AddedFoodItem(foodName: foodItem.name, amount: String(foodItem.amount), calorie: foodItem.nutritionalInfo.calories, carbon: foodItem.nutritionalInfo.carbs, protein: foodItem.nutritionalInfo.protein, fat: foodItem.nutritionalInfo.fat)
+//            ]
+        )
         
         contentView.addSubview(totalNutritionalInfoView)
         
@@ -144,7 +147,8 @@ class AddFoodViewController: UIViewController {
             style: .init(
                 backgroundColor: .white,
                 titleColor: .label,
-                borderColor: .mealTimePickerBorder
+                borderColor: .mealTimePickerBorder,
+                gradientColors: nil
             )
         )
         let addTitledButton = TitledButton(
@@ -152,7 +156,8 @@ class AddFoodViewController: UIViewController {
             style: .init(
                 backgroundColor: .systemBlue,
                 titleColor: .white,
-                borderColor: nil
+                borderColor: nil,
+                gradientColors: nil
             )
         )
         buttonStackView.addArrangedSubview(cancelTitledButton)
