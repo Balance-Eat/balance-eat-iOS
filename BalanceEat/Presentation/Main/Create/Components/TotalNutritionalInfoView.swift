@@ -11,7 +11,6 @@ import RxSwift
 import RxCocoa
 
 final class TotalNutritionalInfoView: UIView {
-    private let title: String
     
     let calorieRelay = BehaviorRelay<Double>(value: 0)
     let carbonRelay = BehaviorRelay<Double>(value: 0)
@@ -25,8 +24,7 @@ final class TotalNutritionalInfoView: UIView {
     private let proteinInfoView: NutritionInfoView = NutritionInfoView(nutritionType: .protein)
     private let fatInfoView: NutritionInfoView = NutritionInfoView(nutritionType: .fat)
     
-    init(title: String) {
-        self.title = title
+    init() {
         super.init(frame: .zero)
         
         setUpView()
@@ -52,9 +50,9 @@ final class TotalNutritionalInfoView: UIView {
         stackView.addArrangedSubview(fatInfoView)
         
         stackView.snp.makeConstraints { make in
-            make.top.equalToSuperview().inset(16)
+            make.top.equalToSuperview().inset(12)
             make.leading.trailing.equalToSuperview().inset(12)
-            make.bottom.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().inset(12)
         }
     }
     

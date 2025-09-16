@@ -122,16 +122,16 @@ class AddFoodViewController: UIViewController {
             make.leading.trailing.equalToSuperview().inset(8)
         }
         
-        let totalNutritionalInfoView = TotalNutritionalInfoView(
-            title: "예상 영양정보"
+        let nutritionalInfoView = TotalNutritionalInfoView(
+            
 //            foodItems: [
 //                AddedFoodItem(foodName: foodItem.name, amount: String(foodItem.amount), calorie: foodItem.nutritionalInfo.calories, carbon: foodItem.nutritionalInfo.carbs, protein: foodItem.nutritionalInfo.protein, fat: foodItem.nutritionalInfo.fat)
 //            ]
         )
         
-        contentView.addSubview(totalNutritionalInfoView)
+        contentView.addSubview(nutritionalInfoView)
         
-        totalNutritionalInfoView.snp.makeConstraints { make in
+        nutritionalInfoView.snp.makeConstraints { make in
             make.top.equalTo(amountCountingTitledContainerView.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(24)
             
@@ -166,7 +166,7 @@ class AddFoodViewController: UIViewController {
         contentView.addSubview(buttonStackView)
         
         buttonStackView.snp.makeConstraints { make in
-            make.top.equalTo(totalNutritionalInfoView.snp.bottom).offset(24)
+            make.top.equalTo(nutritionalInfoView.snp.bottom).offset(24)
             make.leading.trailing.equalToSuperview().inset(24)
             make.bottom.equalToSuperview().inset(24)
             make.height.equalTo(48)

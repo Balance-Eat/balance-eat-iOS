@@ -41,7 +41,8 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     private let tableView = UITableView()
     private var tableViewHeightConstraint: Constraint?
     
-    private lazy var totalNutritionInfo = TotalNutritionalInfoView(title: "총 영양정보")
+    private lazy var sumOfNutritionValueView = SumOfNutritionValueView()
+    private let cellNutritionRelay = BehaviorRelay<[IndexPath: (Double, Double, Double, Double)]>(value: [:])
     
     let deletedFoodItem = PublishRelay<FoodData>()
     private let disposeBag = DisposeBag()
@@ -68,7 +69,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         
         self.addSubview(titleLabel)
         self.addSubview(tableView)
-        self.addSubview(totalNutritionInfo)
+        self.addSubview(sumOfNutritionValueView)
         
         titleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(20)
@@ -81,7 +82,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             self.tableViewHeightConstraint = make.height.equalTo(0).constraint
         }
         
-        totalNutritionInfo.snp.makeConstraints { make in
+        sumOfNutritionValueView.snp.makeConstraints { make in
             make.top.equalTo(tableView.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview()
             make.bottom.equalToSuperview().inset(20)
@@ -91,7 +92,24 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     }
     
     private func setBinding() {
-        
+        cellNutritionRelay
+            .map { dict -> (Double, Double, Double, Double) in
+                let values = dict.values
+                let sumCalorie = values.map { $0.0 }.reduce(0, +)
+                let sumCarbon  = values.map { $0.1 }.reduce(0, +)
+                let sumProtein = values.map { $0.2 }.reduce(0, +)
+                let sumFat     = values.map { $0.3 }.reduce(0, +)
+                return (sumCalorie, sumCarbon, sumProtein, sumFat)
+            }
+            .subscribe(onNext: { [weak self] (cal, carbon, protein, fat) in
+                guard let self else { return }
+                self.sumOfNutritionValueView.calorieRelay.accept(cal)
+                self.sumOfNutritionValueView.carbonRelay.accept(carbon)
+                self.sumOfNutritionValueView.proteinRelay.accept(protein)
+                self.sumOfNutritionValueView.fatRelay.accept(fat)
+            })
+            .disposed(by: disposeBag)
+
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -114,6 +132,16 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             .bind(to: deletedFoodItem)
             .disposed(by: disposeBag)
         
+        cell.nutritionRelay
+            .subscribe(onNext: { [weak self] value in
+                guard let self else { return }
+                var dict = self.cellNutritionRelay.value
+                dict[indexPath] = value
+                self.cellNutritionRelay.accept(dict)
+            })
+            .disposed(by: disposeBag)
+        
+        
         return cell
     }
     
@@ -130,11 +158,20 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         foodItems.remove(at: indexPath.row)
         tableView.deleteRows(at: [indexPath], with: .none)
         tableView.endUpdates()
+        
+        var dict = cellNutritionRelay.value
+        dict.removeValue(forKey: indexPath)
+        
+        var newDict: [IndexPath: (Double, Double, Double, Double)] = [:]
+        for (oldIndexPath, value) in dict {
+            let newRow = oldIndexPath.row > indexPath.row ? oldIndexPath.row - 1 : oldIndexPath.row
+            newDict[IndexPath(row: newRow, section: 0)] = value
+        }
+        cellNutritionRelay.accept(newDict)
+        
+        self.updateTableViewHeight()
+        self.layoutIfNeeded()
 
-        
-            self.updateTableViewHeight()
-            self.layoutIfNeeded()
-        
     }
 }
 
@@ -162,7 +199,7 @@ final class AddedFoodCell: UITableViewCell {
     
     private let stepperView = StepperView(stepValue: 1, servingSize: 100)
     
-    private let totalNutritionalInfoView: TotalNutritionalInfoView
+    private let nutritionalInfoView: TotalNutritionalInfoView
     
     private let foodAmountLabel: UILabel = {
         let label = UILabel()
@@ -186,12 +223,13 @@ final class AddedFoodCell: UITableViewCell {
         return stack
     }()
     
+    let nutritionRelay = BehaviorRelay<(Double, Double, Double, Double)>(value: (0,0,0,0))
     let closeButtonTapped = PublishRelay<Void>()
     
     private let disposeBag = DisposeBag()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        self.totalNutritionalInfoView = TotalNutritionalInfoView(title: "영양정보")
+        self.nutritionalInfoView = TotalNutritionalInfoView()
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         selectionStyle = .none
@@ -218,7 +256,7 @@ final class AddedFoodCell: UITableViewCell {
         containerView.addSubview(stepperView)
         containerView.addSubview(closeButton)
         containerView.addSubview(bottomInfoStackView)
-        containerView.addSubview(totalNutritionalInfoView)
+        containerView.addSubview(nutritionalInfoView)
     }
     
     private func setupConstraints() {
@@ -250,7 +288,7 @@ final class AddedFoodCell: UITableViewCell {
             make.leading.trailing.equalToSuperview().inset(16)
         }
         
-        totalNutritionalInfoView.snp.makeConstraints { make in
+        nutritionalInfoView.snp.makeConstraints { make in
             make.top.equalTo(twoOptionPickerView.snp.bottom).offset(8)
             make.leading.trailing.equalToSuperview().inset(16)
             make.bottom.equalToSuperview().inset(16)
@@ -287,41 +325,51 @@ final class AddedFoodCell: UITableViewCell {
             .subscribe(onNext: { [weak self] amount in
                 guard let self else { return }
                 guard let foodData = self.foodData else {
-                    print("foodData is Nil")
+                    
                     return
                 }
                 
                 let ratio = amount / servingSize
-                print("ratio: \(ratio)")
                 
-                totalNutritionalInfoView.carbonRelay.accept(foodData.carbohydrates * ratio)
-                totalNutritionalInfoView.proteinRelay.accept(foodData.protein * ratio)
-                totalNutritionalInfoView.fatRelay.accept(foodData.fat * ratio)
+                nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates * ratio)
+                nutritionalInfoView.proteinRelay.accept(foodData.protein * ratio)
+                nutritionalInfoView.fatRelay.accept(foodData.fat * ratio)
             })
             .disposed(by: disposeBag)
         
         Observable.combineLatest(
-            totalNutritionalInfoView.carbonRelay,
-            totalNutritionalInfoView.proteinRelay,
-            totalNutritionalInfoView.fatRelay
+            nutritionalInfoView.carbonRelay,
+            nutritionalInfoView.proteinRelay,
+            nutritionalInfoView.fatRelay
         ).subscribe(onNext: { [weak self] (carbon, protein, fat) in
             guard let self else { return }
             let calorieRelayValue = 4 * carbon + 4 * protein + 9 * fat
             
-            totalNutritionalInfoView.calorieRelay.accept(calorieRelayValue)
+            nutritionalInfoView.calorieRelay.accept(calorieRelayValue)
         })
+        .disposed(by: disposeBag)
+        
+        Observable.combineLatest(
+            nutritionalInfoView.calorieRelay,
+            nutritionalInfoView.carbonRelay,
+            nutritionalInfoView.proteinRelay,
+            nutritionalInfoView.fatRelay
+        )
+        .bind(to: nutritionRelay)
         .disposed(by: disposeBag)
     }
     
     func configure(servingSize: Double, foodData: FoodData) {
         foodNameLabel.text = foodData.name
         self.servingSize = servingSize
-        stepperView.servingSize = servingSize
         self.foodData = foodData
         
-        totalNutritionalInfoView.carbonRelay.accept(foodData.carbohydrates)
-        totalNutritionalInfoView.proteinRelay.accept(foodData.protein)
-        totalNutritionalInfoView.fatRelay.accept(foodData.fat)
+        stepperView.unit = foodData.unit
+        stepperView.servingSize = servingSize
+        
+        nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates)
+        nutritionalInfoView.proteinRelay.accept(foodData.protein)
+        nutritionalInfoView.fatRelay.accept(foodData.fat)
     }
     
 }
@@ -373,6 +421,23 @@ final class NutritionInfoView: UIView {
     }()
     
     let valueRelay = BehaviorRelay<Double>(value: 0)
+    
+    var valueTextSize: CGFloat = 16 {
+        didSet {
+            valueLabel.font = .systemFont(ofSize: valueTextSize, weight: .bold)
+        }
+    }
+    var titleTextSize: CGFloat = 12 {
+        didSet {
+            titleLabel.font = .systemFont(ofSize: titleTextSize, weight: .regular)
+        }
+    }
+    var cornerRadius: CGFloat = 0 {
+        didSet {
+            self.layer.cornerRadius = cornerRadius
+        }
+    }
+    
     private let disposeBag = DisposeBag()
     
     init(nutritionType: NutritionType) {
@@ -399,7 +464,8 @@ final class NutritionInfoView: UIView {
         stackView.addArrangedSubview(titleLabel)
         
         stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.leading.trailing.equalToSuperview()
+            make.top.bottom.equalToSuperview().inset(8)
         }
     }
     
