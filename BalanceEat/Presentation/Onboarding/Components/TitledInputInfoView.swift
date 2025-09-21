@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class TitledInputUserInfoView: UIView {
+final class TitledInputInfoView: UIView {
     private let containerView: UIView
     private let titleLabel: UILabel = {
         let label = UILabel()

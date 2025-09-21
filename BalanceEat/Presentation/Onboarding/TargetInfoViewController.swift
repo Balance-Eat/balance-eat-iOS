@@ -88,7 +88,7 @@ class TargetInfoViewController: UIViewController {
         let currentWeightView = self.currentWeightView()
         
         let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "목표 체중을 입력해주세요.", unit: "kg")
-        let weightInputView = TitledInputUserInfoView(title: "목표 체중", inputView: weightInputField)
+        let weightInputView = TitledInputInfoView(title: "목표 체중", inputView: weightInputField)
         self.targetWeightText = weightInputField.textObservable
         
         let goalPickerView = GoalPickerView()
@@ -98,7 +98,7 @@ class TargetInfoViewController: UIViewController {
                 self.selectedGoal.accept(goal)
             })
             .disposed(by: disposeBag)
-        let goalPickerInputView = TitledInputUserInfoView(title: "목표 유형", inputView: goalPickerView)
+        let goalPickerInputView = TitledInputInfoView(title: "목표 유형", inputView: goalPickerView)
         
         let optionalTargetTitleLabel: UILabel = {
             let label = UILabel()
@@ -149,7 +149,7 @@ class TargetInfoViewController: UIViewController {
             placeholder: "",
             unit: "kg"
         )
-        let currentSMITitledInputView = TitledInputUserInfoView(title: "현재 골격근량", inputView: currentSMIInputView)
+        let currentSMITitledInputView = TitledInputInfoView(title: "현재 골격근량", inputView: currentSMIInputView)
         self.currentSMIText = currentSMIInputView.textObservable
         
         let targetSMIInputView = InputFieldWithIcon(
@@ -157,7 +157,7 @@ class TargetInfoViewController: UIViewController {
             placeholder: "",
             unit: "kg"
         )
-        let targetSMITitledInputView = TitledInputUserInfoView(title: "목표 골격근량", inputView: targetSMIInputView)
+        let targetSMITitledInputView = TitledInputInfoView(title: "목표 골격근량", inputView: targetSMIInputView)
         self.targetSMIText = targetSMIInputView.textObservable
         
 //        let SMIStackView: UIStackView = {
@@ -174,7 +174,7 @@ class TargetInfoViewController: UIViewController {
             unit: "%",
             isFat: true
         )
-        let currentFatTitledInputView = TitledInputUserInfoView(title: "현재 체지방률", inputView: currentFatPercentageInputView)
+        let currentFatTitledInputView = TitledInputInfoView(title: "현재 체지방률", inputView: currentFatPercentageInputView)
         self.currentFatPercentageText = currentFatPercentageInputView.textObservable
         
         let targetFatPercentageInputView = InputFieldWithIcon(
@@ -183,7 +183,7 @@ class TargetInfoViewController: UIViewController {
             unit: "%",
             isFat: true
         )
-        let targetFatTitledInputView = TitledInputUserInfoView(title: "목표 체지방률", inputView: targetFatPercentageInputView)
+        let targetFatTitledInputView = TitledInputInfoView(title: "목표 체지방률", inputView: targetFatPercentageInputView)
         self.targetFatPercentageText = targetFatPercentageInputView.textObservable
         
 //        let fatPercentageStackView: UIStackView = {

@@ -28,30 +28,50 @@ class SearchFoodViewController: UIViewController {
         return tableView
     }()
     
+    private let noFoodLabel: UILabel = {
+        let label = UILabel()
+        label.text = "찾으시는 음식이 없어요.\n새 음식을 추가하세요."
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.textColor = .black
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        return label
+    }()
+    
+    private let createFoodButton = TitledButton(
+        title: "음식 직접 추가하기",
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .white,
+            borderColor: nil,
+            gradientColors: [.systemGreen, .systemGreen.withAlphaComponent(0.5)]
+        )
+    )
+    
     private let searchHistory = BehaviorRelay<[FoodDTO]>(
         value: [
-            FoodDTO(
-                id: 1,
-                uuid: "213",
-                name: "바나나",
-                perCapitaIntake: 12,
-                unit: "g",
-                carbohydrates: 30,
-                protein: 40,
-                fat: 40,
-                createdAt: "2025-09-08T12:34:56Z"
-            ),
-            FoodDTO(
-                id: 2,
-                uuid: "1234",
-                name: "닭가슴살",
-                perCapitaIntake: 14,
-                unit: "g",
-                carbohydrates: 40,
-                protein: 40,
-                fat: 40,
-                createdAt: "2025-09-08T12:34:56Z"
-            )
+//            FoodDTO(
+//                id: 1,
+//                uuid: "213",
+//                name: "바나나",
+//                perCapitaIntake: 12,
+//                unit: "g",
+//                carbohydrates: 30,
+//                protein: 40,
+//                fat: 40,
+//                createdAt: "2025-09-08T12:34:56Z"
+//            ),
+//            FoodDTO(
+//                id: 2,
+//                uuid: "1234",
+//                name: "닭가슴살",
+//                perCapitaIntake: 14,
+//                unit: "g",
+//                carbohydrates: 40,
+//                protein: 40,
+//                fat: 40,
+//                createdAt: "2025-09-08T12:34:56Z"
+//            )
         ]
     )
     private let disposeBag = DisposeBag()
@@ -76,6 +96,7 @@ class SearchFoodViewController: UIViewController {
         view.backgroundColor = .homeScreenBackground
         view.addSubview(contentView)
         contentView.addSubview(tableView)
+        contentView.addSubview(createFoodButton)
         
         contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -83,6 +104,16 @@ class SearchFoodViewController: UIViewController {
         
         tableView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+        }
+        
+        let noFoodStackView = UIStackView(arrangedSubviews: [noFoodLabel, createFoodButton])
+        noFoodStackView.axis = .vertical
+        noFoodStackView.spacing = 8
+        
+        contentView.addSubview(noFoodStackView)
+        
+        noFoodStackView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
         
         
@@ -116,6 +147,24 @@ class SearchFoodViewController: UIViewController {
         tableView.rx.modelSelected(FoodDTO.self)
             .subscribe(onNext: { food in
                 print("선택된 검색어: \(food.name)")
+            })
+            .disposed(by: disposeBag)
+        
+        searchHistory
+            .map { $0.count > 0 }
+            .bind(to: createFoodButton.rx.isHidden)
+            .disposed(by: disposeBag)
+        
+        createFoodButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                let createFoodViewController = CreateFoodViewController()
+                if let sheet = createFoodViewController.sheetPresentationController {
+                    sheet.detents = [.medium(), .large()]
+                    sheet.prefersGrabberVisible = true
+                }
+                present(createFoodViewController, animated: true)
             })
             .disposed(by: disposeBag)
     }
@@ -263,3 +312,4 @@ final class SearchResultFoodCell: UITableViewCell {
         infoLabel.text = info
     }
 }
+

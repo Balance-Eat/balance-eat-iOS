@@ -134,3 +134,48 @@ enum DietEndPoints: Endpoint {
     
     
 }
+
+enum FoodEndPoints: Endpoint {
+    case create(createFoodDTO: CreateFoodDTO)
+    
+    var path: String {
+        switch self {
+        case .create:
+            return "/v1/foods"
+        }
+    }
+    
+    var method: Alamofire.HTTPMethod {
+        switch self {
+        case .create:
+            return .post
+        }
+    }
+    
+    var parameters: [String : Any?]? {
+        switch self {
+        case .create(let foodDTO):
+            return [
+                "uuid": foodDTO.uuid,
+                "name": foodDTO.name,
+                "perCapitaIntake": foodDTO.perCapitaIntake,
+                "unit": foodDTO.unit,
+                "carbohydrates": foodDTO.carbohydrates,
+                "protein": foodDTO.protein,
+                "fat": foodDTO.fat,
+                "brand": foodDTO.brand
+            ]
+        default:
+            return nil
+        }
+    }
+    
+    var queryParameters: [String : Any]? {
+        switch self {
+        default:
+            return nil
+        }
+    }
+    
+    
+}

@@ -500,13 +500,13 @@ final class EditTargetItemView: BalanceEatContentView {
         mainStackView.addArrangedSubview(titleStackView)
         
         
-        let currentTitledInputUserInfoView = TitledInputUserInfoView(title: "현재 \(editTargetItemType.title)", inputView: currentField, useBalanceEatWrapper: false)
+        let currentTitledInputUserInfoView = TitledInputInfoView(title: "현재 \(editTargetItemType.title)", inputView: currentField, useBalanceEatWrapper: false)
         
         currentField.textObservable
             .bind(to: currentText)
             .disposed(by: disposeBag)
         
-        let targetTitledInputUserInfoView = TitledInputUserInfoView(title: "목표 \(editTargetItemType.title)", inputView: targetField, useBalanceEatWrapper: false)
+        let targetTitledInputUserInfoView = TitledInputInfoView(title: "목표 \(editTargetItemType.title)", inputView: targetField, useBalanceEatWrapper: false)
         
         targetField.textObservable
             .bind(to: targetText)

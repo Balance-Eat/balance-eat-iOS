@@ -117,17 +117,17 @@ class BasicInfoViewController: UIViewController {
         genderStackView.distribution = .fillEqually
         genderStackView.spacing = 8
         
-        let genderInputView = TitledInputUserInfoView(title: "성별", inputView: genderStackView)
+        let genderInputView = TitledInputInfoView(title: "성별", inputView: genderStackView)
         let ageInputField = InputFieldWithIcon(icon: UIImage(systemName: "calendar.and.person")!, placeholder: "나이를 입력해주세요.", unit: "세", isAge: true)
-        let ageInputView = TitledInputUserInfoView(title: "나이", inputView: ageInputField)
+        let ageInputView = TitledInputInfoView(title: "나이", inputView: ageInputField)
         self.ageText = ageInputField.textObservable
         
         let heightInputField = InputFieldWithIcon(icon: UIImage(systemName: "ruler")!, placeholder: "신장을 입력해주세요.", unit: "cm")
-        let heightInputView = TitledInputUserInfoView(title: "신장", inputView: heightInputField)
+        let heightInputView = TitledInputInfoView(title: "신장", inputView: heightInputField)
         self.heightText = heightInputField.textObservable
         
         let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "체중을 입력해주세요.", unit: "kg")
-        let weightInputView = TitledInputUserInfoView(title: "체중", inputView: weightInputField)
+        let weightInputView = TitledInputInfoView(title: "체중", inputView: weightInputField)
         self.weightText = weightInputField.textObservable
         
         let nextButton = TitledButton(
@@ -182,6 +182,7 @@ final class InputFieldWithIcon: UIView {
     private let unit: String?
     private var isAge: Bool = false
     private var isFat: Bool = false
+    private var isNumber: Bool = true
     
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
@@ -189,13 +190,11 @@ final class InputFieldWithIcon: UIView {
         imageView.tintColor = .gray
         return imageView
     }()
-    private let textField: UITextField = {
+    let textField: UITextField = {
         let textField = UITextField()
         textField.autocapitalizationType = .none
         textField.borderStyle = .none
         textField.font = .systemFont(ofSize: 16, weight: .medium)
-        textField.textAlignment = .center
-        textField.keyboardType = .numberPad
         return textField
     }()
     private let unitLabel: UILabel = {
@@ -210,12 +209,13 @@ final class InputFieldWithIcon: UIView {
         textField.rx.text.asObservable()
     }
     
-    init(icon: UIImage? = nil, placeholder: String, unit: String? = nil, isAge: Bool = false, isFat: Bool = false) {
+    init(icon: UIImage? = nil, placeholder: String, unit: String? = nil, isAge: Bool = false, isFat: Bool = false, isNumber: Bool = true) {
         self.icon = icon
 //        self.placeholder = placeholder
         self.unit = unit
         self.isAge = isAge
         self.isFat = isFat
+        self.isNumber = isNumber
         super.init(frame: .zero)
         
         setUpView()
@@ -228,7 +228,11 @@ final class InputFieldWithIcon: UIView {
     
     private func setUpView() {
         iconImageView.image = icon
+        
         textField.placeholder = placeholder
+        textField.keyboardType = isNumber ? .decimalPad : .default
+        textField.textAlignment = isNumber ? .center : .left
+        textField.clearButtonMode = isNumber ? .never : .whileEditing
         unitLabel.text = unit ?? ""
         
         addSubview(iconImageView)
@@ -237,7 +241,7 @@ final class InputFieldWithIcon: UIView {
         
         self.backgroundColor = .white
         self.layer.cornerRadius = 8
-        self.layer.borderWidth = 1
+        self.layer.borderWidth = 1.5
         self.layer.borderColor = UIColor.lightGray.cgColor
         
         iconImageView.snp.makeConstraints { make in
@@ -247,8 +251,8 @@ final class InputFieldWithIcon: UIView {
         }
         
         textField.snp.makeConstraints { make in
-            make.leading.equalTo(iconImageView.snp.trailing).offset(8)
-            make.trailing.equalTo(unitLabel.snp.leading).offset(-8)
+            make.leading.equalTo(iconImageView.snp.trailing).offset(icon == nil ? 0 : 8)
+            make.trailing.equalTo(unitLabel.snp.leading).offset(unit == nil ? 0 : -8)
             make.top.bottom.equalToSuperview().inset(12)
         }
         textField.clipsToBounds = true
@@ -263,41 +267,62 @@ final class InputFieldWithIcon: UIView {
         textField.rx.text.orEmpty
             .map { [weak self] text in
                 guard let self = self else { return "" }
-                var dotCount = 0
-                let filtered = text.filter {
-                    if $0 == "." {
-                        dotCount += 1
-                        if self.isAge {
-                            return dotCount <= 0
-                        } else {
-                            return dotCount <= 1
+                if self.isNumber {
+                    var dotCount = 0
+                    let filtered = text.filter {
+                        if $0 == "." {
+                            dotCount += 1
+                            if self.isAge {
+                                return dotCount <= 0
+                            } else {
+                                return dotCount <= 1
+                            }
                         }
+                        return $0.isNumber
                     }
-                    return $0.isNumber
-                }
-                if isAge {
-                    return Int(filtered) ?? 0 > 999 ? "999" : filtered
-                }
-                
-                var number = filtered
-                if filtered.contains(".") {
-                    let parts = filtered.split(separator: ".", omittingEmptySubsequences: false)
                     
-                    if let firstPart = parts.first, let secondPart = parts.last {
-                        if secondPart.count > 1  {
-                            number = "\(String(firstPart)).\(String(secondPart).prefix(1))"
+                    if self.isAge {
+                        return Int(filtered) ?? 0 > 999 ? "999" : filtered
+                    }
+                    
+                    var number = filtered
+                    if filtered.contains(".") {
+                        let parts = filtered.split(separator: ".", omittingEmptySubsequences: false)
+                        
+                        if let firstPart = parts.first, let secondPart = parts.last {
+                            if secondPart.count > 1  {
+                                number = "\(String(firstPart)).\(String(secondPart).prefix(1))"
+                            }
                         }
                     }
+                    if self.isFat {
+                        return Double(number) ?? 0 > 100 ? "100" : String(number)
+                    }
+                    
+                    return Double(number) ?? 0 > 999.9 ? "999.9" : String(number)
+                } else {
+                    return text
                 }
-                if isFat {
-                    return Double(number) ?? 0 > 100 ? "100" : String(number)
-                }
-                
-                return Double(number) ?? 0 > 999.9 ? "999.9" : String(number)
             }
             .bind(to: textField.rx.text)
             .disposed(by: disposeBag)
+        
+        textField.rx.controlEvent(.editingDidBegin)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                self.layer.borderColor = UIColor.systemBlue.cgColor
+            })
+            .disposed(by: disposeBag)
 
+        textField.rx.controlEvent(.editingDidEnd)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                self.layer.borderColor = UIColor.lightGray.cgColor
+            })
+            .disposed(by: disposeBag)
+        
     }
     
     func setText(_ text: String?) {

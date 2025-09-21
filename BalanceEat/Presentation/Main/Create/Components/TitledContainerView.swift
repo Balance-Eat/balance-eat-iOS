@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 final class TitledContainerView: UIView {
+    private let icon: UIImage?
     private let title: String
     private lazy var backgroundView: UIView = {
             return isShadowBackground ? BalanceEatContentView() : UIView()
@@ -17,14 +18,22 @@ final class TitledContainerView: UIView {
     private let isSmall: Bool
     private let isShadowBackground: Bool
     
+    private lazy var iconImageView: UIImageView = {
+        let imageView = UIImageView(image: icon)
+        imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .systemBlue
+        return imageView
+    }()
+    
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: isSmall ? 14 : 17, weight: .bold)
+        label.font = .systemFont(ofSize: isSmall ? 14 : 18, weight: .bold)
         label.textColor = .bodyStatusCardNumber
         return label
     }()
     
-    init(title: String, contentView: UIView, isSmall: Bool = false, isShadowBackground: Bool = true) {
+    init(icon: UIImage? = nil, title: String, contentView: UIView, isSmall: Bool = false, isShadowBackground: Bool = true) {
+        self.icon = icon
         self.title = title
         self.contentView = contentView
         self.isSmall = isSmall
@@ -40,8 +49,9 @@ final class TitledContainerView: UIView {
     
     private func setUpView() {
         self.addSubview(backgroundView)
-        backgroundView.addSubview(titleLabel)
         backgroundView.addSubview(contentView)
+        
+        iconImageView.isHidden = icon == nil
         
         contentView.isUserInteractionEnabled = true
         
@@ -51,7 +61,13 @@ final class TitledContainerView: UIView {
             make.edges.equalToSuperview()
         }
         
-        titleLabel.snp.makeConstraints { make in
+        let titleStackView = UIStackView(arrangedSubviews: [iconImageView, titleLabel])
+        titleStackView.axis = .horizontal
+        titleStackView.spacing = 8
+        
+        backgroundView.addSubview(titleStackView)
+        
+        titleStackView.snp.makeConstraints { make in
             make.top.leading.equalToSuperview().offset(20)
         }
         

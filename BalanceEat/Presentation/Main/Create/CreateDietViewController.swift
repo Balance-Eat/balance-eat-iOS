@@ -10,7 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-final class CreateViewController: UIViewController {
+final class CreateDietViewController: UIViewController {
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -55,6 +55,7 @@ final class CreateViewController: UIViewController {
             carbohydrates: 0,
             protein: 31,
             fat: 3.6,
+            brand: "",
             createdAt: "2025-09-25T14:30:00Z"
         ),
         FoodData(
@@ -66,6 +67,7 @@ final class CreateViewController: UIViewController {
             carbohydrates: 3,
             protein: 40,
             fat: 5.6,
+            brand: "",
             createdAt: "2025-09-25T14:30:00Z"
         ),
         FoodData(
@@ -77,6 +79,7 @@ final class CreateViewController: UIViewController {
             carbohydrates: 50,
             protein: 31,
             fat: 19,
+            brand: "",
             createdAt: "2025"
         )
     ]
