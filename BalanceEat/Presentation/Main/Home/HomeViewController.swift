@@ -249,9 +249,9 @@ class HomeViewController: UIViewController {
         viewModel.dietResponseRelay
             .compactMap { $0 }
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] dailyDiet in
+            .subscribe(onNext: { [weak self] dietList in
                 guard let self else { return }
-                updateUIForDailyDietDate(dailyDiet: dailyDiet)
+                updateUIForDailyDietDate(dietList: dietList)
             })
             .disposed(by: disposeBag)
     }
@@ -289,30 +289,35 @@ class HomeViewController: UIViewController {
 
     }
     
-    private func updateUIForDailyDietDate(dailyDiet: DailyDietResponseDTO) {
+    private func updateUIForDailyDietDate(dietList: [DietData]) {
+        let currentCalorie = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.calories } }
+        let currentCarbonhydrate = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.carbohydrates } }
+        let currentProtein = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.protein } }
+        let currentFat = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.fat } }
+        
         todayCalorieView.update(
-            currentCalorie: dailyDiet.dailyTotal.totalCalorie,
+            currentCalorie: Int(currentCalorie),
             targetCalorie: viewModel.userResponseRelay.value?.targetCalorie ?? 0,
-            currentCarbohydrate: dailyDiet.dailyTotal.totalCarbohydrates,
+            currentCarbohydrate: Int(currentCarbonhydrate),
             targetCarbohydrate: Int(viewModel.userResponseRelay.value?.targetCarbohydrates ?? 0),
-            currentProtein: dailyDiet.dailyTotal.totalProtein,
+            currentProtein: Int(currentProtein),
             targetProtein: Int(viewModel.userResponseRelay.value?.targetProtein ?? 0),
-            currentFat: dailyDiet.dailyTotal.totalFat,
+            currentFat: Int(currentFat),
             targetFat: Int(viewModel.userResponseRelay.value?.targetFat ?? 0)
         )
         
         var mealLogs: [MealLogView] = []
-        dailyDiet.diets.forEach { diet in
+        dietList.forEach { diet in
             diet.items.forEach { item in
                 let mealLogView = MealLogView(
-                    title: item.foodName,
-                    ateTime: diet.eatingAt.toDate() ?? Date(),
-                    consumedFoodAmount: item.intake,
-                    consumedCalories: item.calories,
+                    title: item.name,
+                    ateTime: diet.consumedAt.toDate() ?? Date(),
+                    consumedFoodAmount: Int(item.intake),
+                    consumedCalories: Int(item.calories),
                     consumedSugars: 0,
-                    consumedCarbohydrates: item.carbohydrates,
-                    consumedProteins: item.protein,
-                    consumedFats: item.fat
+                    consumedCarbohydrates: Int(item.carbohydrates),
+                    consumedProteins: Int(item.protein),
+                    consumedFats: Int(item.fat)
                 )
                 mealLogs.append(mealLogView)
             }

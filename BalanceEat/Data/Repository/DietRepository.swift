@@ -10,11 +10,11 @@ import Foundation
 struct DietRepository: DietRepositoryProtocol {
     private let apiClient = APIClient.shared
     
-    func getDailyDiet(date: Date) async -> Result<DailyDietResponseDTO, NetworkError> {
-        let endpoint = DietEndPoints.daily(date: date.toString())
+    func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError> {
+        let endpoint = DietEndPoints.daily(date: date.toString(), userId: userId)
         let result = await apiClient.request(
             endpoint: endpoint,
-            responseType: BaseResponse<DailyDietResponseDTO>.self
+            responseType: BaseResponse<[DietDTO]>.self
         )
         
         switch result {

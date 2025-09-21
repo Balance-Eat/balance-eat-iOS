@@ -8,5 +8,5 @@
 import Foundation
 
 protocol DietRepositoryProtocol {
-    func getDailyDiet(date: Date) async -> Result<DailyDietResponseDTO, NetworkError>
+    func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError>
 }

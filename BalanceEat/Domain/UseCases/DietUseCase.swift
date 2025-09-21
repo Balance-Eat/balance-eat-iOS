@@ -8,7 +8,7 @@
 import Foundation
 
 protocol DietUseCaseProtocol {
-    func getDailyDiet(date: Date) async -> Result<DailyDietResponseDTO, NetworkError>
+    func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError>
 }
 
 struct DietUseCase: DietUseCaseProtocol {
@@ -18,7 +18,7 @@ struct DietUseCase: DietUseCaseProtocol {
         self.repository = repository
     }
     
-    func getDailyDiet(date: Date) async -> Result<DailyDietResponseDTO, NetworkError> {
-        await repository.getDailyDiet(date: date)
+    func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError> {
+        await repository.getDailyDiet(date: date, userId: userId)
     }
 }

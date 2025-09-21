@@ -14,7 +14,7 @@ final class HomeViewModel {
     private let dietUseCase: DietUseCaseProtocol
     
     let userResponseRelay = BehaviorRelay<UserData?>(value: nil)
-    let dietResponseRelay = BehaviorRelay<DailyDietResponseDTO?>(value: nil)
+    let dietResponseRelay = BehaviorRelay<[DietData]?>(value: nil)
     
     init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {
         self.userUseCase = userUseCase
@@ -49,12 +49,17 @@ final class HomeViewModel {
     }
     
     func getDailyDiet() async {
-        let getDailyDietResponse = await dietUseCase.getDailyDiet(date: Date())
+        guard let userId = userResponseRelay.value?.id else {
+            return
+        }
+        
+        let getDailyDietResponse = await dietUseCase.getDailyDiet(date: Date(), userId: String(userId))
         
         switch getDailyDietResponse {
-        case .success(let dailyDiet):
-            print("일일 식단 정보: \(dailyDiet)")
-            dietResponseRelay.accept(dailyDiet)
+        case .success(let dietDTOs):
+            print("일일 식단 정보: \(dietDTOs)")
+            let dietDataList: [DietData] = dietDTOs.map { $0.toDietData() }
+            dietResponseRelay.accept(dietDataList)
         case .failure(let failure):
             print("일일 식단 정보 불러오기 실패: \(failure.localizedDescription)")
         }

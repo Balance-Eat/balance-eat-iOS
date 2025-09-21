@@ -13,6 +13,7 @@ protocol Endpoint {
     var method: HTTPMethod { get }
     var parameters: [String: Any?]? { get }
     var queryParameters: [String: Any]? { get }
+    var headers: HTTPHeaders? { get }
 }
 
 enum UserEndPoints: Endpoint {
@@ -99,10 +100,17 @@ enum UserEndPoints: Endpoint {
             return nil
         }
     }
+    
+    var headers: HTTPHeaders? {
+        switch self {
+        default:
+            return nil
+        }
+    }
 }
 
 enum DietEndPoints: Endpoint {
-    case daily(date: String)
+    case daily(date: String, userId: String)
     
     var path: String {
         switch self {
@@ -127,12 +135,17 @@ enum DietEndPoints: Endpoint {
     
     var queryParameters: [String : Any]? {
         switch self {
-        case .daily(let date):
+        case .daily(let date, let userId):
             return ["date": date]
         }
     }
     
-    
+    var headers: HTTPHeaders? {
+        switch self {
+        case .daily(let date, let userId):
+            return ["X-USER-ID": userId]
+        }
+    }
 }
 
 enum FoodEndPoints: Endpoint {
@@ -177,5 +190,10 @@ enum FoodEndPoints: Endpoint {
         }
     }
     
-    
+    var headers: HTTPHeaders? {
+        switch self {
+        default:
+            return nil
+        }
+    }
 }

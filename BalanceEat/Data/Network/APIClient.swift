@@ -25,7 +25,9 @@ final class APIClient {
             AF.request(url,
                        method: endpoint.method,
                        parameters: endpoint.method == .get ? endpoint.queryParameters : endpoint.parameters,
-                       encoding: (endpoint.method == .get ? URLEncoding.default : JSONEncoding.default))
+                       encoding: (endpoint.method == .get ? URLEncoding.default : JSONEncoding.default),
+                       headers: endpoint.headers
+            )
             .validate()
             .responseDecodable(of: T.self) { response in
                 switch response.result {
