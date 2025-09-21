@@ -42,7 +42,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     private var tableViewHeightConstraint: Constraint?
     
     private lazy var sumOfNutritionValueView = SumOfNutritionValueView()
-    private let cellNutritionRelay = BehaviorRelay<[IndexPath: (Double, Double, Double, Double)]>(value: [:])
+    private let cellNutritionRelay = BehaviorRelay<[String: (Double, Double, Double, Double)]>(value: [:])
     
     let deletedFoodItem = PublishRelay<FoodData>()
     private let disposeBag = DisposeBag()
@@ -136,7 +136,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             .subscribe(onNext: { [weak self] value in
                 guard let self else { return }
                 var dict = self.cellNutritionRelay.value
-                dict[indexPath] = value
+                dict[foodItem.uuid] = value
                 self.cellNutritionRelay.accept(dict)
             })
             .disposed(by: disposeBag)
@@ -154,24 +154,20 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     func deleteItem(at indexPath: IndexPath) {
         guard indexPath.row < foodItems.count else { return }
 
+        let food = foodItems[indexPath.row]
+        
         tableView.beginUpdates()
         foodItems.remove(at: indexPath.row)
-        tableView.deleteRows(at: [indexPath], with: .none)
+        tableView.deleteRows(at: [indexPath], with: .fade)
         tableView.endUpdates()
         
+        // ✅ uuid 기반으로 단순 삭제
         var dict = cellNutritionRelay.value
-        dict.removeValue(forKey: indexPath)
-        
-        var newDict: [IndexPath: (Double, Double, Double, Double)] = [:]
-        for (oldIndexPath, value) in dict {
-            let newRow = oldIndexPath.row > indexPath.row ? oldIndexPath.row - 1 : oldIndexPath.row
-            newDict[IndexPath(row: newRow, section: 0)] = value
-        }
-        cellNutritionRelay.accept(newDict)
+        dict.removeValue(forKey: food.uuid)
+        cellNutritionRelay.accept(dict)
         
         self.updateTableViewHeight()
         self.layoutIfNeeded()
-
     }
 }
 
@@ -293,12 +289,6 @@ final class AddedFoodCell: UITableViewCell {
             make.leading.trailing.equalToSuperview().inset(16)
             make.bottom.equalToSuperview().inset(16)
         }
-
-//        bottomInfoStackView.snp.makeConstraints { make in
-//            make.top.equalTo(twoOptionPickerView.snp.bottom).offset(16)
-//            make.leading.trailing.equalToSuperview().inset(12)
-//            make.bottom.equalToSuperview().inset(16)
-//        }
     }
     
     private func setBinding() {
@@ -324,10 +314,7 @@ final class AddedFoodCell: UITableViewCell {
         stepperView.amountSizeRelay
             .subscribe(onNext: { [weak self] amount in
                 guard let self else { return }
-                guard let foodData = self.foodData else {
-                    
-                    return
-                }
+                guard let foodData = self.foodData else { return }
                 
                 let ratio = amount / servingSize
                 
@@ -344,7 +331,6 @@ final class AddedFoodCell: UITableViewCell {
         ).subscribe(onNext: { [weak self] (carbon, protein, fat) in
             guard let self else { return }
             let calorieRelayValue = 4 * carbon + 4 * protein + 9 * fat
-            
             nutritionalInfoView.calorieRelay.accept(calorieRelayValue)
         })
         .disposed(by: disposeBag)
@@ -371,8 +357,8 @@ final class AddedFoodCell: UITableViewCell {
         nutritionalInfoView.proteinRelay.accept(foodData.protein)
         nutritionalInfoView.fatRelay.accept(foodData.fat)
     }
-    
 }
+
 
 final class NutritionInfoView: UIView {
     private let nutritionType: NutritionType
