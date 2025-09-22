@@ -26,4 +26,21 @@ struct FoodRepository: FoodRepositoryProtocol {
             return .failure(error)
         }
     }
+    
+    func searchFood(foodName: String, page: Int, size: Int) async -> Result<SearchFoodResponseDTO, NetworkError> {
+        let endPoint = FoodEndPoints.search(foodName: foodName, page: page, size: size)
+        let result = await apiClient.request(
+            endpoint: endPoint,
+            responseType: BaseResponse<SearchFoodResponseDTO>.self
+        )
+        
+        switch result {
+        case .success(let response):
+            print("search food success \(response)")
+            return .success(response.data)
+        case .failure(let error):
+            print("search food failed: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
 }

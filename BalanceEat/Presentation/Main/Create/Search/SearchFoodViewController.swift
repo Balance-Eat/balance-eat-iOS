@@ -11,6 +11,7 @@ import RxSwift
 import RxCocoa
 
 class SearchFoodViewController: UIViewController {
+    private let viewModel: SearchFoodViewModel
     
     private let contentView = UIView()
     private let searchBar: UISearchBar = {
@@ -77,6 +78,9 @@ class SearchFoodViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     init() {
+        let foodRepository = FoodRepository()
+        let foodUseCase = FoodUseCase(repository: foodRepository)
+        self.viewModel = SearchFoodViewModel(foodUseCase: foodUseCase)
         super.init(nibName: nil, bundle: nil)
         
         setUpView()
@@ -127,7 +131,21 @@ class SearchFoodViewController: UIViewController {
     }
     
     private func setBinding() {
-        searchHistory
+        searchBar.rx.text.orEmpty
+            .filter { !$0.isEmpty }
+            .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] query in
+                guard let self else { return }
+                
+                Task {
+                    await self.viewModel.searchFood(foodName: query, isNew: true)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.searchFoodResultRelay
             .bind(to: tableView.rx.items(cellIdentifier: SearchResultFoodCell.identifier)) { row, element, cell in
                 let calory = Int(element.carbohydrates * 4 + element.protein * 4 + element.fat * 9)
                 
@@ -138,21 +156,26 @@ class SearchFoodViewController: UIViewController {
                         carbon: String(element.carbohydrates),
                         protein: String(element.protein),
                         fat: String(element.fat),
-                        info: "info"
+                        info: "\(element.perCapitaIntake)\(element.unit) 기준"
                     )
                 }
             }
             .disposed(by: disposeBag)
         
-        tableView.rx.modelSelected(FoodDTO.self)
+        tableView.rx.modelSelected(FoodDTOForSearch.self)
             .subscribe(onNext: { food in
                 print("선택된 검색어: \(food.name)")
             })
             .disposed(by: disposeBag)
         
-        searchHistory
+        viewModel.searchFoodResultRelay
             .map { $0.count > 0 }
             .bind(to: createFoodButton.rx.isHidden)
+            .disposed(by: disposeBag)
+        
+        viewModel.searchFoodResultRelay
+            .map { $0.count > 0 }
+            .bind(to: noFoodLabel.rx.isHidden)
             .disposed(by: disposeBag)
         
         createFoodButton.rx.tap

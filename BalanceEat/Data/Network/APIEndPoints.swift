@@ -135,14 +135,14 @@ enum DietEndPoints: Endpoint {
     
     var queryParameters: [String : Any]? {
         switch self {
-        case .daily(let date, let userId):
+        case .daily(let date, _):
             return ["date": date]
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .daily(let date, let userId):
+        case .daily(_, let userId):
             return ["X-USER-ID": userId]
         }
     }
@@ -150,11 +150,14 @@ enum DietEndPoints: Endpoint {
 
 enum FoodEndPoints: Endpoint {
     case create(createFoodDTO: CreateFoodDTO)
+    case search(foodName: String, page: Int, size: Int)
     
     var path: String {
         switch self {
         case .create:
             return "/v1/foods"
+        case .search:
+            return "/v1/foods/search"
         }
     }
     
@@ -162,6 +165,8 @@ enum FoodEndPoints: Endpoint {
         switch self {
         case .create:
             return .post
+        case .search:
+            return .get
         }
     }
     
@@ -185,6 +190,12 @@ enum FoodEndPoints: Endpoint {
     
     var queryParameters: [String : Any]? {
         switch self {
+        case .search(let foodName, let page, let size):
+            return [
+                "foodName": foodName,
+                "page": page,
+                "size": size
+            ]
         default:
             return nil
         }
