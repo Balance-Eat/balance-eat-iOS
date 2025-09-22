@@ -374,6 +374,17 @@ final class CreateFoodViewController: UIViewController {
         }
         .bind(to: resetButton.rx.isHidden)
         .disposed(by: disposeBag)
+        
+        viewModel.createFoodResultRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] result in
+                guard let self else { return }
+                
+                if result {
+                    dismiss(animated: true)
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
     private func showUnitPicker() {
