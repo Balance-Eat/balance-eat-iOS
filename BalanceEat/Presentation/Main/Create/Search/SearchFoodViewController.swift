@@ -132,12 +132,15 @@ class SearchFoodViewController: UIViewController {
     
     private func setBinding() {
         searchBar.rx.text.orEmpty
-            .filter { !$0.isEmpty }
-            .debounce(.milliseconds(500), scheduler: MainScheduler.instance)
+            .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] query in
                 guard let self else { return }
+                if query.isEmpty {
+                    viewModel.searchFoodResultRelay.accept([])
+                    return
+                }
                 
                 Task {
                     await self.viewModel.searchFood(foodName: query, isNew: true)
