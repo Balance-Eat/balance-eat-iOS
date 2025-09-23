@@ -38,6 +38,12 @@ final class TutorialContentViewModel {
         }
     }
     
+    private func saveUserId(_ userId: Int) {
+        if case .failure(let error) = userUseCase.saveUserId(Int64(userId)) {
+            print("userId 저장 실패: \(error.localizedDescription)")
+        }
+    }
+    
     func getUserUUID() -> String {
         let getUserUUIDResponse = userUseCase.getUserUUID()
         

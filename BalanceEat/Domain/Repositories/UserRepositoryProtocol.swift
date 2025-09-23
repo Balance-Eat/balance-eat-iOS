@@ -14,4 +14,7 @@ protocol UserRepositoryProtocol {
     func getUserUUID() -> Result<String, CoreDataError>
     func saveUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
     func deleteUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
+    func getUserId() -> Result<Int64, CoreDataError>
+    func saveUserId(_ userId: Int64) -> Result<Void, CoreDataError>
+    func deleteUserId(_ userId: Int64) -> Result<Void, CoreDataError>
 }

@@ -87,5 +87,15 @@ struct UserRepository: UserRepositoryProtocol {
         userCoreData.deleteUserUUID(uuid)
     }
     
+    func getUserId() -> Result<Int64, CoreDataError> {
+        userCoreData.getUserId()
+    }
+    func saveUserId(_ userId: Int64) -> Result<Void, CoreDataError> {
+        userCoreData.saveUserId(userId)
+    }
+    func deleteUserId(_ userId: Int64) -> Result<Void, CoreDataError> {
+        userCoreData.deleteUserId(userId)
+    }
+    
 }
 

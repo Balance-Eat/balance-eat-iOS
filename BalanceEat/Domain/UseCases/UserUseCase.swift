@@ -14,6 +14,9 @@ protocol UserUseCaseProtocol {
     func getUserUUID() -> Result<String, CoreDataError>
     func saveUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
     func deleteUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
+    func getUserId() -> Result<Int64, CoreDataError>
+    func saveUserId(_ userId: Int64) -> Result<Void, CoreDataError>
+    func deleteUserId(_ userId: Int64) -> Result<Void, CoreDataError>
 }
 
 struct UserUseCase: UserUseCaseProtocol {
@@ -52,5 +55,15 @@ struct UserUseCase: UserUseCaseProtocol {
     
     func deleteUserUUID(_ uuid: String) -> Result<Void, CoreDataError> {
         repository.deleteUserUUID(uuid)
+    }
+    
+    func getUserId() -> Result<Int64, CoreDataError> {
+        repository.getUserId()
+    }
+    func saveUserId(_ userId: Int64) -> Result<Void, CoreDataError> {
+        repository.saveUserId(userId)
+    }
+    func deleteUserId(_ userId: Int64) -> Result<Void, CoreDataError> {
+        repository.deleteUserId(userId)
     }
 }
