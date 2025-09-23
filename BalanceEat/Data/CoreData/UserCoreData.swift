@@ -85,19 +85,31 @@ struct UserCoreData: UserCoreDataProtocol {
     }
     
     func saveUserId(_ userId: Int64) -> Result<Void, CoreDataError> {
-        guard let entity = NSEntityDescription.entity(forEntityName: "User", in: viewContext) else {
-            return .failure(.entityNotFound("User"))
-        }
-        let userObject = NSManagedObject(entity: entity, insertInto: viewContext)
-        userObject.setValue(userId, forKey: "userId")
+        let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
         
         do {
-            try viewContext.save()
-            return .success(())
+            let results = try viewContext.fetch(fetchRequest)
+            if let existingUser = results.first {
+                if existingUser.userId != 0 {
+                    print("userId already exists, skip save")
+                    return .success(())
+                } else {
+                    existingUser.userId = userId
+                    try viewContext.save()
+                    print("update userId success: \(userId)")
+                    return .success(())
+                }
+            } else {
+                print("failure: uuid must exist before saving userId")
+                return .failure(.entityNotFound("User with uuid not found"))
+            }
         } catch {
+            print("save userId failure: \(error.localizedDescription)")
             return .failure(.saveError(error.localizedDescription))
         }
     }
+
+
     
     func deleteUserId(_ userId: Int64) -> Result<Void, CoreDataError> {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
