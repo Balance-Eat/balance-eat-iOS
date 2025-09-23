@@ -113,6 +113,11 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         foodItemsRelay
             .subscribe(onNext: { [weak self] items in
                 guard let self else { return }
+                let currentUUIDs = Set(items.map { $0.uuid })
+                var dict = self.cellNutritionRelay.value
+                dict.keys.filter { !currentUUIDs.contains($0) }.forEach { dict.removeValue(forKey: $0) }
+                self.cellNutritionRelay.accept(dict)
+                
                 self.foodItems = items
                 self.tableView.reloadData()
                 self.updateTableViewHeight()
