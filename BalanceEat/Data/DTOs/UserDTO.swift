@@ -15,6 +15,7 @@ struct UserDTO: Codable {
     let age: Int
     let height: Double
     let weight: Double
+    let goalType: GoalType
     let email: String?
     let activityLevel: ActivityLevel?
     let smi: Double?
@@ -29,25 +30,26 @@ struct UserDTO: Codable {
     let providerId: String?
     let providerType: String?
     
-    init(id: Int? = nil, uuid: String, name: String, gender: Gender, age: Int, height: Double, weight: Double, email: String?, activityLevel: ActivityLevel?, smi: Double?, fatPercentage: Double?, targetWeight: Double?, targetCalorie: Int?, targetSmi: Double?, targetFatPercentage: Double?, targetCarbohydrates: Double?, targetProtein: Double?, targetFat: Double?, providerId: String?, providerType: String?) {
+    init(id: Int? = nil, uuid: String, name: String, gender: Gender, age: Int, height: Double, weight: Double, goalType: GoalType, email: String?, activityLevel: ActivityLevel?, smi: Double?, fatPercentage: Double?, targetWeight: Double?, targetCalorie: Int?, targetSmi: Double?, targetFatPercentage: Double?, targetCarbohydrates: Double?, targetProtein: Double?, targetFat: Double?, providerId: String?, providerType: String?) {
         self.id = id
         self.uuid = uuid
         self.name = name
         self.gender = gender
         self.age = age
-        self.height = height
-        self.weight = weight
+        self.height = height.rounded(toPlaces: 2)
+        self.weight = weight.rounded(toPlaces: 2)
+        self.goalType = goalType
         self.email = email
         self.activityLevel = activityLevel
-        self.smi = smi
-        self.fatPercentage = fatPercentage
-        self.targetWeight = targetWeight
+        self.smi = smi?.rounded(toPlaces: 2)
+        self.fatPercentage = fatPercentage?.rounded(toPlaces: 2)
+        self.targetWeight = targetWeight?.rounded(toPlaces: 2)
         self.targetCalorie = targetCalorie
-        self.targetSmi = targetSmi
-        self.targetFatPercentage = targetFatPercentage
-        self.targetCarbohydrates = targetCarbohydrates
-        self.targetProtein = targetProtein
-        self.targetFat = targetFat
+        self.targetSmi = targetSmi?.rounded(toPlaces: 2)
+        self.targetFatPercentage = targetFatPercentage?.rounded(toPlaces: 2)
+        self.targetCarbohydrates = targetCarbohydrates?.rounded(toPlaces: 2)
+        self.targetProtein = targetProtein?.rounded(toPlaces: 2)
+        self.targetFat = targetFat?.rounded(toPlaces: 2)
         self.providerId = providerId
         self.providerType = providerType
     }
