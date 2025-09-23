@@ -15,6 +15,19 @@ enum MealTime: String {
     case lunch = "점심"
     case dinner = "저녁"
     case snack = "간식"
+    
+    var title : String {
+        switch self {
+        case .breakfast:
+            return "BREAKFAST"
+        case .lunch:
+            return "LUNCH"
+        case .dinner:
+            return "DINNER"
+        case .snack:
+            return "SNACK"
+        }
+    }
 }
 
 final class MealTimePickerView: UIView {

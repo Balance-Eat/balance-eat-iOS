@@ -24,6 +24,11 @@ struct FoodItemForDietDTO: Codable {
     let fat: Double
 }
 
+struct FoodItemForCreateDietDTO: Codable {
+    let foodId: Int
+    let intake: Double
+}
+
 extension DietDTO {
     func toDietData() -> DietData {
         return DietData(

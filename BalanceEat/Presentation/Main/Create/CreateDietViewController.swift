@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 
 final class CreateDietViewController: UIViewController {
-    
+    private let viewModel: CreateDietViewModel
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
@@ -20,8 +20,8 @@ final class CreateDietViewController: UIViewController {
     
     private lazy var searchStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [
-            searchInputField,
-            favoriteFoodGridView
+            searchInputField
+//            favoriteFoodGridView
         ])
         stackView.axis = .vertical
         stackView.spacing = 16
@@ -45,46 +45,8 @@ final class CreateDietViewController: UIViewController {
         title: "언제 드셨나요?",
         contentView: mealTimePickerView
     )
-    private var foodItems: [FoodData] = [
-        FoodData(
-            id: 1,
-            uuid: "123",
-            name: "닭가슴살",
-            perCapitaIntake: 100,
-            unit: "g",
-            carbohydrates: 0,
-            protein: 31,
-            fat: 3.6,
-            brand: "",
-            createdAt: "2025-09-25T14:30:00Z"
-        ),
-        FoodData(
-            id: 2,
-            uuid: "1234",
-            name: "샐러드",
-            perCapitaIntake: 150,
-            unit: "g",
-            carbohydrates: 3,
-            protein: 40,
-            fat: 5.6,
-            brand: "",
-            createdAt: "2025-09-25T14:30:00Z"
-        ),
-        FoodData(
-            id: 3,
-            uuid: "12e21",
-            name: "피자",
-            perCapitaIntake: 200,
-            unit: "g",
-            carbohydrates: 50,
-            protein: 31,
-            fat: 19,
-            brand: "",
-            createdAt: "2025"
-        )
-    ]
     
-    private lazy var addedFoodListView = AddedFoodListView(foodItems: foodItems)
+    private lazy var addedFoodListView = AddedFoodListView(foodItemsRelay: viewModel.addedFoodsRelay)
     
     private let saveButton = TitledButton(
         title: "저장",
@@ -107,6 +69,13 @@ final class CreateDietViewController: UIViewController {
     ]
     
     init() {
+        let userRepository = UserRepository()
+        let userUseCase = UserUseCase(repository: userRepository)
+        
+        let dietRepository = DietRepository()
+        let dietUseCase = DietUseCase(repository: dietRepository)
+        
+        self.viewModel = CreateDietViewModel(dietUseCase: dietUseCase, userUseCase: userUseCase)
         super.init(nibName: nil, bundle: nil)
         setUpView()
         setBinding()
@@ -210,13 +179,41 @@ final class CreateDietViewController: UIViewController {
                 })
             .disposed(by: disposeBag)
         
+        viewModel.addedFoodsRelay
+            .map { $0.count > 0 }
+            .bind(to: saveButton.rx.isEnabled)
+            .disposed(by: disposeBag)
+        
         addedFoodListView.deletedFoodItem
             .subscribe(onNext: { [weak self] item in
                 guard let self = self else { return }
                 
-                if let index = self.foodItems.firstIndex(where: { $0.name == item.name }) {
-                    self.foodItems.remove(at: index)
-                    self.addedFoodListView.deleteItem(at: IndexPath(row: index, section: 0))
+                viewModel.deleteFood(food: item)
+            })
+            .disposed(by: disposeBag)
+        
+        saveButton.rx.tap
+            .subscribe(
+                onNext: { [weak self] in
+                    guard let self else { return }
+                    
+                    let mealTime = mealTimePickerView.selectedMealTime
+                    let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
+                    let dietFoods = viewModel.addedFoodsRelay.value.map { food in
+                        FoodItemForCreateDietDTO(
+                            foodId: food.id,
+                            intake: food.perCapitaIntake
+                        )
+                    }
+                    let userId = viewModel.getUserId()
+                    
+                    Task {
+                        await self.viewModel.createDiet(
+                            mealTime: mealTime,
+                            consumedAt: consumedAt,
+                            dietFoods: dietFoods,
+                            userId: userId
+                        )
                 }
             })
             .disposed(by: disposeBag)

@@ -27,8 +27,8 @@ struct AddedFoodItem {
 }
 
 final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSource {
-    
     private var foodItems: [FoodData] = []
+    private let foodItemsRelay: BehaviorRelay<[FoodData]>
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -47,8 +47,8 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     let deletedFoodItem = PublishRelay<FoodData>()
     private let disposeBag = DisposeBag()
     
-    init(foodItems: [FoodData]) {
-        self.foodItems = foodItems
+    init(foodItemsRelay: BehaviorRelay<[FoodData]>) {
+        self.foodItemsRelay = foodItemsRelay
         super.init(frame: .zero)
         
         setUpView()
@@ -110,6 +110,21 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             })
             .disposed(by: disposeBag)
 
+        foodItemsRelay
+            .subscribe(onNext: { [weak self] items in
+                guard let self else { return }
+                self.foodItems = items
+                self.tableView.reloadData()
+                self.updateTableViewHeight()
+            })
+            .disposed(by: disposeBag)
+        
+        deletedFoodItem
+            .withLatestFrom(foodItemsRelay) { deleted, current -> [FoodData] in
+                current.filter { $0.uuid != deleted.uuid }
+            }
+            .bind(to: foodItemsRelay)
+            .disposed(by: disposeBag)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -161,7 +176,6 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         tableView.deleteRows(at: [indexPath], with: .fade)
         tableView.endUpdates()
         
-        // ✅ uuid 기반으로 단순 삭제
         var dict = cellNutritionRelay.value
         dict.removeValue(forKey: food.uuid)
         cellNutritionRelay.accept(dict)

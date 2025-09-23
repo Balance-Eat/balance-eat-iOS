@@ -10,6 +10,23 @@ import Foundation
 struct DietRepository: DietRepositoryProtocol {
     private let apiClient = APIClient.shared
     
+    func createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async -> Result<CreateDietResponseDTO, NetworkError> {
+        let endPoint = DietEndPoints.createDiet(mealTime: mealTime, consumedAt: consumedAt, dietFoods: dietFoods, userId: userId)
+        let result = await apiClient.request(
+            endpoint: endPoint,
+            responseType: BaseResponse<CreateDietResponseDTO>.self
+        )
+        
+        switch result {
+        case .success(let response):
+            print("create diet success \(response)")
+            return .success(response.data)
+        case .failure(let error):
+            print("create diet failed: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
+    
     func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError> {
         let endpoint = DietEndPoints.daily(date: date.toString(), userId: userId)
         let result = await apiClient.request(

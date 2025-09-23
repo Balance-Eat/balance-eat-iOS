@@ -110,10 +110,13 @@ enum UserEndPoints: Endpoint {
 }
 
 enum DietEndPoints: Endpoint {
+    case createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String)
     case daily(date: String, userId: String)
     
     var path: String {
         switch self {
+        case .createDiet:
+            return "/v1/diets"
         case .daily:
             return "/v1/diets/daily"
         }
@@ -121,6 +124,8 @@ enum DietEndPoints: Endpoint {
     
     var method: Alamofire.HTTPMethod {
         switch self {
+        case .createDiet:
+            return .post
         case .daily:
             return .get
         }
@@ -128,6 +133,12 @@ enum DietEndPoints: Endpoint {
     
     var parameters: [String : Any?]? {
         switch self {
+        case .createDiet(let mealTime, let consumedAt, let dietFoods, _):
+            return [
+                "mealType": mealTime.title,
+                "consumedAt": consumedAt,
+                "dietFoods": dietFoods
+            ]
         default:
             return nil
         }
@@ -137,12 +148,14 @@ enum DietEndPoints: Endpoint {
         switch self {
         case .daily(let date, _):
             return ["date": date]
+        default:
+            return nil
         }
     }
     
     var headers: HTTPHeaders? {
         switch self {
-        case .daily(_, let userId):
+        case .daily(_, let userId), .createDiet(_, _, _, let userId):
             return ["X-USER-ID": userId]
         }
     }
