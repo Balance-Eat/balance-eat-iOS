@@ -17,6 +17,7 @@ class HomeViewController: UIViewController {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
+    private let refreshControl = UIRefreshControl()
     private let welcomeBackgroundView = GradientView()
     
     private lazy var welcomeLabelStackView: UIStackView = {
@@ -172,6 +173,8 @@ class HomeViewController: UIViewController {
         
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
+        scrollView.refreshControl = refreshControl
+        
         contentView.addSubview(welcomeBackgroundView)
         contentView.addSubview(bodyStatusStackView)
         contentView.addSubview(todayCalorieView)
@@ -233,6 +236,9 @@ class HomeViewController: UIViewController {
         Task {
             await viewModel.getUser()
             await viewModel.getDailyDiet()
+            DispatchQueue.main.async { [weak self] in
+                self?.refreshControl.endRefreshing()
+            }
         }
     }
     
@@ -253,6 +259,13 @@ class HomeViewController: UIViewController {
                 guard let self else { return }
                 updateUIForDailyDietDate(dietList: dietList)
             })
+            .disposed(by: disposeBag)
+        
+        refreshControl.rx.controlEvent(.valueChanged)
+            .bind { [weak self] in
+                guard let self else { return }
+                getDatas()
+            }
             .disposed(by: disposeBag)
     }
     
