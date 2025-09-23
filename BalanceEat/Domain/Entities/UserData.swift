@@ -16,6 +16,7 @@ struct UserData {
     let age: Int
     let weight: Double
     let height: Double
+    let goalType: GoalType
     let activityLevel: ActivityLevel
     let smi: Double?
     let fatPercentage: Double?
@@ -39,6 +40,7 @@ struct UserData {
             age: userResponseDTO.age,
             weight: userResponseDTO.weight,
             height: userResponseDTO.height,
+            goalType: userResponseDTO.goalType,
             activityLevel: userResponseDTO.activityLevel,
             smi: userResponseDTO.smi,
             fatPercentage: userResponseDTO.fatPercentage,

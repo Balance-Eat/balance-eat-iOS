@@ -73,6 +73,7 @@ class TutorialPageViewController: UIViewController {
             .subscribe(onNext: { [weak self] in
                 guard let self = self else { return }
                 let data = self.viewModel.dataRelay.value
+                let goalType = self.viewModel.goalTypeRelay.value
                 let createUserDTO = UserDTO(
                     uuid: UUID.uuidV7String(),
                     name: viewModel.generateRandomNickname(),
@@ -80,6 +81,7 @@ class TutorialPageViewController: UIViewController {
                     age: data.age ?? 0,
                     height: data.height ?? 0,
                     weight: data.weight ?? 0,
+                    goalType: goalType,
                     email: nil,
                     activityLevel: data.activityLevel,
                     smi: data.smi,

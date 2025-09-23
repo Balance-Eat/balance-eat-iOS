@@ -54,6 +54,7 @@ enum UserEndPoints: Endpoint {
                 "age": userDTO.age,
                 "height": userDTO.height,
                 "weight": userDTO.weight,
+                "goalType": userDTO.goalType.title,
                 "email": userDTO.email,
                 "activityLevel": userDTO.activityLevel?.rawValue,
                 "smi": userDTO.smi,
@@ -137,7 +138,7 @@ enum DietEndPoints: Endpoint {
             return [
                 "mealType": mealTime.title,
                 "consumedAt": consumedAt,
-                "dietFoods": dietFoods
+                "dietFoods": dietFoods.map { $0.toDictionary() }
             ]
         default:
             return nil

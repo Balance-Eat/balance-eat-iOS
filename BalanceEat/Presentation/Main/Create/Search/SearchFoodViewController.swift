@@ -12,6 +12,7 @@ import RxCocoa
 
 class SearchFoodViewController: UIViewController {
     private let viewModel: SearchFoodViewModel
+    let selectedFoodDataRelay: BehaviorRelay<FoodData?> = BehaviorRelay(value: nil)
     
     private let contentView = UIView()
     private let searchBar: UISearchBar = {
@@ -166,8 +167,12 @@ class SearchFoodViewController: UIViewController {
             .disposed(by: disposeBag)
         
         tableView.rx.modelSelected(FoodDTOForSearch.self)
-            .subscribe(onNext: { food in
-                print("선택된 검색어: \(food.name)")
+            .subscribe(onNext: { [weak self] food in
+                guard let self else { return }
+                
+                let foodData = food.toFoodData()
+                selectedFoodDataRelay.accept(foodData)
+                navigationController?.popViewController(animated: true)
             })
             .disposed(by: disposeBag)
         

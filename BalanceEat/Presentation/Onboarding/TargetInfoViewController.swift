@@ -326,11 +326,24 @@ class TargetInfoViewController: UIViewController {
     }
 }
 
-enum GoalType {
-    case diet
-    case bulkUp
-    case maintain
+enum GoalType: String, Codable {
+    case diet = "DIET"
+    case bulkUp = "BULK_UP"
+    case maintain = "MAINTAIN"
     case none
+    
+    var title: String {
+        switch self {
+        case .diet:
+            return "DIET"
+        case .bulkUp:
+            return "BULK_UP"
+        case .maintain:
+            return "MAINTAIN"
+        case .none:
+            return ""
+        }
+    }
     
     var coefficient: Double {
         switch self {

@@ -29,7 +29,8 @@ final class HomeViewModel {
         switch getUserResponse {
         case .success(let user):
             print("사용자 정보: \(user)")
-            userResponseRelay.accept(user) 
+            userResponseRelay.accept(user)
+            saveUserId(user.id)
         case .failure(let failure):
             print("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
         }
@@ -46,6 +47,12 @@ final class HomeViewModel {
             return ""
         }
         
+    }
+    
+    private func saveUserId(_ userId: Int) {
+        if case .failure(let error) = userUseCase.saveUserId(Int64(userId)) {
+            print("userId 저장 실패: \(error.localizedDescription)")
+        }
     }
     
     func getDailyDiet() async {

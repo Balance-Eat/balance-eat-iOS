@@ -263,6 +263,7 @@ class EditTargetViewController: UIViewController {
                         age: currentUser.age,
                         height: currentUser.height,
                         weight: edittedCurrentWeight,
+                        goalType: currentUser.goalType,
                         email: currentUser.email,
                         activityLevel: currentUser.activityLevel,
                         smi: edittedCurrentSMI,

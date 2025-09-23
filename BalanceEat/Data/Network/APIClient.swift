@@ -64,6 +64,7 @@ final class APIClient {
                                         - Error: \(serverMessage)
                                         - Response Body: \(responseDataString)
                                         - afError: \(afError.localizedDescription)
+                                        - headers: \(endpoint.headers)
                                         """
                     
                     print(errorMessage)

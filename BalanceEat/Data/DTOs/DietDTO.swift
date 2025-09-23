@@ -27,6 +27,13 @@ struct FoodItemForDietDTO: Codable {
 struct FoodItemForCreateDietDTO: Codable {
     let foodId: Int
     let intake: Double
+    
+    func toDictionary() -> [String: Any] {
+        return [
+            "foodId": foodId,
+            "intake": intake
+        ]
+    }
 }
 
 extension DietDTO {

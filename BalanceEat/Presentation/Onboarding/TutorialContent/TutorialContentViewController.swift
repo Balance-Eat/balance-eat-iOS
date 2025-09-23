@@ -141,7 +141,6 @@ class TutorialContentViewController: UIViewController {
                         })
 
                     Task {
-                        print("createUserDTO: \(createUserDTO)")
                         await self.viewModel.createUser(createUserDTO: createUserDTO)
                     }
 

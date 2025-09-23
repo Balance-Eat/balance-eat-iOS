@@ -149,8 +149,18 @@ final class CreateDietViewController: UIViewController {
 //
         searchInputField.textField.rx.controlEvent(.editingDidBegin)
             .bind { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 let searchFoodViewController = SearchFoodViewController()
+                
+                searchFoodViewController.selectedFoodDataRelay
+                    .subscribe(onNext: { [weak self] foodData in
+                        guard let self else { return }
+                        guard let foodData else { return }
+                        
+                        viewModel.addedFoodsRelay.accept(self.viewModel.addedFoodsRelay.value + [foodData])
+                    })
+                    .disposed(by: disposeBag)
+                
                 self.navigationController?.pushViewController(searchFoodViewController, animated: true)
             }
             .disposed(by: disposeBag)
@@ -206,7 +216,7 @@ final class CreateDietViewController: UIViewController {
                         )
                     }
                     let userId = viewModel.getUserId()
-                    
+                    print("userId: \(userId)")
                     Task {
                         await self.viewModel.createDiet(
                             mealTime: mealTime,

@@ -28,4 +28,19 @@ struct FoodDTOForSearch: Codable {
     let isAdminApproved: Bool
     let createdAt: String
     let updatedAt: String
+    
+    func toFoodData() -> FoodData {
+        return FoodData(
+            id: self.id,
+            uuid: self.uuid,
+            name: self.name,
+            perCapitaIntake: self.perCapitaIntake,
+            unit: self.unit,
+            carbohydrates: self.carbohydrates,
+            protein: self.protein,
+            fat: self.fat,
+            brand: self.brand,
+            createdAt: self.createdAt
+        )
+    }
 }
