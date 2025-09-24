@@ -104,7 +104,7 @@ final class CreateFoodViewController: UIViewController {
         
         let guideLabel = UILabel()
         guideLabel.numberOfLines = 0
-        let fullText = "💡 팁: 포장지의 영양성분표나 온라인 영양 정보를 참고하세요. 3대 영양소는 선택사항이지만 입력하시면 더 정확한 분석이 가능합니다."
+        let fullText = "💡 팁: 포장지의 영양성분표나 온라인 영양 정보를 참고하세요."
         let attrText = NSMutableAttributedString(string: fullText, attributes: [.font: UIFont.systemFont(ofSize: 14, weight: .regular)])
         if let range = fullText.range(of: "팁") {
             attrText.addAttributes([.font: UIFont.systemFont(ofSize: 14, weight: .bold)], range: NSRange(range, in: fullText))
