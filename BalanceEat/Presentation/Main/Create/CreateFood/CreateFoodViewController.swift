@@ -120,7 +120,7 @@ final class CreateFoodViewController: UIViewController {
             make.edges.equalToSuperview().inset(12)
         }
         
-        let mainStackView = UIStackView(arrangedSubviews: [calorieTitledInfoView, nutritionStackView, guideContainer])
+        let mainStackView = UIStackView(arrangedSubviews: [nutritionStackView, guideContainer])
         mainStackView.axis = .vertical
         mainStackView.spacing = 16
         
@@ -236,6 +236,16 @@ final class CreateFoodViewController: UIViewController {
             .bind(to: willCreateFoodPreviewView.foodNameRelay)
             .disposed(by: disposeBag)
         
+        Observable.combineLatest(carbonRelay, proteinRelay, fatRelay)
+            .map { (carbon, protein, fat) in
+                let carbonCal = carbon * 4
+                let proteinCal = protein * 4
+                let fatCal = fat * 9
+                return Int(carbonCal + proteinCal + fatCal)
+            }
+            .bind(to: willCreateFoodPreviewView.calorieRelay)
+            .disposed(by: disposeBag)
+        
         calorieInputField.textObservable
             .map { Int($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.calorieRelay)
@@ -321,23 +331,21 @@ final class CreateFoodViewController: UIViewController {
         
         Observable.combineLatest(
             foodNameInputField.textObservable,
-            calorieInputField.textObservable,
             carbonInputField.textObservable,
             proteinInputField.textObservable,
             fatInputField.textObservable,
             amountInputField.textObservable,
             unitInputField.textObservable
-        ) { name, calorie, carbon, protein, fat, amount, unit -> Bool in
+        ) { name, carbon, protein, fat, amount, unit -> Bool in
                         
             let isNameEmpty = name?.isEmpty ?? true
-            let isCalorieEmpty = calorie?.isEmpty ?? true
             let isCarbonEmpty = carbon?.isEmpty ?? true
             let isProteinEmpty = protein?.isEmpty ?? true
             let isFatEmpty = fat?.isEmpty ?? true
             let isAmountEmpty = amount?.isEmpty ?? true
             let isUnitEmpty = unit?.isEmpty ?? true
             
-            return isNameEmpty || isCalorieEmpty || isCarbonEmpty || isProteinEmpty || isFatEmpty || isAmountEmpty || isUnitEmpty
+            return isNameEmpty || isCarbonEmpty || isProteinEmpty || isFatEmpty || isAmountEmpty || isUnitEmpty
         }
         .bind(to: isInValidInputRelay)
         .disposed(by: disposeBag)
