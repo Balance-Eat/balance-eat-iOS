@@ -12,7 +12,7 @@ import RxCocoa
 final class CreateFoodViewModel {
     private let foodUseCase: FoodUseCaseProtocol
     
-    let createFoodResultRelay = PublishRelay<Bool>()
+    let createFoodResultRelay = PublishRelay<FoodData>()
     
     init(foodUseCase: FoodUseCaseProtocol) {
         self.foodUseCase = foodUseCase
@@ -23,10 +23,10 @@ final class CreateFoodViewModel {
         
         switch createFoodResponse {
         case .success(let foodData):
-            createFoodResultRelay.accept(true)
+            createFoodResultRelay.accept(foodData)
             
         case .failure(let failure):
-            createFoodResultRelay.accept(false)
+            print("fail to create food: \(failure)")
         }
     }
 }

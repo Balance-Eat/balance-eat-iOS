@@ -20,6 +20,8 @@ final class CreateFoodViewController: UIViewController {
     private let fatRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
     private let brandNameRelay = BehaviorRelay(value: "")
     
+    let createdFoodRelay: BehaviorRelay<FoodData?> = BehaviorRelay(value: nil)
+    
     private let disposeBag = DisposeBag()
     private let viewModel: CreateFoodViewModel
     
@@ -388,9 +390,8 @@ final class CreateFoodViewController: UIViewController {
             .subscribe(onNext: { [weak self] result in
                 guard let self else { return }
                 
-                if result {
-                    dismiss(animated: true)
-                }
+                createdFoodRelay.accept(result)
+                dismiss(animated: true)
             })
             .disposed(by: disposeBag)
     }

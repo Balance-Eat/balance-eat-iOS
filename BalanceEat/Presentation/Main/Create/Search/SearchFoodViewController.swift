@@ -191,6 +191,14 @@ class SearchFoodViewController: UIViewController {
                 guard let self else { return }
                 
                 let createFoodViewController = CreateFoodViewController()
+                
+                createFoodViewController.createdFoodRelay
+                    .subscribe(onNext: { [weak self] food in
+                        guard let self else { return }
+                        selectedFoodDataRelay.accept(food)
+                    })
+                    .disposed(by: disposeBag)
+                
                 if let sheet = createFoodViewController.sheetPresentationController {
                     sheet.detents = [.medium(), .large()]
                     sheet.prefersGrabberVisible = true
