@@ -212,7 +212,7 @@ final class CreateDietViewController: UIViewController {
                     let dietFoods = viewModel.addedFoodsRelay.value.map { food in
                         FoodItemForCreateDietDTO(
                             foodId: food.id,
-                            intake: food.perCapitaIntake
+                            intake: food.servingSize
                         )
                     }
                     let userId = viewModel.getUserId()

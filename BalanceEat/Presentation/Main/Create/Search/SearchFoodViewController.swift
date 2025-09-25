@@ -160,7 +160,7 @@ class SearchFoodViewController: UIViewController {
                         carbon: String(element.carbohydrates),
                         protein: String(element.protein),
                         fat: String(element.fat),
-                        info: "\(element.perCapitaIntake)\(element.unit) 기준"
+                        info: "\(element.servingSize)\(element.unit) 기준"
                     )
                 }
             }

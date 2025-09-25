@@ -10,7 +10,7 @@ import Foundation
 struct CreateFoodDTO: Codable {
     let uuid: String
     let name: String
-    let perCapitaIntake: Double
+    let servingSize: Double
     let unit: String
     let carbohydrates: Double
     let protein: Double

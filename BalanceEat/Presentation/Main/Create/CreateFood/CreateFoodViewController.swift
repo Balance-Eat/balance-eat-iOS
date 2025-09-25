@@ -284,7 +284,7 @@ final class CreateFoodViewController: UIViewController {
                     guard let self else { return }
                     
                     let name = nameRelay.value
-                    let perCapitaIntake = amountRelay.value
+                    let servingSize = amountRelay.value
                     let unit = unitRelay.value
                     let carbohydrates = carbonRelay.value
                     let protein = proteinRelay.value
@@ -295,7 +295,7 @@ final class CreateFoodViewController: UIViewController {
                     let createFoodDTO = CreateFoodDTO(
                         uuid: UUID.uuidV7String(),
                         name: name,
-                        perCapitaIntake: perCapitaIntake,
+                        servingSize: servingSize,
                         unit: unit,
                         carbohydrates: carbohydrates,
                         protein: protein,

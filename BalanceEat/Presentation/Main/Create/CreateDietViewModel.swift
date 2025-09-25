@@ -35,7 +35,6 @@ final class CreateDietViewModel {
     
     func deleteFood(food: FoodData) {
         var current = addedFoodsRelay.value
-        
         if let index = current.firstIndex(where: { $0.id == food.id }) {
             current.remove(at: index)
             addedFoodsRelay.accept(current)

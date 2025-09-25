@@ -190,7 +190,7 @@ enum FoodEndPoints: Endpoint {
             return [
                 "uuid": foodDTO.uuid,
                 "name": foodDTO.name,
-                "perCapitaIntake": foodDTO.perCapitaIntake,
+                "servingSize": foodDTO.servingSize,
                 "unit": foodDTO.unit,
                 "carbohydrates": foodDTO.carbohydrates,
                 "protein": foodDTO.protein,
