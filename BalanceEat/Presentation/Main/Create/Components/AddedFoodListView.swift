@@ -159,7 +159,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
                 dict[foodItem.uuid] = value
                 self.cellNutritionRelay.accept(dict)
             })
-            .disposed(by: disposeBag)
+            .disposed(by: cell.disposeBag)
         
         
         return cell
