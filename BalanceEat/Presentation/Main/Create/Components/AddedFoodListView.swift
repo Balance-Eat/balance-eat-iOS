@@ -124,12 +124,12 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             })
             .disposed(by: disposeBag)
         
-        deletedFoodItem
-            .withLatestFrom(foodItemsRelay) { deleted, current -> [FoodData] in
-                current.filter { $0.uuid != deleted.uuid }
-            }
-            .bind(to: foodItemsRelay)
-            .disposed(by: disposeBag)
+//        deletedFoodItem
+//            .withLatestFrom(foodItemsRelay) { deleted, current -> [FoodData] in
+//                current.filter { $0.id != deleted.id }
+//            }
+//            .bind(to: foodItemsRelay)
+//            .disposed(by: disposeBag)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -143,14 +143,14 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         
         let foodItem = foodItems[indexPath.row]
         cell.configure(
-            servingSize: foodItem.perCapitaIntake,
+            servingSize: foodItem.servingSize,
             foodData: foodItem
         )
         
         cell.closeButtonTapped
             .map { foodItem }
             .bind(to: deletedFoodItem)
-            .disposed(by: disposeBag)
+            .disposed(by: cell.disposeBag)
         
         cell.nutritionRelay
             .subscribe(onNext: { [weak self] value in
@@ -241,7 +241,7 @@ final class AddedFoodCell: UITableViewCell {
     let nutritionRelay = BehaviorRelay<(Double, Double, Double, Double)>(value: (0,0,0,0))
     let closeButtonTapped = PublishRelay<Void>()
     
-    private let disposeBag = DisposeBag()
+    var disposeBag = DisposeBag()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         self.nutritionalInfoView = TotalNutritionalInfoView()
@@ -250,11 +250,16 @@ final class AddedFoodCell: UITableViewCell {
         selectionStyle = .none
         setupView()
         setupConstraints()
-        setBinding()
+//        setBinding()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
     }
     
     private func setupView() {
@@ -365,6 +370,8 @@ final class AddedFoodCell: UITableViewCell {
     }
     
     func configure(servingSize: Double, foodData: FoodData) {
+        prepareForReuse()
+        
         foodNameLabel.text = foodData.name
         self.servingSize = servingSize
         self.foodData = foodData
@@ -375,6 +382,62 @@ final class AddedFoodCell: UITableViewCell {
         nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates)
         nutritionalInfoView.proteinRelay.accept(foodData.protein)
         nutritionalInfoView.fatRelay.accept(foodData.fat)
+        
+        closeButton.rx.tap
+                .bind(to: closeButtonTapped)
+                .disposed(by: disposeBag)
+            
+        twoOptionPickerView.selectedOption
+            .subscribe(onNext: { [weak self] selectedOption in
+                guard let self else { return }
+                
+                switch selectedOption {
+                case .first:
+                    stepperView.stepValue = 1
+                    stepperView.stepperModeRelay.accept(.servingSize)
+                case .second:
+                    stepperView.stepValue = 1
+                    stepperView.stepperModeRelay.accept(.amountSize)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        closeButton.rx.tap
+            .bind(to: closeButtonTapped)
+            .disposed(by: disposeBag)
+        
+        stepperView.amountSizeRelay
+            .subscribe(onNext: { [weak self] amount in
+                guard let self else { return }
+                guard let foodData = self.foodData else { return }
+                
+                let ratio = amount / servingSize
+                
+                nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates * ratio)
+                nutritionalInfoView.proteinRelay.accept(foodData.protein * ratio)
+                nutritionalInfoView.fatRelay.accept(foodData.fat * ratio)
+            })
+            .disposed(by: disposeBag)
+        
+        Observable.combineLatest(
+            nutritionalInfoView.carbonRelay,
+            nutritionalInfoView.proteinRelay,
+            nutritionalInfoView.fatRelay
+        ).subscribe(onNext: { [weak self] (carbon, protein, fat) in
+            guard let self else { return }
+            let calorieRelayValue = 4 * carbon + 4 * protein + 9 * fat
+            nutritionalInfoView.calorieRelay.accept(calorieRelayValue)
+        })
+        .disposed(by: disposeBag)
+        
+        Observable.combineLatest(
+            nutritionalInfoView.calorieRelay,
+            nutritionalInfoView.carbonRelay,
+            nutritionalInfoView.proteinRelay,
+            nutritionalInfoView.fatRelay
+        )
+        .bind(to: nutritionRelay)
+        .disposed(by: disposeBag)
     }
 }
 
