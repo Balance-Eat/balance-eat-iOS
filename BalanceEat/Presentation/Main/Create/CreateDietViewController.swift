@@ -207,16 +207,21 @@ final class CreateDietViewController: UIViewController {
                 onNext: { [weak self] in
                     guard let self else { return }
                     
+                    
                     let mealTime = mealTimePickerView.selectedMealTime
                     let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
-                    let dietFoods = viewModel.addedFoodsRelay.value.map { food in
-                        FoodItemForCreateDietDTO(
-                            foodId: food.id,
-                            intake: food.servingSize
-                        )
+                    let dietFoods = viewModel.addedFoodsRelay.value.map { [weak self] food in
+                        
+                        if let servingSize = self?.addedFoodListView.cellServingSizeRelay.value[food.uuid] {
+                            FoodItemForCreateDietDTO(
+                                foodId: food.id,
+                                intake: servingSize
+                            )
+                        } else {
+                            FoodItemForCreateDietDTO(foodId: -1, intake: -1)
+                        }
                     }
                     let userId = viewModel.getUserId()
-                    print("userId: \(userId)")
                     Task {
                         await self.viewModel.createDiet(
                             mealTime: mealTime,
