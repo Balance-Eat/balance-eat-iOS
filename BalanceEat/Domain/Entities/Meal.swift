@@ -8,10 +8,36 @@
 import Foundation
 
 enum MealType: String, Codable {
-    case breakfast
-    case lunch
-    case dinner
-    case snack
+    case breakfast = "BREAKFAST"
+    case lunch = "LUNCH"
+    case dinner = "DINNER"
+    case snack = "SNACK"
+    
+    var title : String {
+        switch self {
+        case .breakfast:
+            return "아침"
+        case .lunch:
+            return "점심"
+        case .dinner:
+            return "저녁"
+        case .snack:
+            return "간식"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+            case .breakfast:
+            return "sunrise"
+        case .lunch:
+            return "fork.knife"
+        case .dinner:
+            return "fork.knife.circle.fill"
+        case .snack:
+            return "takeoutbag.fill"
+        }
+    }
 }
 
 struct Meal: Identifiable, Equatable, Codable {

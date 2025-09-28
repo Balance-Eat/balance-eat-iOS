@@ -321,21 +321,31 @@ class HomeViewController: UIViewController {
         
         var mealLogs: [MealLogView] = []
         dietList.forEach { diet in
-            diet.items.forEach { item in
-                let mealLogView = MealLogView(
-                    title: item.name,
-                    ateTime: diet.consumedAt.toDate() ?? Date(),
-                    consumedFoodAmount: Int(item.intake),
-                    consumedCalories: Int(item.calories),
-                    consumedSugars: 0,
-                    consumedCarbohydrates: Int(item.carbohydrates),
-                    consumedProteins: Int(item.protein),
-                    consumedFats: Int(item.fat)
-                )
-                mealLogs.append(mealLogView)
-            }
+            let mealLogView = MealLogView(
+                icon: UIImage(systemName: diet.mealType.icon),
+                title: diet.mealType.title,
+                ateTime: extractHourMinute(from: diet.consumedAt) ?? "",
+                consumedCalories: diet.items.reduce(0) { $0 + Int($1.calories) },
+                foodDatas: diet.items
+            )
+            
+            mealLogs.append(mealLogView)
         }
         todayAteMealLogListView.updateMealLogs(mealLogs)
+    }
+    
+    func extractHourMinute(from dateString: String) -> String? {
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        isoFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        
+        guard let date = isoFormatter.date(from: dateString) else { return nil }
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "HH:mm"
+        timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        
+        return timeFormatter.string(from: date)
     }
 }
 
@@ -343,18 +353,19 @@ final class MealLogListView: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "최근 식사 기록"
+        label.text = "오늘 식사 기록"
         label.font = .systemFont(ofSize: 17, weight: .bold)
         label.textColor = .bodyStatusCardNumber
         return label
     }()
     
     private let stackView: UIStackView = {
-        let sv = UIStackView()
-        sv.axis = .vertical
-        sv.spacing = 0
-        sv.distribution = .fill
-        return sv
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 20
+        stackView.distribution = .fill
+        stackView.backgroundColor = .clear
+        return stackView
     }()
     
     private var mealLogs: [MealLogView] = []
@@ -372,17 +383,13 @@ final class MealLogListView: UIView {
     }
     
     private func setupView() {
-        let contentView = BalanceEatContentView()
-        addSubview(contentView)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(stackView)
+        addSubview(titleLabel)
+        addSubview(stackView)
         
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+        self.backgroundColor = .clear
         
         titleLabel.snp.makeConstraints { make in
-            make.top.leading.equalToSuperview().inset(20)
+            make.top.equalToSuperview()
         }
         
         stackView.snp.makeConstraints { make in
@@ -393,23 +400,7 @@ final class MealLogListView: UIView {
     }
     
     private func configureStackView() {
-        for (index, mealLog) in mealLogs.enumerated() {
-            if index > 0 {
-                let separator = UIView()
-                separator.backgroundColor = .systemGray5
-                separator.snp.makeConstraints { make in
-                    make.height.equalTo(1)
-                }
-                
-                let separatorContainer = UIView()
-                separatorContainer.addSubview(separator)
-                separator.snp.makeConstraints { make in
-                    make.top.bottom.equalToSuperview()
-                    make.leading.trailing.equalToSuperview().inset(20)
-                }
-                
-                stackView.addArrangedSubview(separatorContainer)
-            }
+        for mealLog in mealLogs {
             stackView.addArrangedSubview(mealLog)
         }
     }

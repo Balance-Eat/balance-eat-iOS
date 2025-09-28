@@ -11,23 +11,20 @@ import SnapKit
 final class MealLogView: UIView {
     private let icon: UIImage?
     private let title: String
-    private let ateTime: Date
-    private let consumedFoodAmount: Int
+    private let ateTime: String
     private let consumedCalories: Int
-    private let consumedSugars: Int
-    private let consumedCarbohydrates: Int
-    private let consumedProteins: Int
-    private let consumedFats: Int
+    private let foodDatas: [DietFoodData]
     
-    private let containerView: UIView = UIView()
+    private let containerView: UIView = BalanceEatContentView()
     private let iconImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .systemOrange
         return imageView
     }()
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 14, weight: .bold)
+        label.font = .systemFont(ofSize: 16, weight: .bold)
         return label
     }()
     private let ateTimeLabel: UILabel = {
@@ -41,34 +38,13 @@ final class MealLogView: UIView {
         label.font = .systemFont(ofSize: 18, weight: .heavy)
         return label
     }()
-    private let consumedFoodAmountLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.textColor = .darkGray
-        return label
-    }()
-    private let nutrientStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .horizontal
-        stackView.distribution = .equalSpacing
-        stackView.alignment = .center
-        return stackView
-    }()
-//    private lazy var consumedSugarView = ConsumedNutirientItemView(consumedNutrientItemType: .sugar, consumedStatistics: consumedSugars)
-    private lazy var consumedCarbohydratesView = ConsumedNutirientItemView(consumedNutrientItemType: .carbohydrate, consumedStatistics: consumedCarbohydrates)
-    private lazy var consumedProteinsView = ConsumedNutirientItemView(consumedNutrientItemType: .protein, consumedStatistics: consumedProteins)
-    private lazy var consumedFatsView = ConsumedNutirientItemView(consumedNutrientItemType: .fat, consumedStatistics: consumedFats)
     
-    init(icon: UIImage? = nil, title: String, ateTime: Date, consumedFoodAmount: Int, consumedCalories: Int, consumedSugars: Int, consumedCarbohydrates: Int, consumedProteins: Int, consumedFats: Int) {
+    init(icon: UIImage? = nil, title: String, ateTime: String, consumedCalories: Int, foodDatas: [DietFoodData]) {
         self.icon = icon
         self.title = title
         self.ateTime = ateTime
-        self.consumedFoodAmount = consumedFoodAmount
         self.consumedCalories = consumedCalories
-        self.consumedSugars = consumedSugars
-        self.consumedCarbohydrates = consumedCarbohydrates
-        self.consumedProteins = consumedProteins
-        self.consumedFats = consumedFats
+        self.foodDatas = foodDatas
         super.init(frame: .zero)
         
         setUpView()
@@ -81,61 +57,136 @@ final class MealLogView: UIView {
     private func setUpView() {
         iconImageView.image = icon
         titleLabel.text = title
-        ateTimeLabel.text = formattedTime(from: ateTime)
-        consumedFoodAmountLabel.text = "\(consumedFoodAmount)g"
+        ateTimeLabel.text = ateTime
         consumedCaloriesLabel.text = "\(consumedCalories) kcal"
         
         self.addSubview(containerView)
-        
-        [iconImageView, titleLabel, ateTimeLabel, consumedCaloriesLabel, consumedFoodAmountLabel, nutrientStackView].forEach {
-            containerView.addSubview($0)
-        }
+        self.backgroundColor = .clear
         
         containerView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(20)
+            make.edges.equalToSuperview()
         }
         
-//        iconImageView.snp.makeConstraints { make in
-//            make.top.leading.equalToSuperview()
-//            make.width.height.equalTo(30)
-//        }
+        let titleStackView = UIStackView(arrangedSubviews: [iconImageView, titleLabel, ateTimeLabel])
+        titleStackView.axis = .horizontal
+        titleStackView.spacing = 8
+        titleStackView.layer.cornerRadius = 16
+        titleStackView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        titleStackView.backgroundColor = .systemOrange.withAlphaComponent(0.15)
         
-        titleLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview()
-            make.top.equalToSuperview()
+        let foodStackView = UIStackView()
+        foodStackView.axis = .vertical
+        
+        for (index, food) in foodDatas.enumerated() {
+            let mealLogFoodView = MealLogFoodView(
+                title: food.name,
+                amount: "\(food.intake) \(food.unit)",
+                calorie: makeCalorie(carbon: food.carbohydrates, protein: food.protein, fat: food.fat)
+            )
+
+            mealLogFoodView.snp.makeConstraints { make in
+                make.height.equalTo(64)
+            }
+            foodStackView.addArrangedSubview(mealLogFoodView)
+
+            if index < foodDatas.count - 1 {
+                let separatorContainer = UIView()
+                let separator = UIView()
+                separator.backgroundColor = .lightGray.withAlphaComponent(0.2)
+                
+                separatorContainer.addSubview(separator)
+                separator.snp.makeConstraints { make in
+                    make.leading.trailing.equalToSuperview().inset(16)
+                    make.height.equalTo(1)
+                    make.centerY.equalToSuperview()
+                }
+                
+                separatorContainer.snp.makeConstraints { make in
+                    make.height.equalTo(1)
+                }
+                
+                foodStackView.addArrangedSubview(separatorContainer)
+            }
         }
+
         
-        ateTimeLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview()
-            make.top.equalTo(titleLabel.snp.bottom).offset(8)
-        }
+        [titleStackView, consumedCaloriesLabel, foodStackView].forEach { containerView.addSubview($0) }
         
-        consumedFoodAmountLabel.snp.makeConstraints { make in
-            make.top.trailing.equalToSuperview().inset(8)
+        iconImageView.snp.makeConstraints { make in
+            make.leading.equalToSuperview().inset(16)
         }
         
         consumedCaloriesLabel.snp.makeConstraints { make in
-            make.top.equalTo(consumedFoodAmountLabel.snp.bottom).offset(40)
-            make.leading.equalToSuperview()
+            make.trailing.equalToSuperview().inset(16)
+            make.centerY.equalTo(titleStackView)
+        }
+        
+        titleStackView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+            make.height.equalTo(48)
         }
 
-        nutrientStackView.snp.makeConstraints { make in
-            make.top.equalTo(consumedCaloriesLabel.snp.bottom).offset(8)
+        foodStackView.snp.makeConstraints { make in
+            make.top.equalTo(titleStackView.snp.bottom)
             make.leading.trailing.bottom.equalToSuperview()
         }
-        
-//        nutrientStackView.addArrangedSubview(consumedSugarView)
-        nutrientStackView.addArrangedSubview(consumedCarbohydratesView)
-        nutrientStackView.addArrangedSubview(consumedProteinsView)
-        nutrientStackView.addArrangedSubview(consumedFatsView)
     }
     
-    private func formattedTime(from date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "a h:mm"
+    private func makeCalorie(carbon: Double, protein: Double, fat: Double) -> Double {
+        return carbon * 4 + protein * 4 + fat * 9
+    }
+}
+
+final class MealLogFoodView: UIView {
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .bold)
+        label.textColor = .black
+        return label
+    }()
+    private let amountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12)
+        label.textColor = .darkGray
+        return label
+    }()
+    private let calorieLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.textColor = .systemRed
+        return label
+    }()
+    
+    init(title: String, amount: String, calorie: Double) {
+        titleLabel.text = title
+        amountLabel.text = amount
+        calorieLabel.text = String(format: "%.1f kcal", calorie)
+        super.init(frame: .zero)
         
-        return formatter.string(from: date)
+        setUpView()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        let leftStackView = UIStackView(arrangedSubviews: [titleLabel, amountLabel])
+        leftStackView.axis = .vertical
+        leftStackView.spacing = 4
+        
+        [leftStackView, calorieLabel].forEach {
+            addSubview($0)
+        }
+        
+        leftStackView.snp.makeConstraints { make in
+            make.leading.top.bottom.equalToSuperview().inset(16)
+        }
+        
+        calorieLabel.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(16)
+            make.centerY.equalToSuperview()
+        }
     }
 }
 
