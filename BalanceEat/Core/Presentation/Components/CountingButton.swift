@@ -18,8 +18,8 @@ final class CountingButton: UIView {
         let button = UIButton(type: .system)
         button.layer.cornerRadius = 20
         button.backgroundColor = .systemGray6
-        button.tintColor = .label
-        button.titleLabel?.font = .systemFont(ofSize: 20, weight: .bold)
+        button.tintColor = .black
+        button.titleLabel?.font = .systemFont(ofSize: 20, weight: .regular)
         return button
     }()
     
@@ -40,6 +40,12 @@ final class CountingButton: UIView {
         addSubview(button)
         button.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+        }
+        
+        button.imageView?.contentMode = .scaleAspectFit
+        button.imageView?.snp.makeConstraints { make in
+            make.width.height.equalTo(12)
+            make.center.equalToSuperview()
         }
     }
     

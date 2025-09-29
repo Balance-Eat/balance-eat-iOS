@@ -46,7 +46,7 @@ class MainViewController: UIViewController {
     private let viewControllers: [UIViewController] = [
         HomeViewController(),
         CreateDietViewController(),
-        ListViewController(),
+        DietListViewController(),
         ChartViewController(),
         MenuViewController()
     ]
