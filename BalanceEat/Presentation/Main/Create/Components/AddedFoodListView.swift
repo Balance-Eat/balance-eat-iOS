@@ -41,7 +41,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     private let tableView = UITableView()
     private var tableViewHeightConstraint: Constraint?
     
-    private lazy var sumOfNutritionValueView = SumOfNutritionValueView()
+    private lazy var sumOfNutritionValueView = SumOfNutritionValueView(title: "총 영양소")
     
     /// (Calorie, Carbon, Protein, Fat, ServingSize)
     private let cellNutritionRelay = BehaviorRelay<[String: (Double, Double, Double, Double)]>(value: [:])

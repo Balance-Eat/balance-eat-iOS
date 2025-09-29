@@ -28,7 +28,12 @@ final class SumOfNutritionValueView: UIView {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textColor = .black
-        label.text = "총 영양소"
+        return label
+    }()
+    private let subTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .gray
         return label
     }()
     
@@ -39,7 +44,13 @@ final class SumOfNutritionValueView: UIView {
     
     
     
-    init() {
+    init(title: String, subTitle: String? = nil) {
+        titleLabel.text = title
+        if let subTitle = subTitle {
+            self.subTitleLabel.text = subTitle
+        } else {
+            subTitleLabel.isHidden = true
+        }
         super.init(frame: .zero)
         
         setUpView()
@@ -83,10 +94,15 @@ final class SumOfNutritionValueView: UIView {
         nutritionMainStackView.axis = .vertical
         nutritionMainStackView.spacing = 12
         
-        [titleStackView, nutritionMainStackView].forEach(containerView.addSubview)
+        [titleStackView, subTitleLabel, nutritionMainStackView].forEach(containerView.addSubview)
         
         titleStackView.snp.makeConstraints { make in
             make.top.leading.equalToSuperview().inset(20)
+        }
+        
+        subTitleLabel.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().inset(20)
+            make.centerY.equalTo(titleStackView)
         }
         
         nutritionMainStackView.snp.makeConstraints { make in
