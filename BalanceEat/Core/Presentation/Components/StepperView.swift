@@ -34,11 +34,8 @@ final class StepperView: UIView {
         return stackView
     }()
     
-    private let minusButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("-", for: .normal)
-        button.layer.cornerRadius = 20
-        button.backgroundColor = .systemGray6
+    private let minusButton: CountingButton = {
+        let button = CountingButton(title: "-")
         return button
     }()
     
@@ -62,11 +59,8 @@ final class StepperView: UIView {
         return label
     }()
     
-    private let plusButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("+", for: .normal)
-        button.layer.cornerRadius = 20
-        button.backgroundColor = .systemGray6
+    private let plusButton: CountingButton = {
+        let button = CountingButton(title: "+")
         return button
     }()
     
@@ -108,7 +102,7 @@ final class StepperView: UIView {
     }
     
     private func setBinding() {
-        minusButton.rx.tap
+        minusButton.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 guard textField.text != "1" else { return }
@@ -120,7 +114,7 @@ final class StepperView: UIView {
             })
             .disposed(by: disposeBag)
         
-        plusButton.rx.tap
+        plusButton.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 let currentValue = Double(textField.text ?? "") ?? 0
