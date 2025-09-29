@@ -493,6 +493,18 @@ final class NutritionInfoView: UIView {
             "지방"
         }
     }()
+    private lazy var viewBackgroundColor: UIColor = {
+        switch nutritionType {
+        case .calorie:
+                .calorieText.withAlphaComponent(0.1)
+        case .carbon:
+                .carbonText.withAlphaComponent(0.1)
+        case .protein:
+                .proteinText.withAlphaComponent(0.1)
+        case .fat:
+                .fatText.withAlphaComponent(0.1)
+        }
+    }()
     
     private lazy var valueLabel: UILabel = {
         let label = UILabel()
@@ -546,6 +558,8 @@ final class NutritionInfoView: UIView {
     }
     
     private func setUpView() {
+        self.backgroundColor = viewBackgroundColor
+        
         let stackView = UIStackView()
         stackView.axis = .vertical
         stackView.alignment = .center

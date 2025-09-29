@@ -51,14 +51,16 @@ final class SumOfNutritionValueView: UIView {
     }
     
     private func setUpView() {
-        self.backgroundColor = .systemBlue.withAlphaComponent(0.05)
-        self.layer.cornerRadius = 8
-        self.layer.borderWidth = 2
-        self.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.3).cgColor
+        let containerView = BalanceEatContentView()
+        
+        addSubview(containerView)
+        
+        containerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
         
         [calorieInfoView, carbonInfoView, proteinInfoView, fatInfoView].forEach {
             $0.cornerRadius = 8
-            $0.backgroundColor = .white
             $0.valueTextSize = 24
             $0.titleTextSize = 12
         }
@@ -81,7 +83,7 @@ final class SumOfNutritionValueView: UIView {
         nutritionMainStackView.axis = .vertical
         nutritionMainStackView.spacing = 12
         
-        [titleStackView, nutritionMainStackView].forEach(addSubview)
+        [titleStackView, nutritionMainStackView].forEach(containerView.addSubview)
         
         titleStackView.snp.makeConstraints { make in
             make.top.leading.equalToSuperview().inset(20)
