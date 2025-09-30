@@ -15,6 +15,7 @@ final class SumOfNutritionValueView: UIView {
     let carbonRelay = BehaviorRelay<Double>(value: 0)
     let proteinRelay = BehaviorRelay<Double>(value: 0)
     let fatRelay = BehaviorRelay<Double>(value: 0)
+    let subTitleRelay = BehaviorRelay<String>(value: "")
     
     private let disposeBag = DisposeBag()
     
@@ -126,6 +127,10 @@ final class SumOfNutritionValueView: UIView {
         
         fatRelay
             .bind(to: fatInfoView.valueRelay)
+            .disposed(by: disposeBag)
+        
+        subTitleRelay
+            .bind(to: subTitleLabel.rx.text)
             .disposed(by: disposeBag)
     }
 }

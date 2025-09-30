@@ -11,7 +11,8 @@ import RxSwift
 import RxCocoa
 
 final class DietListViewController: UIViewController {
-    
+    private let viewModel: DietListViewModel
+    private let disposeBag = DisposeBag()
     private let headerView = DietListHeaderView()
     
     private let scrollView = UIScrollView()
@@ -22,12 +23,26 @@ final class DietListViewController: UIViewController {
         stackView.spacing = 20
         return stackView
     }()
+    private lazy var sumOfNutritionValueView = SumOfNutritionValueView(title: "이날의 영양 요약", subTitle: "목표 : \(viewModel.userDataRelay.value?.targetCalorie ?? 0)kcal")
+    
+    private let todayAteMealLogListView: MealLogListView = {
+        let mealLogs: [MealLogView] = []
+        return MealLogListView(mealLogs: mealLogs)
+    }()
+    
+    private let dietEmptyInfoView = DietEmptyInfoView()
     
     init() {
+        let userRepository = UserRepository()
+        let userUseCase = UserUseCase(repository: userRepository)
+        let dietRepository = DietRepository()
+        let dietUseCase = DietUseCase(repository: dietRepository)
+        self.viewModel = DietListViewModel(userUseCase: userUseCase, dietUseCase: dietUseCase)
         super.init(nibName: nil, bundle: nil)
         
         setUpView()
         setBinding()
+        getDatas()
     }
     
     required init?(coder: NSCoder) {
@@ -62,10 +77,106 @@ final class DietListViewController: UIViewController {
         mainStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(16)
         }
+        
+        
+        [sumOfNutritionValueView, todayAteMealLogListView, dietEmptyInfoView].forEach(mainStackView.addArrangedSubview(_:))
     }
     
     private func setBinding() {
+        headerView.selectedDate
+            .bind(to: viewModel.selectedDate)
+            .disposed(by: disposeBag)
         
+        headerView.goToTodayButtonTap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                viewModel.selectedDate.accept(Date())
+                headerView.selectedDate.accept(Date())
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.userDataRelay
+            .subscribe(onNext: { [weak self] userData in
+                guard let self else { return }
+                if let targetCalorie = userData?.targetCalorie {
+                    self.sumOfNutritionValueView.subTitleRelay.accept("목표: \(targetCalorie)kcal")
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.selectedDayDataCache
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] dietDatas in
+                guard let self else { return }
+                let totalCalories = dietDatas
+                    .flatMap { $0.items }
+                    .map { $0.calories }
+                    .reduce(0, +)
+                let totalCarbon = dietDatas
+                    .flatMap { $0.items }
+                    .map { $0.carbohydrates }
+                    .reduce(0, +)
+                let totalProtein = dietDatas
+                    .flatMap { $0.items }
+                    .map { $0.protein }
+                    .reduce(0, +)
+                let totalFat = dietDatas
+                    .flatMap { $0.items }
+                    .map { $0.fat }
+                    .reduce(0, +)
+                sumOfNutritionValueView.calorieRelay.accept(totalCalories)
+                sumOfNutritionValueView.carbonRelay.accept(totalCarbon)
+                sumOfNutritionValueView.proteinRelay.accept(totalProtein)
+                sumOfNutritionValueView.fatRelay.accept(totalFat)
+                
+                var mealLogs: [MealLogView] = []
+                dietDatas.forEach { [weak self] diet in
+                    guard let self else { return }
+                
+                    let mealLogView = MealLogView(
+                        icon: UIImage(systemName: diet.mealType.icon),
+                        title: diet.mealType.title,
+                        ateTime: extractHourMinute(from: diet.consumedAt) ?? "",
+                        consumedCalories: diet.items.reduce(0) { $0 + Int($1.calories) },
+                        foodDatas: diet.items
+                    )
+                    mealLogs.append(mealLogView)
+                }
+                todayAteMealLogListView.updateMealLogs(mealLogs)
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.selectedDayDataCache
+            .map { $0.isEmpty }
+            .bind(to: todayAteMealLogListView.rx.isHidden)
+            .disposed(by: disposeBag)
+        
+        viewModel.selectedDayDataCache
+            .map { !$0.isEmpty }
+            .bind(to: dietEmptyInfoView.rx.isHidden)
+            .disposed(by: disposeBag)
+        
+    }
+    
+    private func getDatas() {
+        Task {
+            await viewModel.getUser()
+            await viewModel.getMonthlyDiets()
+        }
+    }
+    
+    func extractHourMinute(from dateString: String) -> String? {
+        let isoFormatter = ISO8601DateFormatter()
+        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        isoFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        
+        guard let date = isoFormatter.date(from: dateString) else { return nil }
+        
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateFormat = "HH:mm"
+        timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        
+        return timeFormatter.string(from: date)
     }
 }
 
@@ -76,6 +187,19 @@ final class DietListHeaderView: UIView {
         label.textColor = .black
         label.text = "식단 내역"
         return label
+    }()
+    
+    private let goToTodayButton: TitledButton = {
+        let button = TitledButton(
+            title: "오늘",
+            style: .init(
+                backgroundColor: .lightGray.withAlphaComponent(0.15),
+                titleColor: .black,
+                borderColor: nil,
+                gradientColors: nil
+            )
+        )
+        return button
     }()
     
     private let openCalendarButton = OpenCalendarButton()
@@ -96,6 +220,12 @@ final class DietListHeaderView: UIView {
         return label
     }()
     
+    private let separatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGray6
+        return view
+    }()
+    
     private let datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
         datePicker.datePickerMode = .date
@@ -106,6 +236,7 @@ final class DietListHeaderView: UIView {
     }()
     
     let selectedDate = BehaviorRelay<Date>(value: Date())
+    let goToTodayButtonTap = PublishSubject<Void>()
     private let disposeBag = DisposeBag()
     
     init() {
@@ -121,7 +252,9 @@ final class DietListHeaderView: UIView {
     
     private func setUpView() {
         self.backgroundColor = .white
-        if let formattedDate = formatKoreanDate("2025-09-29") {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        if let formattedDate = formatKoreanDate(formatter.string(from: selectedDate.value)) {
             dateLabel.text = formattedDate
         }
         
@@ -132,22 +265,35 @@ final class DietListHeaderView: UIView {
             return stackView
         }()
         
-        let titleStackView = UIStackView(arrangedSubviews: [titleLabel, openCalendarButton])
+        let leftSpacer = UIView()
+        let rightSpacer = UIView()
+
+        let titleStackView = UIStackView(arrangedSubviews: [titleLabel, leftSpacer, goToTodayButton, rightSpacer, openCalendarButton])
         titleStackView.axis = .horizontal
-        titleStackView.distribution = .equalSpacing
         titleStackView.alignment = .center
+        titleStackView.spacing = 8
+
+        leftSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        leftSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        rightSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        rightSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
         
         let dateStackView = UIStackView(arrangedSubviews: [previousDateButton, dateLabel, nextDateButton])
         dateStackView.axis = .horizontal
         dateStackView.distribution = .equalSpacing
         dateStackView.alignment = .center
         
-        [titleStackView, dateStackView, datePicker].forEach { mainStackview.addArrangedSubview($0) }
+        [titleStackView, dateStackView, separatorView, datePicker].forEach { mainStackview.addArrangedSubview($0) }
        
         addSubview(mainStackview)
         
         mainStackview.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(16)
+        }
+        
+        separatorView.snp.makeConstraints { make in
+            make.height.equalTo(1)
         }
         
         previousDateButton.snp.makeConstraints { make in
@@ -164,8 +310,17 @@ final class DietListHeaderView: UIView {
             .bind(to: datePicker.rx.isHidden)
             .disposed(by: disposeBag)
         
+        openCalendarButton.isSelectedRelay
+            .map { !$0 }
+            .bind(to: separatorView.rx.isHidden)
+            .disposed(by: disposeBag)
+        
         datePicker.rx.date
             .bind(to: selectedDate)
+            .disposed(by: disposeBag)
+        
+        goToTodayButton.rx.tap
+            .bind(to: goToTodayButtonTap)
             .disposed(by: disposeBag)
         
         previousDateButton.tap
@@ -259,5 +414,89 @@ final class OpenCalendarButton: UIButton {
     
     @objc private func didTap() {
         isSelectedRelay.accept(!isSelectedRelay.value)
+    }
+}
+
+final class DietEmptyInfoView: UIView {
+    private let iconLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 48, weight: .bold)
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.text = "🍽️"
+        return label
+    }()
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        label.textAlignment = .center
+        label.textColor = .black
+        label.text = "이 날의 식단 기록이 없습니다"
+        return label
+    }()
+    private let subTitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        label.textAlignment = .center
+        label.textColor = .black.withAlphaComponent(0.8)
+        label.text = "해당 날짜에 기록된 식단이 없습니다."
+        return label
+    }()
+    private let addDietButton = TitledButton(
+        title: "식단 추가하기",
+        image: UIImage(systemName: "plus"),
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .white,
+            borderColor: nil,
+            gradientColors: [.systemBlue, .systemBlue.withAlphaComponent(0.2)]
+        )
+    )
+    
+    let buttonTappedRelay: PublishRelay<Void> = .init()
+    private let disposeBag = DisposeBag()
+    
+    init() {
+        super.init(frame: .zero)
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        let containerView = BalanceEatContentView()
+        
+        let mainStackView = UIStackView(arrangedSubviews: [iconLabel, titleLabel, subTitleLabel])
+        mainStackView.axis = .vertical
+        mainStackView.spacing = 16
+        
+        addSubview(containerView)
+        containerView.addSubview(mainStackView)
+        containerView.addSubview(addDietButton)
+        
+        containerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
+        mainStackView.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(32)
+            make.leading.trailing.equalToSuperview()
+        }
+        
+        addDietButton.snp.makeConstraints { make in
+            make.top.equalTo(mainStackView.snp.bottom).offset(16)
+            make.centerX.equalToSuperview()
+            make.width.equalTo(140)
+            make.bottom.equalToSuperview().inset(32)
+        }
+    }
+    
+    private func setBinding() {
+        addDietButton.rx.tap
+            .bind(to: buttonTappedRelay)
+            .disposed(by: disposeBag)
     }
 }

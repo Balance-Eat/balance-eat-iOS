@@ -10,4 +10,5 @@ import Foundation
 protocol DietRepositoryProtocol {
     func createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async -> Result<CreateDietResponseDTO, NetworkError>
     func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError>
+    func getMonthlyDiet(year: Int, month: Int, userId: String) async -> Result<[DietDTO], NetworkError>
 }

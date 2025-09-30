@@ -44,5 +44,21 @@ struct DietRepository: DietRepositoryProtocol {
         }
     }
     
-    
+    func getMonthlyDiet(year: Int, month: Int, userId: String) async -> Result<[DietDTO], NetworkError> {
+        let formattedMonth = String(format: "%02d", month)
+        let endPoint = DietEndPoints.monthly(yearMonth: "\(year)-\(formattedMonth)", userId: userId)
+        let result = await apiClient.request(
+            endpoint: endPoint,
+            responseType: BaseResponse<[DietDTO]>.self
+        )
+        
+        switch result {
+        case .success(let response):
+            print("get monthly diet success \(response)")
+            return .success(response.data)
+        case .failure(let error):
+            print("get monthly diet failed: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
 }

@@ -10,6 +10,7 @@ import Foundation
 protocol DietUseCaseProtocol {
     func createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async -> Result<CreateDietResponseDTO, NetworkError>
     func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError>
+    func getMonthlyDiet(year: Int, month: Int, userId: String) async -> Result<[DietDTO], NetworkError>
 }
 
 struct DietUseCase: DietUseCaseProtocol {
@@ -25,5 +26,9 @@ struct DietUseCase: DietUseCaseProtocol {
     
     func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError> {
         await repository.getDailyDiet(date: date, userId: userId)
+    }
+    
+    func getMonthlyDiet(year: Int, month: Int, userId: String) async -> Result<[DietDTO], NetworkError> {
+        await repository.getMonthlyDiet(year: year, month: month, userId: userId)
     }
 }

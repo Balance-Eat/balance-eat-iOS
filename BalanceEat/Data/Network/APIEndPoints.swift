@@ -113,6 +113,7 @@ enum UserEndPoints: Endpoint {
 enum DietEndPoints: Endpoint {
     case createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String)
     case daily(date: String, userId: String)
+    case monthly(yearMonth: String, userId: String)
     
     var path: String {
         switch self {
@@ -120,6 +121,8 @@ enum DietEndPoints: Endpoint {
             return "/v1/diets"
         case .daily:
             return "/v1/diets/daily"
+        case .monthly:
+            return "/v1/diets/monthly"
         }
     }
     
@@ -128,6 +131,8 @@ enum DietEndPoints: Endpoint {
         case .createDiet:
             return .post
         case .daily:
+            return .get
+        case .monthly:
             return .get
         }
     }
@@ -149,6 +154,8 @@ enum DietEndPoints: Endpoint {
         switch self {
         case .daily(let date, _):
             return ["date": date]
+        case .monthly(let yearMonth, _):
+            return ["yearMonth": yearMonth]
         default:
             return nil
         }
@@ -156,7 +163,7 @@ enum DietEndPoints: Endpoint {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .daily(_, let userId), .createDiet(_, _, _, let userId):
+        case .daily(_, let userId), .createDiet(_, _, _, let userId), .monthly(_, let userId):
             return ["X-USER-ID": userId]
         }
     }
