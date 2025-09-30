@@ -380,6 +380,7 @@ final class MealLogListView: UIView {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupView()
+        updateTitleVisibility()
     }
     
     private func setupView() {
@@ -409,5 +410,10 @@ final class MealLogListView: UIView {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         self.mealLogs = logs
         configureStackView()
+        updateTitleVisibility()
     }
+    
+    private func updateTitleVisibility() {
+            titleLabel.isHidden = mealLogs.isEmpty
+        }
 }
