@@ -8,6 +8,7 @@ import Foundation
 
 struct DietDTO: Codable {
     let dietId: Int
+    let consumeDate: String
     let consumedAt: String
     let mealType: String
     let items: [FoodItemForDietDTO]
@@ -40,6 +41,7 @@ extension DietDTO {
     func toDietData() -> DietData {
         return DietData(
             id: dietId,
+            consumeDate: consumeDate,
             consumedAt: consumedAt,
             mealType: MealType(rawValue: mealType) ?? .breakfast,
             items: items.map { $0.toDietFoodData() }
