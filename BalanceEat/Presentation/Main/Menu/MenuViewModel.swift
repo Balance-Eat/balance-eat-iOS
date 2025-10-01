@@ -9,11 +9,8 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class MenuViewModel {
+final class MenuViewModel: BaseViewModel {
     private let userUseCase: UserUseCaseProtocol
-    
-    let loadingRelay = BehaviorRelay<Bool>(value: false)
-    let errorRelay = PublishRelay<String>()
     
     let userRelay = BehaviorRelay<UserData?>(value: nil)
     let updateUserResultRelay = PublishRelay<Bool>()
@@ -36,8 +33,7 @@ final class MenuViewModel {
             userRelay.accept(user)
             loadingRelay.accept(false)
         case .failure(let failure):
-            print("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
-            errorRelay.accept(failure.localizedDescription)
+            errorMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
             loadingRelay.accept(false)
         }
     }
@@ -49,8 +45,7 @@ final class MenuViewModel {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
-            print("UUID 불러오기 실패: \(failure.localizedDescription)")
-            errorRelay.accept(failure.localizedDescription)
+            errorMessageRelay.accept("UUID 불러오기 실패: \(failure.localizedDescription)")
             return ""
         }
         

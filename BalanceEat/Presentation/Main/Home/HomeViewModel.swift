@@ -9,7 +9,7 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class HomeViewModel {
+final class HomeViewModel: BaseViewModel {
     private let userUseCase: UserUseCaseProtocol
     private let dietUseCase: DietUseCaseProtocol
     
@@ -24,6 +24,7 @@ final class HomeViewModel {
     func getUser() async {
         let uuid = getUserUUID()
         
+        loadingRelay.accept(true)
         let getUserResponse = await userUseCase.getUser(uuid: uuid)
         
         switch getUserResponse {
@@ -31,8 +32,10 @@ final class HomeViewModel {
             print("사용자 정보: \(user)")
             userResponseRelay.accept(user)
             saveUserId(user.id)
+            loadingRelay.accept(false)
         case .failure(let failure):
-            print("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
+            errorMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
+            loadingRelay.accept(false)
         }
     }
     
@@ -43,7 +46,7 @@ final class HomeViewModel {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
-            print("UUID 불러오기 실패: \(failure.localizedDescription)")
+            errorMessageRelay.accept("UUID 불러오기 실패: \(failure.localizedDescription)")
             return ""
         }
         
@@ -51,7 +54,7 @@ final class HomeViewModel {
     
     private func saveUserId(_ userId: Int) {
         if case .failure(let error) = userUseCase.saveUserId(Int64(userId)) {
-            print("userId 저장 실패: \(error.localizedDescription)")
+            errorMessageRelay.accept("userId 저장 실패: \(error.localizedDescription)")
         }
     }
     
@@ -60,6 +63,7 @@ final class HomeViewModel {
             return
         }
         
+        loadingRelay.accept(true)
         let getDailyDietResponse = await dietUseCase.getDailyDiet(date: Date(), userId: String(userId))
         
         switch getDailyDietResponse {
@@ -67,8 +71,10 @@ final class HomeViewModel {
             print("일일 식단 정보: \(dietDTOs)")
             let dietDataList: [DietData] = dietDTOs.map { $0.toDietData() }
             dietResponseRelay.accept(dietDataList)
+            loadingRelay.accept(false)
         case .failure(let failure):
-            print("일일 식단 정보 불러오기 실패: \(failure.localizedDescription)")
+            errorMessageRelay.accept("일일 식단 정보 불러오기 실패: \(failure.localizedDescription)")
+            loadingRelay.accept(false)
         }
     }
 }

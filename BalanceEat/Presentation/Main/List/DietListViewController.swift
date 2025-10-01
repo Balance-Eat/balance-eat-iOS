@@ -6,30 +6,18 @@
 //
 
 import UIKit
-import SnapKit
 import RxSwift
 import RxCocoa
+import SnapKit
 
-final class DietListViewController: UIViewController {
-    private let viewModel: DietListViewModel
-    private let disposeBag = DisposeBag()
+final class DietListViewController: BaseViewController<DietListViewModel> {
+    
     private let headerView = DietListHeaderView()
-    
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    private let mainStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 20
-        return stackView
-    }()
-    private lazy var sumOfNutritionValueView = SumOfNutritionValueView(title: "이날의 영양 요약", subTitle: "목표 : \(viewModel.userDataRelay.value?.targetCalorie ?? 0)kcal")
-    
-    private let todayAteMealLogListView: MealLogListView = {
-        let mealLogs: [MealLogView] = []
-        return MealLogListView(mealLogs: mealLogs)
-    }()
-    
+    private lazy var sumOfNutritionValueView = SumOfNutritionValueView(
+        title: "이날의 영양 요약",
+        subTitle: "목표 : \(viewModel.userDataRelay.value?.targetCalorie ?? 0)kcal"
+    )
+    private let todayAteMealLogListView = MealLogListView(mealLogs: [])
     private let dietEmptyInfoView = DietEmptyInfoView()
     
     init() {
@@ -37,48 +25,43 @@ final class DietListViewController: UIViewController {
         let userUseCase = UserUseCase(repository: userRepository)
         let dietRepository = DietRepository()
         let dietUseCase = DietUseCase(repository: dietRepository)
-        self.viewModel = DietListViewModel(userUseCase: userUseCase, dietUseCase: dietUseCase)
-        super.init(nibName: nil, bundle: nil)
+        let vm = DietListViewModel(userUseCase: userUseCase, dietUseCase: dietUseCase)
+        super.init(viewModel: vm)
         
-        setUpView()
-        setBinding()
-        getDatas()
     }
     
-    required init?(coder: NSCoder) {
+    @MainActor required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setupHeaderView()
+        setupStackView()
+        setBinding()
+        getDatas()
     }
     
-    private func setUpView() {
-        view.backgroundColor = .homeScreenBackground
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
-        view.addSubview(headerView)
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(mainStackView)
-        
+        Task {
+            await viewModel.getMonthlyDiets()
+        }
+    }
+    
+    private func setupHeaderView() {
+        topContentView.addSubview(headerView)
         headerView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-        }
-        
-        scrollView.snp.makeConstraints { make in
-            make.top.equalTo(headerView.snp.bottom)
-            make.leading.trailing.bottom.equalToSuperview()
-        }
-        
-        contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width)
         }
-        mainStackView.snp.makeConstraints { make in
+    }
+    
+    private func setupStackView() {
+        mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
         }
-        
-        
         [sumOfNutritionValueView, todayAteMealLogListView, dietEmptyInfoView].forEach(mainStackView.addArrangedSubview(_:))
     }
     
@@ -95,12 +78,16 @@ final class DietListViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
+        dietEmptyInfoView.buttonTappedRelay
+            .subscribe(onNext: { [weak self] in
+                
+            })
+            .disposed(by: disposeBag)
+        
         viewModel.userDataRelay
             .subscribe(onNext: { [weak self] userData in
-                guard let self else { return }
-                if let targetCalorie = userData?.targetCalorie {
-                    self.sumOfNutritionValueView.subTitleRelay.accept("목표: \(targetCalorie)kcal")
-                }
+                guard let self, let targetCalorie = userData?.targetCalorie else { return }
+                sumOfNutritionValueView.subTitleRelay.accept("목표: \(targetCalorie)kcal")
             })
             .disposed(by: disposeBag)
         
@@ -108,39 +95,26 @@ final class DietListViewController: UIViewController {
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] dietDatas in
                 guard let self else { return }
-                let totalCalories = dietDatas
-                    .flatMap { $0.items }
-                    .map { $0.calories }
-                    .reduce(0, +)
-                let totalCarbon = dietDatas
-                    .flatMap { $0.items }
-                    .map { $0.carbohydrates }
-                    .reduce(0, +)
-                let totalProtein = dietDatas
-                    .flatMap { $0.items }
-                    .map { $0.protein }
-                    .reduce(0, +)
-                let totalFat = dietDatas
-                    .flatMap { $0.items }
-                    .map { $0.fat }
-                    .reduce(0, +)
+                
+                let totalCalories = dietDatas.flatMap { $0.items }.map { $0.calories }.reduce(0, +)
+                let totalCarbon = dietDatas.flatMap { $0.items }.map { $0.carbohydrates }.reduce(0, +)
+                let totalProtein = dietDatas.flatMap { $0.items }.map { $0.protein }.reduce(0, +)
+                let totalFat = dietDatas.flatMap { $0.items }.map { $0.fat }.reduce(0, +)
+                
                 sumOfNutritionValueView.calorieRelay.accept(totalCalories)
                 sumOfNutritionValueView.carbonRelay.accept(totalCarbon)
                 sumOfNutritionValueView.proteinRelay.accept(totalProtein)
                 sumOfNutritionValueView.fatRelay.accept(totalFat)
                 
-                var mealLogs: [MealLogView] = []
-                dietDatas.forEach { [weak self] diet in
-                    guard let self else { return }
-                
-                    let mealLogView = MealLogView(
+                let mealLogs = dietDatas.map { diet in
+                    
+                    MealLogView(
                         icon: UIImage(systemName: diet.mealType.icon),
                         title: diet.mealType.title,
-                        ateTime: extractHourMinute(from: diet.consumedAt) ?? "",
+                        ateTime: self.extractHourMinute(from: diet.consumedAt) ?? "",
                         consumedCalories: diet.items.reduce(0) { $0 + Int($1.calories) },
                         foodDatas: diet.items
                     )
-                    mealLogs.append(mealLogView)
                 }
                 todayAteMealLogListView.updateMealLogs(mealLogs)
             })
@@ -155,7 +129,6 @@ final class DietListViewController: UIViewController {
             .map { !$0.isEmpty }
             .bind(to: dietEmptyInfoView.rx.isHidden)
             .disposed(by: disposeBag)
-        
     }
     
     private func getDatas() {
@@ -165,7 +138,7 @@ final class DietListViewController: UIViewController {
         }
     }
     
-    func extractHourMinute(from dateString: String) -> String? {
+    private func extractHourMinute(from dateString: String) -> String? {
         let isoFormatter = ISO8601DateFormatter()
         isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         isoFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
@@ -179,6 +152,7 @@ final class DietListViewController: UIViewController {
         return timeFormatter.string(from: date)
     }
 }
+
 
 final class DietListHeaderView: UIView {
     private let titleLabel: UILabel = {

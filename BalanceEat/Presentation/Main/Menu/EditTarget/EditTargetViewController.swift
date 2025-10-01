@@ -10,17 +10,8 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class EditTargetViewController: UIViewController {
+class EditTargetViewController: BaseViewController<EditTargetViewModel> {
     private let userData: UserData
-    private let viewModel: EditTargetViewModel
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    private let mainStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 20
-        return stackView
-    }()
     
     private let weightEditTargetItemView = EditTargetItemView(editTargetItemType: .weight)
     private let smiEditTargetItemView = EditTargetItemView(editTargetItemType: .smi)
@@ -64,47 +55,46 @@ class EditTargetViewController: UIViewController {
     private let targetFatPercentageRelay = BehaviorRelay<String?>(value: nil)
     
     private let valueChangedRelay = BehaviorRelay<Bool>(value: false)
-    
-    private let disposeBag = DisposeBag()
-    
+        
     init(userData: UserData) {
         self.userData = userData
         let userRepository = UserRepository()
         let userUseCase = UserUseCase(repository: userRepository)
-        self.viewModel = EditTargetViewModel(userUseCase: userUseCase)
-        super.init(nibName: nil, bundle: nil)
-        
-        setUpView()
-        setBinding()
+        let vm = EditTargetViewModel(userUseCase: userUseCase)
+        super.init(viewModel: vm)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(false, animated: false)
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setUpView()
+        setBinding()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
+
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .white
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+    }
+
+    
     private func setUpView() {
-        
-        view.backgroundColor = .homeScreenBackground
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(mainStackView)
-        
-        scrollView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
-            make.leading.trailing.bottom.equalToSuperview()
+        topContentView.snp.makeConstraints { make in
+            make.height.equalTo(0)
         }
         
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width)
-        }
-        
-        mainStackView.snp.makeConstraints { make in
+        mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(20)
         }
         

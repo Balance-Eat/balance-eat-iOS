@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 import UUIDV7
 
-final class CreateFoodViewController: UIViewController {
+final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
     private let nameRelay = BehaviorRelay(value: "")
     private let amountRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
     private let unitRelay = BehaviorRelay(value: "")
@@ -21,18 +21,6 @@ final class CreateFoodViewController: UIViewController {
     private let brandNameRelay = BehaviorRelay(value: "")
     
     let createdFoodRelay: BehaviorRelay<FoodData?> = BehaviorRelay(value: nil)
-    
-    private let disposeBag = DisposeBag()
-    private let viewModel: CreateFoodViewModel
-    
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    private let mainStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 20
-        return stackView
-    }()
     
     private let foodNameInputField = InputFieldWithIcon(placeholder: "", isNumber: false)
     private lazy var foodNameTitledInfoView = TitledInputInfoView(title: "음식 이름", inputView: foodNameInputField, useBalanceEatWrapper: false)
@@ -157,31 +145,27 @@ final class CreateFoodViewController: UIViewController {
     init() {
         let foodRepository = FoodRepository()
         let foodUseCase = FoodUseCase(repository: foodRepository)
-        self.viewModel = CreateFoodViewModel(foodUseCase: foodUseCase)
-        super.init(nibName: nil, bundle: nil)
-        setUpView()
-        setBinding()
+        let vm = CreateFoodViewModel(foodUseCase: foodUseCase)
+        super.init(viewModel: vm)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setUpView()
+        setBinding()
+    }
+    
     private func setUpView() {
-        view.backgroundColor = .homeScreenBackground
-        
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(mainStackView)
-        
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+        topContentView.snp.makeConstraints { make in
+            make.height.equalTo(0)
         }
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width)
-        }
-        mainStackView.snp.makeConstraints { make in
+        
+        mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
         }
         

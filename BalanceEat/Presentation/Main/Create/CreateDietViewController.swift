@@ -10,10 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-final class CreateDietViewController: UIViewController {
-    private let viewModel: CreateDietViewModel
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
+final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     
     private let searchInputField = SearchInputField(placeholder: "음식 이름을 입력하세요")
     private lazy var favoriteFoodGridView = FavoriteFoodGridView(favoriteFoods: favoriteFoods)
@@ -58,7 +55,6 @@ final class CreateDietViewController: UIViewController {
         )
     )
     
-    private let disposeBag = DisposeBag()
     private var mealTime: MealTime = .breakfast
     
     private let favoriteFoods: [FavoriteFood] = [
@@ -75,10 +71,8 @@ final class CreateDietViewController: UIViewController {
         let dietRepository = DietRepository()
         let dietUseCase = DietUseCase(repository: dietRepository)
         
-        self.viewModel = CreateDietViewModel(dietUseCase: dietUseCase, userUseCase: userUseCase)
-        super.init(nibName: nil, bundle: nil)
-        setUpView()
-        setBinding()
+        let vm = CreateDietViewModel(dietUseCase: dietUseCase, userUseCase: userUseCase)
+        super.init(viewModel: vm)
     }
     
     required init?(coder: NSCoder) {
@@ -87,47 +81,27 @@ final class CreateDietViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setUpView()
+        setBinding()
     }
     
     private func setUpView() {
-        view.backgroundColor = .homeScreenBackground
-        
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(mealTimeTitledView)
-        contentView.addSubview(searchMealTitledView)
-        contentView.addSubview(addedFoodListView)
-        contentView.addSubview(saveButton)
-        
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+        topContentView.snp.makeConstraints { make in
+            make.height.equalTo(0)
         }
         
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width)
+        [mealTimeTitledView, searchMealTitledView, addedFoodListView, saveButton].forEach(mainStackView.addArrangedSubview(_:))
+        
+        mainStackView.snp.remakeConstraints { make in
+            make.edges.equalToSuperview().inset(16)
         }
         
         mealTimeTitledView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(120)
         }
         
-        searchMealTitledView.snp.makeConstraints { make in
-            make.top.equalTo(mealTimeTitledView.snp.bottom).offset(20)
-            make.leading.trailing.equalTo(mealTimeTitledView)
-            //            make.bottom.equalToSuperview().inset(20)
-        }
-        
-        addedFoodListView.snp.makeConstraints { make in
-            make.top.equalTo(searchMealTitledView.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
-        }
-        
         saveButton.snp.makeConstraints { make in
-            make.top.equalTo(addedFoodListView.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.bottom.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
     }

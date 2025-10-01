@@ -10,19 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class MenuViewController: UIViewController {
-    private let viewModel: MenuViewModel
-    private let disposeBag = DisposeBag()
-    
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    
-    private let mainStackView: UIStackView = {
-        let stackView = UIStackView()
-        stackView.axis = .vertical
-        stackView.spacing = 20
-        return stackView
-    }()
+class MenuViewController: BaseViewController<MenuViewModel> {
     private let profileInfoView = ProfileInfoView(name: "", goal: "", currentWeight: 0, goalWeight: 0)
     private let basicInfoMenuItemView = MenuItemView(
         icon: UIImage(systemName: "person.fill") ?? UIImage(),
@@ -49,12 +37,8 @@ class MenuViewController: UIViewController {
     init() {
         let userRepository = UserRepository()
         let userUseCase = UserUseCase(repository: userRepository)
-        self.viewModel = MenuViewModel(userUseCase: userUseCase)
-        super.init(nibName: nil, bundle: nil)
-        
-        setUpView()
-        getDatas()
-        setBinding()
+        let vm = MenuViewModel(userUseCase: userUseCase)
+        super.init(viewModel: vm)
     }
     
     required init?(coder: NSCoder) {
@@ -63,32 +47,24 @@ class MenuViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setUpView()
+        setBinding()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        getDatas()
     }
     
     private func setUpView() {
-        view.backgroundColor = .homeScreenBackground
-        
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(mainStackView)
-        contentView.addSubview(profileInfoView)
-        
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width)
-        }
-        
+        topContentView.addSubview(profileInfoView)
         profileInfoView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
+            make.edges.equalToSuperview()
         }
         
-        mainStackView.snp.makeConstraints { make in
-            make.top.equalTo(profileInfoView.snp.bottom).offset(16)
-            make.leading.trailing.bottom.equalToSuperview().inset(16)
+        mainStackView.snp.remakeConstraints { make in
+            make.edges.equalToSuperview().inset(16)
         }
         
         let personalInfoMenuStackView = createMenuStackView(title: "개인 정보", views: [
@@ -98,6 +74,7 @@ class MenuViewController: UIViewController {
         ])
         
         [personalInfoMenuStackView].forEach(mainStackView.addArrangedSubview)
+        
         
     }
     

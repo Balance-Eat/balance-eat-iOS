@@ -9,11 +9,8 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class EditTargetViewModel {
+final class EditTargetViewModel: BaseViewModel {
     private let userUseCase: UserUseCaseProtocol
-    
-    let loadingRelay = BehaviorRelay<Bool>(value: false)
-    let errorRelay = PublishRelay<String>()
     
     let userRelay = BehaviorRelay<User?>(value: nil)
     let updateUserResultRelay = PublishRelay<Bool>()
@@ -23,18 +20,18 @@ final class EditTargetViewModel {
     }
     
     func updateUser(userDTO: UserDTO) async {
-        let updateUserResponse = await userUseCase.updateUser(userDTO: userDTO)
-        
         loadingRelay.accept(true)
+        
+        let updateUserResponse = await userUseCase.updateUser(userDTO: userDTO)
         
         switch updateUserResponse {
         case .success(()):
             print("사용자 정보 수정 성공")
             updateUserResultRelay.accept(true)
+            loadingRelay.accept(false)
         case .failure(let failure):
-            print("사용자 정보 수정 실패: \(failure.localizedDescription)")
             updateUserResultRelay.accept(false)
-            errorRelay.accept(failure.localizedDescription)
+            errorMessageRelay.accept("사용자 정보 수정 실패: \(failure.localizedDescription)")
             loadingRelay.accept(false)
         }
     }

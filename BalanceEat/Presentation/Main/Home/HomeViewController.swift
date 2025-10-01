@@ -10,12 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class HomeViewController: UIViewController {
-    private let viewModel: HomeViewModel
-    private let disposeBag = DisposeBag()
-    
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
+class HomeViewController: BaseViewController<HomeViewModel> {
     
     private let refreshControl = UIRefreshControl()
     private let welcomeBackgroundView = GradientView()
@@ -82,68 +77,6 @@ class HomeViewController: UIViewController {
         return MealLogListView(mealLogs: mealLogs)
     }()
     
-//    private let todayAteMealLogListView: UIView = {
-//        let contentView = BalanceEatContentView()
-//        
-//        let titleLabel: UILabel = {
-//            let titleLabel = UILabel()
-//            titleLabel.text = "최근 식사 기록"
-//            titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
-//            titleLabel.textColor = .bodyStatusCardNumber
-//            return titleLabel
-//        }()
-//        
-//        let mealLogs: [MealLogView] = [
-//            MealLogView(icon: .chickenChest, title: "닭가슴살", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 120, consumedSugars: 0, consumedCarbohydrates: 0, consumedProteins: 23, consumedFats: 1),
-//            MealLogView(icon: .salad, title: "샐러드", ateTime: Date(), consumedFoodAmount: 100, consumedCalories: 25, consumedSugars: 3, consumedCarbohydrates: 4, consumedProteins: 2, consumedFats: 0)
-//        ]
-//        
-//        let stackView: UIStackView = {
-//            let stackView = UIStackView()
-//            stackView.axis = .vertical
-//            stackView.distribution = .fill
-//            stackView.spacing = 0 
-//            return stackView
-//        }()
-//        
-//        for (index, mealLog) in mealLogs.enumerated() {
-//            if index > 0 {
-//                let separator = UIView()
-//                separator.backgroundColor = .systemGray5
-//
-//                separator.translatesAutoresizingMaskIntoConstraints = false
-//                NSLayoutConstraint.activate([
-//                    separator.heightAnchor.constraint(equalToConstant: 1)
-//                ])
-//                
-//                let separatorContainer = UIView()
-//                separatorContainer.addSubview(separator)
-//                separator.snp.makeConstraints { make in
-//                    make.top.bottom.equalToSuperview()
-//                    make.leading.trailing.equalToSuperview().inset(20)
-//                }
-//
-//                stackView.addArrangedSubview(separatorContainer)
-//            }
-//            
-//            stackView.addArrangedSubview(mealLog)
-//        }
-//        
-//        contentView.addSubview(titleLabel)
-//        contentView.addSubview(stackView)
-//        
-//        titleLabel.snp.makeConstraints { make in
-//            make.top.leading.equalToSuperview().inset(20)
-//        }
-//        
-//        stackView.snp.makeConstraints { make in
-//            make.top.equalTo(titleLabel.snp.bottom).offset(10)
-//            make.leading.trailing.equalToSuperview()
-//            make.bottom.equalToSuperview()
-//        }
-//        
-//        return contentView
-//    }()
     
     init() {
         let userRepository = UserRepository()
@@ -152,11 +85,8 @@ class HomeViewController: UIViewController {
         let dietRepository = DietRepository()
         let dietUseCase = DietUseCase(repository: dietRepository)
         
-        self.viewModel = HomeViewModel(userUseCase: userUseCase, dietUseCase: dietUseCase)
-        super.init(nibName: nil, bundle: nil)
-        setUpView()
-        getDatas()
-        setBinding()
+        let vm = HomeViewModel(userUseCase: userUseCase, dietUseCase: dietUseCase)
+        super.init(viewModel: vm)
     }
     
     required init?(coder: NSCoder) {
@@ -166,20 +96,23 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setUpView()
+        setBinding()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        getDatas()
     }
     
     private func setUpView() {
-        view.backgroundColor = .homeScreenBackground
-        
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
         scrollView.refreshControl = refreshControl
         
-        contentView.addSubview(welcomeBackgroundView)
-        contentView.addSubview(bodyStatusStackView)
-        contentView.addSubview(todayCalorieView)
-        contentView.addSubview(proteinRemindCardView)
-        contentView.addSubview(todayAteMealLogListView)
+        topContentView.snp.makeConstraints { make in
+            make.height.equalTo(0)
+        }
+        
+        [welcomeBackgroundView, bodyStatusStackView, todayCalorieView, proteinRemindCardView, todayAteMealLogListView].forEach(mainStackView.addArrangedSubview(_:))
         
         welcomeBackgroundView.addSubview(welcomeLabelStackView)
         welcomeBackgroundView.colors = [
@@ -189,15 +122,6 @@ class HomeViewController: UIViewController {
         
         bodyStatusStackView.addArrangedSubview(nowBodyStatusCardView)
         bodyStatusStackView.addArrangedSubview(targetBodyStatusCardView)
-        
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width)
-        }
         
         welcomeBackgroundView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
@@ -396,7 +320,7 @@ final class MealLogListView: UIView {
         stackView.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(10)
             make.leading.trailing.equalToSuperview()
-            make.bottom.equalToSuperview()
+            make.bottom.equalToSuperview().inset(16)
         }
     }
     

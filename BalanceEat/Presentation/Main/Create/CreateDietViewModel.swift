@@ -9,13 +9,12 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class CreateDietViewModel {
+final class CreateDietViewModel: BaseViewModel {
     private let dietUseCase: DietUseCaseProtocol
     private let userUseCase: UserUseCaseProtocol
     
     let addedFoodsRelay = BehaviorRelay<[FoodData]>(value: [])
     let createDietSuccessRelay = PublishRelay<Void>()
-    let errorMessageRelay = PublishRelay<String>()
     
     init(dietUseCase: DietUseCaseProtocol, userUseCase: UserUseCaseProtocol) {
         self.dietUseCase = dietUseCase
@@ -23,13 +22,17 @@ final class CreateDietViewModel {
     }
     
     func createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async {
+        loadingRelay.accept(true)
+        
         let createDietResponse = await dietUseCase.createDiet(mealTime: mealTime, consumedAt: consumedAt, dietFoods: dietFoods, userId: userId)
         
         switch createDietResponse {
         case .success(let createDietResponseDTO):
             createDietSuccessRelay.accept(())
+            loadingRelay.accept(false)
         case .failure(let failure):
             errorMessageRelay.accept(failure.localizedDescription)
+            loadingRelay.accept(false)
         }
     }
     
