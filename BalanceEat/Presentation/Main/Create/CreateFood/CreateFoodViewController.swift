@@ -227,33 +227,33 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
                 let carbonCal = carbon * 4
                 let proteinCal = protein * 4
                 let fatCal = fat * 9
-                return Int(carbonCal + proteinCal + fatCal)
+                return Double(carbonCal + proteinCal + fatCal)
             }
             .bind(to: willCreateFoodPreviewView.calorieRelay)
             .disposed(by: disposeBag)
         
         calorieInputField.textObservable
-            .map { Int($0 ?? "") ?? 0 }
+            .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.calorieRelay)
             .disposed(by: disposeBag)
         
         carbonInputField.textObservable
-            .map { Int($0 ?? "") ?? 0 }
+            .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.carbonRelay)
             .disposed(by: disposeBag)
         
         proteinInputField.textObservable
-            .map { Int($0 ?? "") ?? 0 }
+            .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.proteinRelay)
             .disposed(by: disposeBag)
         
         fatInputField.textObservable
-            .map { Int($0 ?? "") ?? 0 }
+            .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.fatRelay)
             .disposed(by: disposeBag)
         
         amountInputField.textObservable
-            .map { Int($0 ?? "") ?? 0 }
+            .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.amountRelay)
             .disposed(by: disposeBag)
         
@@ -427,11 +427,11 @@ extension CreateFoodViewController: UIPickerViewDataSource, UIPickerViewDelegate
 
 final class WillCreateFoodPreviewView: UIView {
     let foodNameRelay: BehaviorRelay<String> = .init(value: "")
-    let calorieRelay: BehaviorRelay<Int> = .init(value: 0)
-    let carbonRelay: BehaviorRelay<Int> = .init(value: 0)
-    let proteinRelay: BehaviorRelay<Int> = .init(value: 0)
-    let fatRelay: BehaviorRelay<Int> = .init(value: 0)
-    let amountRelay: BehaviorRelay<Int> = .init(value: 0)
+    let calorieRelay: BehaviorRelay<Double> = .init(value: 0)
+    let carbonRelay: BehaviorRelay<Double> = .init(value: 0)
+    let proteinRelay: BehaviorRelay<Double> = .init(value: 0)
+    let fatRelay: BehaviorRelay<Double> = .init(value: 0)
+    let amountRelay: BehaviorRelay<Double> = .init(value: 0)
     let unitRelay: BehaviorRelay<String> = .init(value: "")
     private let disposeBag = DisposeBag()
     
