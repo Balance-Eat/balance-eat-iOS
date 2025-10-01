@@ -17,7 +17,7 @@ final class CircleProgressView: UIView {
     var maxValue: CGFloat = 2000
     var currentValue: CGFloat = 0 {
         didSet {
-            updateProgress()
+            updateProgress(animated: true)
         }
     }
     
@@ -52,16 +52,15 @@ final class CircleProgressView: UIView {
     }
     
     private func setupLayers() {
-        
         trackLayer.strokeColor = UIColor.lightGray.withAlphaComponent(0.3).cgColor
         trackLayer.lineWidth = 16
         trackLayer.fillColor = UIColor.clear.cgColor
         layer.addSublayer(trackLayer)
         
-        progressLayer.strokeColor = UIColor.carlorieCircle.cgColor
+        progressLayer.strokeColor = UIColor.systemBlue.cgColor
         progressLayer.lineWidth = 16
         progressLayer.fillColor = UIColor.clear.cgColor
-        progressLayer.lineCap = .square
+        progressLayer.lineCap = .round
         progressLayer.strokeEnd = 0
         layer.addSublayer(progressLayer)
     }
@@ -78,9 +77,47 @@ final class CircleProgressView: UIView {
         progressLabel.numberOfLines = 2
     }
     
-    func updateProgress() {
-        let percentage = currentValue / maxValue
-        progressLayer.strokeEnd = percentage
+    private func interpolateColor(from: UIColor, to: UIColor, fraction: CGFloat) -> UIColor {
+        var fRed: CGFloat = 0, fGreen: CGFloat = 0, fBlue: CGFloat = 0, fAlpha: CGFloat = 0
+        var tRed: CGFloat = 0, tGreen: CGFloat = 0, tBlue: CGFloat = 0, tAlpha: CGFloat = 0
+        
+        from.getRed(&fRed, green: &fGreen, blue: &fBlue, alpha: &fAlpha)
+        to.getRed(&tRed, green: &tGreen, blue: &tBlue, alpha: &tAlpha)
+        
+        let red = fRed + (tRed - fRed) * fraction
+        let green = fGreen + (tGreen - fGreen) * fraction
+        let blue = fBlue + (tBlue - fBlue) * fraction
+        let alpha = fAlpha + (tAlpha - fAlpha) * fraction
+        
+        return UIColor(red: red, green: green, blue: blue, alpha: alpha)
+    }
+    
+    func updateProgress(animated: Bool = true) {
+        let percentage = max(0, min(currentValue / maxValue, 1))
+        
+        let newColor = interpolateColor(from: .systemBlue, to: .systemRed, fraction: percentage).cgColor
+        
+        if animated {
+            let strokeAnim = CABasicAnimation(keyPath: "strokeEnd")
+            strokeAnim.fromValue = progressLayer.strokeEnd
+            strokeAnim.toValue = percentage
+            strokeAnim.duration = 0.5
+            strokeAnim.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            progressLayer.strokeEnd = percentage
+            progressLayer.add(strokeAnim, forKey: "strokeEnd")
+            
+            let colorAnim = CABasicAnimation(keyPath: "strokeColor")
+            colorAnim.fromValue = progressLayer.strokeColor
+            colorAnim.toValue = newColor
+            colorAnim.duration = 0.5
+            colorAnim.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            progressLayer.strokeColor = newColor
+            progressLayer.add(colorAnim, forKey: "strokeColor")
+            
+        } else {
+            progressLayer.strokeEnd = percentage
+            progressLayer.strokeColor = newColor
+        }
         
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal

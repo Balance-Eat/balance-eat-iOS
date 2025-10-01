@@ -92,7 +92,7 @@ final class TodayCalorieView: UIView {
         }
     }
     
-    private func createSubNutritionalView(title: String, current: Int, target: Int) -> UIView {
+    private func createSubNutritionalView(title: String, current: Int, target: Int, isOver: Bool = false) -> UIView {
         let containerVIew = UIView()
         
         let titleLabel = UILabel()
@@ -103,7 +103,7 @@ final class TodayCalorieView: UIView {
         let currentValueLabel = UILabel()
         currentValueLabel.text = "\(current)g"
         currentValueLabel.font = .systemFont(ofSize: 16, weight: .bold)
-        currentValueLabel.textColor = .bodyStatusCardNumber
+        currentValueLabel.textColor = isOver ? .systemRed : .bodyStatusCardNumber
         
         let targetValueLabel = UILabel()
         targetValueLabel.text = "/ \(target)g"
@@ -141,8 +141,8 @@ final class TodayCalorieView: UIView {
             view.removeFromSuperview()
         }
         
-        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "탄수화물", current: currentCarbohydrate, target: targetCarbohydrate))
-        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "단백질", current: currentProtein, target: targetProtein))
-        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "지방", current: currentFat, target: targetFat))
+        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "탄수화물", current: currentCarbohydrate, target: targetCarbohydrate, isOver: currentCarbohydrate > targetCarbohydrate))
+        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "단백질", current: currentProtein, target: targetProtein, isOver: currentProtein > targetProtein))
+        nutritionalValueStackView.addArrangedSubview(createSubNutritionalView(title: "지방", current: currentFat, target: targetFat, isOver: currentFat > targetFat))
     }
 }
