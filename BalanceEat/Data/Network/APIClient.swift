@@ -54,6 +54,9 @@ final class APIClient {
                     if let data = response.data {
                         if let apiError = try? JSONDecoder().decode(BaseResponse<EmptyData>.self, from: data) {
                             serverMessage = apiError.message
+                        } else if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                                  let message = json["message"] as? String {
+                            serverMessage = message
                         }
                     }
                     
@@ -64,7 +67,7 @@ final class APIClient {
                                         - Error: \(serverMessage)
                                         - Response Body: \(responseDataString)
                                         - afError: \(afError.localizedDescription)
-                                        - headers: \(endpoint.headers)
+                                        - headers: \(endpoint.headers?.description ?? "")
                                         """
                     
                     print(errorMessage)
