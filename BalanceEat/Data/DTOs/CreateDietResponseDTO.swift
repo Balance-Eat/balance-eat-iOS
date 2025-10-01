@@ -11,15 +11,16 @@ struct CreateDietResponseDTO: Codable {
     let dietId: Int
     let userId: Int
     let mealType: String
+    let consumeDate: String
     let consumedAt: String
     let totalNutrition: NutritionForCreateDietDTO
     let dietFoods: [DietFoodForCreateDietDTO]
 }
 
 struct NutritionForCreateDietDTO: Codable {
-    let calories: Int
-    let carbohydrates: Int
-    let protein: Int
+    let calories: Double
+    let carbohydrates: Double
+    let protein: Double
     let fat: Double
 }
 
@@ -32,8 +33,8 @@ struct DietFoodForCreateDietDTO: Codable {
 }
 
 struct FoodNutritionForCreateDietDTO: Codable {
-    let calories: Int
-    let carbohydrates: Int
-    let protein: Int
+    let calories: Double
+    let carbohydrates: Double
+    let protein: Double
     let fat: Double
 }

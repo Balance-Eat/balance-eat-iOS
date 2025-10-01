@@ -77,6 +77,7 @@ enum UserEndPoints: Endpoint {
                 "age": userDTO.age,
                 "height": userDTO.height,
                 "weight": userDTO.weight,
+                "goalType": userDTO.goalType.rawValue,
                 "activityLevel": userDTO.activityLevel?.rawValue,
                 "smi": userDTO.smi,
                 "fatPercentage": userDTO.fatPercentage,
