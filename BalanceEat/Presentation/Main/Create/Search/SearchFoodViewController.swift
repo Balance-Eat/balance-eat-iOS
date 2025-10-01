@@ -196,6 +196,10 @@ class SearchFoodViewController: UIViewController {
                     .subscribe(onNext: { [weak self] food in
                         guard let self else { return }
                         selectedFoodDataRelay.accept(food)
+                        
+                        if food != nil {
+                            navigationController?.popViewController(animated: true)
+                        }
                     })
                     .disposed(by: disposeBag)
                 
