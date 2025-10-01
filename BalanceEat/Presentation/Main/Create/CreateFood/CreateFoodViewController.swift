@@ -53,7 +53,7 @@ final class CreateFoodViewController: UIViewController {
     private let unitInputField = InputFieldWithIcon(placeholder: "", isNumber: false)
     private lazy var unitTitledInfoView = TitledInputInfoView(title: "단위", inputView: unitInputField, useBalanceEatWrapper: false)
     
-    private let unitPickerCategories = ["g", "ml", "컵", "개"]
+    private let unitPickerCategories = ["g", "ml"]
     
     private lazy var servingSizeInfoTitledContainerView: TitledContainerView = {
         let infoStack = UIStackView(arrangedSubviews: [amountTitledInfoView, unitTitledInfoView])
