@@ -114,6 +114,7 @@ final class MealLogView: UIView {
         
         iconImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(16)
+            make.width.height.equalTo(20)
         }
         
         consumedCaloriesLabel.snp.makeConstraints { make in

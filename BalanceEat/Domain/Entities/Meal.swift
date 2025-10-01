@@ -31,11 +31,11 @@ enum MealType: String, Codable {
             case .breakfast:
             return "sunrise"
         case .lunch:
-            return "fork.knife"
+            return "sun.min.fill"
         case .dinner:
             return "fork.knife.circle.fill"
         case .snack:
-            return "takeoutbag.fill"
+            return "takeoutbag.and.cup.and.straw"
         }
     }
 }
