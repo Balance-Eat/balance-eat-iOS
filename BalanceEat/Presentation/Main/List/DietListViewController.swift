@@ -113,7 +113,8 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
                         title: diet.mealType.title,
                         ateTime: self.extractHourMinute(from: diet.consumedAt) ?? "",
                         consumedCalories: diet.items.reduce(0) { $0 + Int($1.calories) },
-                        foodDatas: diet.items
+                        foodDatas: diet.items,
+                        showNutritionInfo: true
                     )
                 }
                 todayAteMealLogListView.updateMealLogs(mealLogs)
@@ -139,18 +140,20 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
     }
     
     private func extractHourMinute(from dateString: String) -> String? {
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        isoFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         
-        guard let date = isoFormatter.date(from: dateString) else { return nil }
+        guard let date = formatter.date(from: dateString) else {
+            print("dateString parsing failed: \(dateString)")
+            return nil
+        }
         
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        
-        return timeFormatter.string(from: date)
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: date)
     }
+
+
 }
 
 

@@ -14,6 +14,7 @@ final class MealLogView: UIView {
     private let ateTime: String
     private let consumedCalories: Int
     private let foodDatas: [DietFoodData]
+    private let showNutritionInfo: Bool
     
     private let containerView: UIView = BalanceEatContentView()
     private let iconImageView: UIImageView = {
@@ -39,12 +40,13 @@ final class MealLogView: UIView {
         return label
     }()
     
-    init(icon: UIImage? = nil, title: String, ateTime: String, consumedCalories: Int, foodDatas: [DietFoodData]) {
+    init(icon: UIImage? = nil, title: String, ateTime: String, consumedCalories: Int, foodDatas: [DietFoodData], showNutritionInfo: Bool = false) {
         self.icon = icon
         self.title = title
         self.ateTime = ateTime
         self.consumedCalories = consumedCalories
         self.foodDatas = foodDatas
+        self.showNutritionInfo = showNutritionInfo
         super.init(frame: .zero)
         
         setUpView()
@@ -67,7 +69,7 @@ final class MealLogView: UIView {
             make.edges.equalToSuperview()
         }
         
-        let titleStackView = UIStackView(arrangedSubviews: [iconImageView, titleLabel, ateTimeLabel])
+        let titleStackView = UIStackView(arrangedSubviews: [iconImageView, titleLabel])
         titleStackView.axis = .horizontal
         titleStackView.spacing = 8
         titleStackView.layer.cornerRadius = 16
@@ -78,14 +80,10 @@ final class MealLogView: UIView {
         foodStackView.axis = .vertical
         
         for (index, food) in foodDatas.enumerated() {
-            let mealLogFoodView = MealLogFoodView(
-                title: food.name,
-                amount: "\(food.intake) \(food.unit)",
-                calorie: makeCalorie(carbon: food.carbohydrates, protein: food.protein, fat: food.fat)
-            )
+            let mealLogFoodView = MealLogFoodView(dietFoodData: food, showNutrientInfo: showNutritionInfo)
 
             mealLogFoodView.snp.makeConstraints { make in
-                make.height.equalTo(64)
+                make.height.equalTo(72)
             }
             foodStackView.addArrangedSubview(mealLogFoodView)
 
@@ -139,6 +137,9 @@ final class MealLogView: UIView {
 }
 
 final class MealLogFoodView: UIView {
+    private let dietFoodData: DietFoodData
+    private let showNutrientInfo: Bool
+    
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .bold)
@@ -157,11 +158,28 @@ final class MealLogFoodView: UIView {
         label.textColor = .systemRed
         return label
     }()
+    private let carbonLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.textColor = .carbonText
+        return label
+    }()
+    private let proteinLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.textColor = .proteinText
+        return label
+    }()
+    private let fatLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .semibold)
+        label.textColor = .fatText
+        return label
+    }()
     
-    init(title: String, amount: String, calorie: Double) {
-        titleLabel.text = title
-        amountLabel.text = amount
-        calorieLabel.text = String(format: "%.1f kcal", calorie)
+    init(dietFoodData: DietFoodData, showNutrientInfo: Bool = false) {
+        self.dietFoodData = dietFoodData
+        self.showNutrientInfo = showNutrientInfo
         super.init(frame: .zero)
         
         setUpView()
@@ -172,22 +190,48 @@ final class MealLogFoodView: UIView {
     }
     
     private func setUpView() {
+        titleLabel.text = dietFoodData.name
+        amountLabel.text = "\(dietFoodData.intake) \(dietFoodData.unit)"
+        calorieLabel.text = String(format: "%.1f kcal", makeCalorie(carbon: dietFoodData.carbohydrates, protein: dietFoodData.protein, fat: dietFoodData.fat))
+        
+        let rightStackSubviews: [UIView] = {
+            if showNutrientInfo {
+                carbonLabel.text = String(format: "탄: %.1fg", dietFoodData.carbohydrates)
+                proteinLabel.text = String(format: "단: %.1fg", dietFoodData.protein)
+                fatLabel.text = String(format: "지: %.1fg", dietFoodData.fat)
+                let nutritionStack = UIStackView(arrangedSubviews: [carbonLabel, proteinLabel, fatLabel])
+                nutritionStack.axis = .horizontal
+                nutritionStack.spacing = 8
+                return [calorieLabel, nutritionStack]
+            } else {
+                return [calorieLabel]
+            }
+        }()
+        
         let leftStackView = UIStackView(arrangedSubviews: [titleLabel, amountLabel])
         leftStackView.axis = .vertical
-        leftStackView.spacing = 4
+        leftStackView.spacing = 0
         
-        [leftStackView, calorieLabel].forEach {
-            addSubview($0)
-        }
+        let rightStackView = UIStackView(arrangedSubviews: rightStackSubviews)
+        rightStackView.axis = .vertical
+        rightStackView.alignment = .trailing
+        rightStackView.spacing = 0
+        
+        addSubview(leftStackView)
+        addSubview(rightStackView)
         
         leftStackView.snp.makeConstraints { make in
             make.leading.top.bottom.equalToSuperview().inset(16)
         }
-        
-        calorieLabel.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(16)
-            make.centerY.equalToSuperview()
+        rightStackView.snp.makeConstraints { make in
+            make.trailing.top.bottom.equalToSuperview().inset(16)
         }
+    }
+
+
+    
+    private func makeCalorie(carbon: Double, protein: Double, fat: Double) -> Double {
+        return carbon * 4 + protein * 4 + fat * 9
     }
 }
 
