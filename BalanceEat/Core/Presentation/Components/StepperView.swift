@@ -144,6 +144,10 @@ final class StepperView: UIView {
             .map { [weak self] text in
                 guard let self else { return 0 }
                 
+                if Double(text) ?? 0 > 1000 {
+                    textField.text = "1000"
+                }
+                
                 switch self.stepperModeRelay.value {
                 case .servingSize:
                     return (Double(text) ?? 0) * servingSize
