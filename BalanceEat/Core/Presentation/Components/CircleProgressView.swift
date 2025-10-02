@@ -93,30 +93,44 @@ final class CircleProgressView: UIView {
     }
     
     func updateProgress(animated: Bool = true) {
-        let percentage = max(0, min(currentValue / maxValue, 1))
+        let newColor: UIColor
+        if currentValue <= maxValue {
+            let fraction = currentValue / maxValue
+            newColor = interpolateColor(from: .systemBlue, to: .systemGreen, fraction: fraction)
+        } else if currentValue <= maxValue * 1.15 {
+            let fraction = (currentValue - maxValue) / (maxValue * 0.15)
+            newColor = interpolateColor(from: .systemGreen, to: .systemYellow, fraction: fraction)
+        } else if currentValue <= maxValue * 1.3 {
+            let fraction = (currentValue - maxValue) / (maxValue * 0.3)
+            newColor = interpolateColor(from: .systemYellow, to: .systemOrange, fraction: fraction)
+        } else if currentValue <= maxValue * 1.5 {
+            let fraction = (currentValue - maxValue) / (maxValue * 0.5)
+            newColor = interpolateColor(from: .systemOrange, to: .systemRed, fraction: fraction)
+        } else {
+            newColor = .systemRed
+        }
         
-        let newColor = interpolateColor(from: .systemBlue, to: .systemRed, fraction: percentage).cgColor
+        let cgNewColor = newColor.cgColor
         
         if animated {
             let strokeAnim = CABasicAnimation(keyPath: "strokeEnd")
             strokeAnim.fromValue = progressLayer.strokeEnd
-            strokeAnim.toValue = percentage
+            strokeAnim.toValue = min(currentValue / maxValue, 1)
             strokeAnim.duration = 0.5
             strokeAnim.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            progressLayer.strokeEnd = percentage
+            progressLayer.strokeEnd = min(currentValue / maxValue, 1)
             progressLayer.add(strokeAnim, forKey: "strokeEnd")
             
             let colorAnim = CABasicAnimation(keyPath: "strokeColor")
             colorAnim.fromValue = progressLayer.strokeColor
-            colorAnim.toValue = newColor
+            colorAnim.toValue = cgNewColor
             colorAnim.duration = 0.5
             colorAnim.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            progressLayer.strokeColor = newColor
+            progressLayer.strokeColor = cgNewColor
             progressLayer.add(colorAnim, forKey: "strokeColor")
-            
         } else {
-            progressLayer.strokeEnd = percentage
-            progressLayer.strokeColor = newColor
+            progressLayer.strokeEnd = min(currentValue / maxValue, 1)
+            progressLayer.strokeColor = cgNewColor
         }
         
         let numberFormatter = NumberFormatter()
@@ -139,4 +153,5 @@ final class CircleProgressView: UIView {
         
         progressLabel.attributedText = attributedText
     }
+
 }
