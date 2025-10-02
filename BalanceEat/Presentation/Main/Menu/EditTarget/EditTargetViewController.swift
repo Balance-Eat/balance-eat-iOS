@@ -348,6 +348,15 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
             .bind(to: resetButton.rx.isHidden)
             .disposed(by: disposeBag)
         
+        viewModel.updateUserResultRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] updateUserResult in
+                guard let self else { return }
+                if updateUserResult {
+                    navigationController?.popViewController(animated: true)
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
     @objc private func backButtonTapped() {
