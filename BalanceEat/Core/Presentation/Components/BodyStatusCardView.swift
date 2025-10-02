@@ -6,6 +6,9 @@
 //
 
 import UIKit
+import SnapKit
+import RxSwift
+import RxCocoa
 
 final class BodyStatusCardView: UIView {
     private let title: String
@@ -22,6 +25,13 @@ final class BodyStatusCardView: UIView {
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = .bodyStatusCardTitle
         return label
+    }()
+    
+    private let goToEditButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "slider.horizontal.3"), for: .normal)
+        button.tintColor = .systemBlue
+        return button
     }()
     
     private lazy var weightLabel: StatusLabel = {
@@ -70,6 +80,9 @@ final class BodyStatusCardView: UIView {
         return stack
     }()
     
+    let goToEditTapRelay = PublishRelay<Void>()
+    private let disposeBag = DisposeBag()
+    
     init(title: String, weight: Double, smi: Double?, fatPercentage: Double?, isTarget: Bool = false) {
         self.title = title
         self.weight = weight
@@ -79,6 +92,7 @@ final class BodyStatusCardView: UIView {
         super.init(frame: .zero)
         
         setUpView()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -88,7 +102,7 @@ final class BodyStatusCardView: UIView {
     private func setUpView() {
         self.addSubview(containerView)
         
-        [titleLabel, weightLabel, separatorView, subMetricsStackView].forEach {
+        [titleLabel, goToEditButton, weightLabel, separatorView, subMetricsStackView].forEach {
             containerView.addSubview($0)
         }
         
@@ -102,6 +116,12 @@ final class BodyStatusCardView: UIView {
         titleLabel.snp.makeConstraints { make in
             make.top.equalTo(containerView.snp.top).offset(20)
             make.centerX.equalToSuperview()
+        }
+        
+        goToEditButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(12)
+            make.trailing.equalToSuperview().inset(12)
+            make.width.height.equalTo(16)
         }
         
         weightLabel.snp.makeConstraints { make in
@@ -120,6 +140,12 @@ final class BodyStatusCardView: UIView {
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)
         }
+    }
+    
+    private func setBinding() {
+        goToEditButton.rx.tap
+            .bind(to: goToEditTapRelay)
+            .disposed(by: disposeBag)
     }
     
     func update(weight: Double, smi: Double?, fatPercentage: Double?) {

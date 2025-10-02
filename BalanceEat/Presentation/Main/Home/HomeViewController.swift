@@ -191,6 +191,19 @@ class HomeViewController: BaseViewController<HomeViewModel> {
                 getDatas()
             }
             .disposed(by: disposeBag)
+        
+        Observable.merge(nowBodyStatusCardView.goToEditTapRelay.asObservable(), targetBodyStatusCardView.goToEditTapRelay.asObservable())
+            .subscribe(onNext: { [weak self] in
+                guard let self else {
+                    return
+                }
+                guard let userData = viewModel.userResponseRelay.value else {
+                    return
+                }
+                                
+                navigationController?.pushViewController(EditTargetViewController(userData: userData), animated: true)
+            })
+            .disposed(by: disposeBag)
     }
     
     private func updateUIForUserData(user: UserData) {
