@@ -11,7 +11,13 @@ import RxSwift
 import RxCocoa
 
 final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
-    
+    private let dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.textColor = .black
+        label.textAlignment = .center
+        return label
+    }()
     private let searchInputField = SearchInputField(placeholder: "음식 이름을 입력하세요")
     private lazy var favoriteFoodGridView = FavoriteFoodGridView(favoriteFoods: favoriteFoods)
     
@@ -55,6 +61,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         )
     )
     
+    let dateRelay: BehaviorRelay<Date> = BehaviorRelay(value: Date())
     private var mealTime: MealTime = .breakfast
     
     private let favoriteFoods: [FavoriteFood] = [
@@ -91,7 +98,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             make.height.equalTo(0)
         }
         
-        [mealTimeTitledView, searchMealTitledView, addedFoodListView, saveButton].forEach(mainStackView.addArrangedSubview(_:))
+        [dateLabel, mealTimeTitledView, searchMealTitledView, addedFoodListView, saveButton].forEach(mainStackView.addArrangedSubview(_:))
         
         mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
@@ -121,6 +128,19 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
 //            }
 //            .disposed(by: disposeBag)
 //
+        dateRelay
+            .map { [weak self] date in
+                guard let self else { return "" }
+                
+                if isToday(date) {
+                    return "오늘의 식단"
+                } else {
+                    return formattedMealDate(date)
+                }
+            }
+            .bind(to: dateLabel.rx.text)
+            .disposed(by: disposeBag)
+        
         searchInputField.textField.rx.controlEvent(.editingDidBegin)
             .bind { [weak self] in
                 guard let self else { return }
@@ -206,5 +226,16 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 }
             })
             .disposed(by: disposeBag)
+    }
+    
+    private func isToday(_ date: Date) -> Bool {
+        Calendar.current.isDateInToday(date)
+    }
+    
+    private func formattedMealDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.dateFormat = "yyyy년 MM월 dd일 '식단'"
+        return formatter.string(from: date)
     }
 }
