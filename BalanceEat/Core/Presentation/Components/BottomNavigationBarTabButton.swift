@@ -71,7 +71,7 @@ final class BottomNavigationBarTabButton: UIView {
         
         stackView.snp.makeConstraints { make in
             make.width.equalTo(44)
-            make.height.equalTo(50)
+            make.height.equalTo(48)
             make.center.equalToSuperview()
         }
     }
