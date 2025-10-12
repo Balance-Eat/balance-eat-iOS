@@ -17,7 +17,7 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
         title: "이날의 영양 요약",
         subTitle: "목표 : \(viewModel.userDataRelay.value?.targetCalorie ?? 0)kcal"
     )
-    private let todayAteMealLogListView = MealLogListView(mealLogs: [])
+    private let todayAteMealLogListView = MealLogListView()
     private let dietEmptyInfoView = DietEmptyInfoView()
     
     init() {
@@ -117,7 +117,7 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
                         showNutritionInfo: true
                     )
                 }
-                todayAteMealLogListView.updateMealLogs(mealLogs)
+                todayAteMealLogListView.mealLogsRelay.accept(mealLogs)
             })
             .disposed(by: disposeBag)
         

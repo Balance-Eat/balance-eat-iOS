@@ -74,7 +74,7 @@ class HomeViewController: BaseViewController<HomeViewModel> {
     
     private lazy var todayAteMealLogListView: MealLogListView = {
         let mealLogs: [MealLogView] = []
-        return MealLogListView(mealLogs: mealLogs)
+        return MealLogListView()
     }()
     
     
@@ -109,7 +109,7 @@ class HomeViewController: BaseViewController<HomeViewModel> {
         scrollView.refreshControl = refreshControl
         
         topContentView.snp.makeConstraints { make in
-            make.height.equalTo(0)
+            make.height.equalTo(1)
         }
         
         [welcomeBackgroundView, bodyStatusStackView, todayCalorieView, proteinRemindCardView, todayAteMealLogListView].forEach(mainStackView.addArrangedSubview(_:))
@@ -268,7 +268,7 @@ class HomeViewController: BaseViewController<HomeViewModel> {
             
             mealLogs.append(mealLogView)
         }
-        todayAteMealLogListView.updateMealLogs(mealLogs)
+        todayAteMealLogListView.mealLogsRelay.accept(mealLogs)
     }
     
     func extractHourMinute(from dateString: String) -> String? {
@@ -288,12 +288,24 @@ class HomeViewController: BaseViewController<HomeViewModel> {
 
 final class MealLogListView: UIView {
     
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "오늘 식사 기록"
-        label.font = .systemFont(ofSize: 17, weight: .bold)
-        label.textColor = .bodyStatusCardNumber
-        return label
+    private let goToDietButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        config.title = "오늘 식사 기록"
+        config.titleAlignment = .leading
+        config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attr in
+            var attr = attr
+            attr.font = .systemFont(ofSize: 17, weight: .bold)
+            attr.foregroundColor = .black
+            return attr
+        }
+        let imageConfig = UIImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+        config.image = UIImage(systemName: "chevron.right", withConfiguration: imageConfig)
+        config.imagePlacement = .trailing
+        config.imagePadding = 8
+        
+        let button = UIButton(configuration: config)
+        button.tintColor = .black
+        return button
     }()
     
     private let stackView: UIStackView = {
@@ -305,52 +317,116 @@ final class MealLogListView: UIView {
         return stackView
     }()
     
-    private var mealLogs: [MealLogView] = []
+    private let dietEmptyInfoLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.textAlignment = .center
+        label.textColor = .black
+        label.text = "오늘의 식단 기록이 없습니다"
+        return label
+    }()
     
-    init(mealLogs: [MealLogView]) {
+    private let addDietButton = TitledButton(
+        title: "식단 추가하기",
+        image: UIImage(systemName: "plus"),
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .white,
+            borderColor: nil,
+            gradientColors: [.systemBlue, .systemBlue.withAlphaComponent(0.2)]
+        )
+    )
+    
+    private lazy var dietEmptyStackView: UIStackView = {
+        let v = UIStackView(arrangedSubviews: [dietEmptyInfoLabel, addDietButton])
+        v.axis = .vertical
+        v.spacing = 8
+        return v
+    }()
+    
+    let mealLogsRelay = BehaviorRelay<[MealLogView]>(value: [])
+    private let logIsEmptyRelay = BehaviorRelay<Bool>(value: false)
+    private let disposeBag = DisposeBag()
+    
+    
+    init() {
         super.init(frame: .zero)
-        self.mealLogs = mealLogs
-        setupView()
-        configureStackView()
+        setUpView()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupView()
-        updateTitleVisibility()
+        fatalError("init(coder:) has not been implemented")
     }
     
-    private func setupView() {
-        addSubview(titleLabel)
-        addSubview(stackView)
+    private func setUpView() {
+        backgroundColor = .clear
         
-        self.backgroundColor = .clear
+        [goToDietButton, stackView, dietEmptyStackView].forEach(addSubview)
         
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview()
+        goToDietButton.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview()
         }
         
         stackView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(10)
+            make.top.equalTo(goToDietButton.snp.bottom).offset(10)
             make.leading.trailing.equalToSuperview()
             make.bottom.equalToSuperview().inset(16)
         }
-    }
-    
-    private func configureStackView() {
-        for mealLog in mealLogs {
-            stackView.addArrangedSubview(mealLog)
+         
+        dietEmptyStackView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
     
-    func updateMealLogs(_ logs: [MealLogView]) {
+    
+    private func setBinding() {
+        mealLogsRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] logs in
+                self?.configureStackView(with: logs)
+            })
+            .disposed(by: disposeBag)
+        
+        mealLogsRelay
+            .map { $0.isEmpty }
+            .bind(to: logIsEmptyRelay)
+            .disposed(by: disposeBag)
+        
+        logIsEmptyRelay
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] isEmpty in
+                self?.toggleEmptyState(isEmpty: isEmpty)
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    private func configureStackView(with mealLogs: [MealLogView]) {
         stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        self.mealLogs = logs
-        configureStackView()
-        updateTitleVisibility()
+            
+            mealLogs.forEach { log in
+                
+                stackView.addArrangedSubview(log)
+            }
     }
     
-    private func updateTitleVisibility() {
-            titleLabel.isHidden = mealLogs.isEmpty
+    private func toggleEmptyState(isEmpty: Bool) {
+        goToDietButton.isHidden = isEmpty
+        stackView.isHidden = isEmpty
+        dietEmptyStackView.isHidden = !isEmpty
+        
+        if isEmpty {
+            dietEmptyStackView.snp.remakeConstraints { make in
+                make.centerX.equalToSuperview()
+                make.top.equalToSuperview()
+                make.bottom.equalToSuperview().inset(24)
+            }
+        } else {
+            dietEmptyStackView.snp.remakeConstraints { make in
+                make.center.equalToSuperview()
+            }
         }
+    }
 }
+

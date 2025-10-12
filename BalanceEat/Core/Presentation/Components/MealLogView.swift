@@ -39,6 +39,13 @@ final class MealLogView: UIView {
         label.font = .systemFont(ofSize: 18, weight: .heavy)
         return label
     }()
+    private let moreButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "chevron.right"), for: .normal)
+        button.tintColor = .orange
+        button.imageView?.contentMode = .scaleAspectFit
+        return button
+    }()
     
     init(icon: UIImage? = nil, title: String, ateTime: String, consumedCalories: Int, foodDatas: [DietFoodData], showNutritionInfo: Bool = false) {
         self.icon = icon
