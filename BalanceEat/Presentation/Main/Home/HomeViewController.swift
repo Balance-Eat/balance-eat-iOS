@@ -204,6 +204,14 @@ class HomeViewController: BaseViewController<HomeViewModel> {
                 navigationController?.pushViewController(EditTargetViewController(userData: userData), animated: true)
             })
             .disposed(by: disposeBag)
+        
+        todayAteMealLogListView.goToDietButtonTapRelay
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                navigationController?.pushViewController(CreateDietViewController(dietDatas: viewModel.dietResponseRelay.value ?? [], date: Date()), animated: true)
+            })
+            .disposed(by: disposeBag)
     }
     
     private func updateUIForUserData(user: UserData) {
@@ -290,7 +298,7 @@ final class MealLogListView: UIView {
     
     private let goToDietButton: UIButton = {
         var config = UIButton.Configuration.plain()
-        config.title = "오늘 식사 기록"
+        config.title = "식단 상세보기"
         config.titleAlignment = .leading
         config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { attr in
             var attr = attr
@@ -338,13 +346,14 @@ final class MealLogListView: UIView {
     )
     
     private lazy var dietEmptyStackView: UIStackView = {
-        let v = UIStackView(arrangedSubviews: [dietEmptyInfoLabel, addDietButton])
-        v.axis = .vertical
-        v.spacing = 8
-        return v
+        let stackView = UIStackView(arrangedSubviews: [dietEmptyInfoLabel, addDietButton])
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        return stackView
     }()
     
     let mealLogsRelay = BehaviorRelay<[MealLogView]>(value: [])
+    let goToDietButtonTapRelay = PublishRelay<Void>()
     private let logIsEmptyRelay = BehaviorRelay<Bool>(value: false)
     private let disposeBag = DisposeBag()
     
@@ -399,6 +408,10 @@ final class MealLogListView: UIView {
             .subscribe(onNext: { [weak self] isEmpty in
                 self?.toggleEmptyState(isEmpty: isEmpty)
             })
+            .disposed(by: disposeBag)
+        
+        goToDietButton.rx.tap
+            .bind(to: goToDietButtonTapRelay)
             .disposed(by: disposeBag)
     }
     

@@ -80,7 +80,7 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
         
         dietEmptyInfoView.buttonTappedRelay
             .subscribe(onNext: { [weak self] in
-                
+                self?.goToDiet()
             })
             .disposed(by: disposeBag)
         
@@ -130,6 +130,12 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
             .map { !$0.isEmpty }
             .bind(to: dietEmptyInfoView.rx.isHidden)
             .disposed(by: disposeBag)
+        
+        todayAteMealLogListView.goToDietButtonTapRelay
+            .subscribe(onNext: { [weak self] in
+                self?.goToDiet()
+            })
+            .disposed(by: disposeBag)
     }
     
     private func getDatas() {
@@ -153,7 +159,9 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
         return formatter.string(from: date)
     }
 
-
+    private func goToDiet() {
+        navigationController?.pushViewController(CreateDietViewController(dietDatas: viewModel.selectedDayDataCache.value, date: viewModel.selectedDate.value), animated: true)
+    }
 }
 
 

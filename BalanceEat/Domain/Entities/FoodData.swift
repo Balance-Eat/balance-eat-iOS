@@ -34,4 +34,17 @@ struct FoodData {
             createdAt: self.createdAt
         )
     }
+    
+    func modelToDietFoodData() -> DietFoodData {
+        DietFoodData(
+            id: self.id,
+            name: self.name,
+            intake: self.servingSize,
+            unit: self.unit,
+            calories: self.carbohydrates * 4 + self.protein * 4 + self.fat * 9,
+            carbohydrates: self.carbohydrates,
+            protein: self.protein,
+            fat: self.fat
+        )
+    }
 }

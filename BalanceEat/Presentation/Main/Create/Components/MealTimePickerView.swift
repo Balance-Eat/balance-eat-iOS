@@ -10,43 +10,20 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-enum MealTime: String {
-    case breakfast = "아침"
-    case lunch = "점심"
-    case dinner = "저녁"
-    case snack = "간식"
-    
-    var title : String {
-        switch self {
-        case .breakfast:
-            return "BREAKFAST"
-        case .lunch:
-            return "LUNCH"
-        case .dinner:
-            return "DINNER"
-        case .snack:
-            return "SNACK"
-        }
-    }
-}
-
 final class MealTimePickerView: UIView {
     private var selectedItemView: MealTimePickerItem?
     private let stackView = UIStackView()
     
-    var selectedMealTime: MealTime {
-        didSet {
-            updateSelectedItem()
-        }
-    }
+    let selectedMealTimeRelay: BehaviorRelay<MealType>
     
-    private var itemViews: [MealTime: MealTimePickerItem] = [:]
+    private var itemViews: [MealType: MealTimePickerItem] = [:]
     private let disposeBag = DisposeBag()
     
-    init(selectedMealTime: MealTime) {
-        self.selectedMealTime = selectedMealTime
+    init(selectedMealTimeRelay: BehaviorRelay<MealType>) {
+        self.selectedMealTimeRelay = selectedMealTimeRelay
         super.init(frame: .zero)
         setUpView()
+        setBinding()
         setUpItems()
         updateSelectedItem()
     }
@@ -71,18 +48,27 @@ final class MealTimePickerView: UIView {
             }
     }
     
+    private func setBinding() {
+        selectedMealTimeRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] mealTime in
+                self?.updateSelectedItem()
+            })
+            .disposed(by: disposeBag)
+    }
+    
     private func setUpItems() {
-        for mealTime in [MealTime.breakfast, .lunch, .dinner, .snack] {
-            let item = MealTimePickerItem(mealTile: mealTime, isSelected: mealTime == selectedMealTime)
-            itemViews[mealTime] = item
+        for mealType in [MealType.breakfast, .lunch, .dinner, .snack] {
+            let item = MealTimePickerItem(mealType: mealType, isSelected: mealType == selectedMealTimeRelay.value)
+            itemViews[mealType] = item
             stackView.addArrangedSubview(item)
         
             
             item.tapObservable
                 .subscribe(onNext: { [weak self] in
                     guard let self = self else { return }
-                    if self.selectedMealTime != mealTime {
-                        self.selectedMealTime = mealTime
+                    if self.selectedMealTimeRelay.value != mealType {
+                        self.selectedMealTimeRelay.accept(mealType)
                     } else {
                         self.updateSelectedItem()
                     }
@@ -93,7 +79,7 @@ final class MealTimePickerView: UIView {
     
     private func updateSelectedItem() {
         for (mealTime, itemView) in itemViews {
-            let isCurrent = (mealTime == selectedMealTime)
+            let isCurrent = (mealTime == selectedMealTimeRelay.value)
             itemView.setSelected(isCurrent)
             if isCurrent {
                 selectedItemView = itemView
@@ -103,10 +89,10 @@ final class MealTimePickerView: UIView {
 }
 
 final class MealTimePickerItem: UIView {
-    private let mealTime: MealTime
+    private let mealType: MealType
     private var isSelected: Bool = false
     private var titleText: String {
-        switch mealTime {
+        switch mealType {
         case .breakfast:
             "아침"
         case .lunch:
@@ -130,8 +116,8 @@ final class MealTimePickerItem: UIView {
         return label
     }()
     
-    init(mealTile: MealTime, isSelected: Bool) {
-        self.mealTime = mealTile
+    init(mealType: MealType, isSelected: Bool) {
+        self.mealType = mealType
         self.isSelected = isSelected
         super.init(frame: .zero)
         
@@ -199,3 +185,4 @@ final class MealTimePickerItem: UIView {
         self.titleLabel.textColor = selected ? .systemBlue : .mealTimePickerTitle
     }
 }
+

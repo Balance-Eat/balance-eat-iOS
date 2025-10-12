@@ -27,8 +27,8 @@ struct AddedFoodItem {
 }
 
 final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSource {
-    private var foodItems: [FoodData] = []
-    private let foodItemsRelay: BehaviorRelay<[FoodData]>
+    private var foodItems: [DietFoodData] = []
+    let foodItemsRelay: BehaviorRelay<[DietFoodData]> = BehaviorRelay(value: [])
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -47,11 +47,10 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     private let cellNutritionRelay = BehaviorRelay<[String: (Double, Double, Double, Double)]>(value: [:])
     let cellServingSizeRelay = BehaviorRelay<[String: Double]>(value: [:])
     
-    let deletedFoodItem = PublishRelay<FoodData>()
+    let deletedFoodItem = PublishRelay<DietFoodData>()
     private let disposeBag = DisposeBag()
     
-    init(foodItemsRelay: BehaviorRelay<[FoodData]>) {
-        self.foodItemsRelay = foodItemsRelay
+    init() {
         super.init(frame: .zero)
         
         setUpView()
@@ -117,19 +116,22 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         foodItemsRelay
             .subscribe(onNext: { [weak self] items in
                 guard let self else { return }
-                let currentUUIDs = Set(items.map { $0.uuid })
+                let currentIDs = Set(items.map { String($0.id) })
                 var dict = self.cellNutritionRelay.value
-                dict.keys.filter { !currentUUIDs.contains($0) }.forEach { dict.removeValue(forKey: $0) }
+                dict.keys.filter { !currentIDs.contains($0) }.forEach { dict.removeValue(forKey: $0) }
                 self.cellNutritionRelay.accept(dict)
                 
                 self.foodItems = items
-                self.tableView.reloadData()
-                self.updateTableViewHeight()
+
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                    self.updateTableViewHeight()
+                }
             })
             .disposed(by: disposeBag)
         
         deletedFoodItem
-            .withLatestFrom(foodItemsRelay) { deleted, current -> [FoodData] in
+            .withLatestFrom(foodItemsRelay) { deleted, current -> [DietFoodData] in
                 current.filter { $0.id != deleted.id }
             }
             .bind(to: foodItemsRelay)
@@ -147,7 +149,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         
         let foodItem = foodItems[indexPath.row]
         cell.configure(
-            servingSize: foodItem.servingSize,
+            servingSize: foodItem.intake,
             foodData: foodItem
         )
         
@@ -160,7 +162,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             .subscribe(onNext: { [weak self] value in
                 guard let self else { return }
                 var dict = self.cellNutritionRelay.value
-                dict[foodItem.uuid] = value
+                dict[String(foodItem.id)] = value
                 self.cellNutritionRelay.accept(dict)
             })
             .disposed(by: cell.disposeBag)
@@ -169,7 +171,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             .subscribe(onNext: { [weak self] servingSize in
                 guard let self else { return }
                 var dict = self.cellServingSizeRelay.value
-                dict[foodItem.uuid] = servingSize
+                dict[String(foodItem.id)] = servingSize
                 self.cellServingSizeRelay.accept(dict)
             })
             .disposed(by: cell.disposeBag)
@@ -194,7 +196,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         tableView.endUpdates()
         
         var dict = cellNutritionRelay.value
-        dict.removeValue(forKey: food.uuid)
+        dict.removeValue(forKey: String(food.id))
         cellNutritionRelay.accept(dict)
         
         self.updateTableViewHeight()
@@ -203,7 +205,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
 }
 
 final class AddedFoodCell: UITableViewCell {
-    private var foodData: FoodData?
+    private var foodData: DietFoodData?
     private var servingSize: Double = 0
     
     private let containerView = UIView()
@@ -383,7 +385,7 @@ final class AddedFoodCell: UITableViewCell {
 //        .disposed(by: disposeBag)
 //    }
     
-    func configure(servingSize: Double, foodData: FoodData) {
+    func configure(servingSize: Double, foodData: DietFoodData) {
         prepareForReuse()
         
         foodNameLabel.text = foodData.name
@@ -454,8 +456,6 @@ final class AddedFoodCell: UITableViewCell {
         )
         .subscribe(onNext: { [weak self] (cal, carbon, protein, fat) in
             guard let self else { return }
-            guard let foodData = self.foodData else { return }
-
 
             self.nutritionRelay.accept((cal, carbon, protein, fat))
         })

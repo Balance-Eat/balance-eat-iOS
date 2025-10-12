@@ -30,7 +30,7 @@ class MainViewController: UIViewController {
 
     private let tabItems: [TabItem] = [
         TabItem(iconImage: UIImage(systemName: "house.fill") ?? UIImage(), title: "홈"),
-        TabItem(iconImage: UIImage(systemName: "fork.knife") ?? UIImage(), title: "식단"),
+//        TabItem(iconImage: UIImage(systemName: "fork.knife") ?? UIImage(), title: "식단"),
         TabItem(iconImage: UIImage(systemName: "list.bullet.rectangle.portrait.fill") ?? UIImage(), title: "내역"),
         TabItem(iconImage: UIImage(systemName: "chart.line.text.clipboard.fill") ?? UIImage(), title: "통계"),
         TabItem(iconImage: UIImage(systemName: "line.horizontal.3") ?? UIImage(), title: "메뉴")
@@ -46,7 +46,6 @@ class MainViewController: UIViewController {
 
     private let viewControllers: [UIViewController] = [
         HomeViewController(),
-        CreateDietViewController(),
         DietListViewController(),
         ChartViewController(),
         MenuViewController()

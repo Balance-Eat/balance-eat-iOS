@@ -8,7 +8,7 @@
 import Foundation
 
 protocol DietUseCaseProtocol {
-    func createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async -> Result<CreateDietResponseDTO, NetworkError>
+    func createDiet(mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async -> Result<CreateDietResponseDTO, NetworkError>
     func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError>
     func getMonthlyDiet(year: Int, month: Int, userId: String) async -> Result<[DietDTO], NetworkError>
 }
@@ -20,8 +20,8 @@ struct DietUseCase: DietUseCaseProtocol {
         self.repository = repository
     }
     
-    func createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async -> Result<CreateDietResponseDTO, NetworkError> {
-        await repository.createDiet(mealTime: mealTime, consumedAt: consumedAt, dietFoods: dietFoods, userId: userId)
+    func createDiet(mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async -> Result<CreateDietResponseDTO, NetworkError> {
+        await repository.createDiet(mealType: mealType, consumedAt: consumedAt, dietFoods: dietFoods, userId: userId)
     }
     
     func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError> {

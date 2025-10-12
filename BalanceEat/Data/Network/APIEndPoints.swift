@@ -112,7 +112,7 @@ enum UserEndPoints: Endpoint {
 }
 
 enum DietEndPoints: Endpoint {
-    case createDiet(mealTime: MealTime, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String)
+    case createDiet(mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String)
     case daily(date: String, userId: String)
     case monthly(yearMonth: String, userId: String)
     

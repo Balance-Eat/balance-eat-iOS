@@ -37,7 +37,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     )
     
     private lazy var mealTimePickerView: MealTimePickerView = {
-        let view = MealTimePickerView(selectedMealTime: mealTime)
+        let view = MealTimePickerView(selectedMealTimeRelay: viewModel.mealTimeRelay)
         view.snp.makeConstraints { make in
             make.height.equalTo(40)
         }
@@ -49,7 +49,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         contentView: mealTimePickerView
     )
     
-    private lazy var addedFoodListView = AddedFoodListView(foodItemsRelay: viewModel.addedFoodsRelay)
+    private let addedFoodListView = AddedFoodListView()
     
     private let saveButton = TitledButton(
         title: "저장",
@@ -61,9 +61,6 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         )
     )
     
-    let dateRelay: BehaviorRelay<Date> = BehaviorRelay(value: Date())
-    private var mealTime: MealTime = .breakfast
-    
     private let favoriteFoods: [FavoriteFood] = [
         FavoriteFood(iconImage: .chickenChest, name: "닭가슴살", calorie: 165),
         FavoriteFood(iconImage: .salad, name: "샐러드", calorie: 100),
@@ -71,14 +68,16 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         FavoriteFood(iconImage: .kakaoLogo, name: "카카오", calorie: 1010)
     ]
     
-    init() {
+    init(dietDatas: [DietData], date: Date) {
         let userRepository = UserRepository()
         let userUseCase = UserUseCase(repository: userRepository)
         
         let dietRepository = DietRepository()
         let dietUseCase = DietUseCase(repository: dietRepository)
         
-        let vm = CreateDietViewModel(dietUseCase: dietUseCase, userUseCase: userUseCase)
+        print("dietDatas: \(dietDatas)")
+        
+        let vm = CreateDietViewModel(dietUseCase: dietUseCase, userUseCase: userUseCase, dietDatas: dietDatas, date: date)
         super.init(viewModel: vm)
     }
     
@@ -92,6 +91,20 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         setUpView()
         setBinding()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
+
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .white
+        
+        navigationController?.navigationBar.standardAppearance = appearance
+        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        navigationController?.navigationBar.compactAppearance = appearance
+    }
+
     
     private func setUpView() {
         topContentView.snp.makeConstraints { make in
@@ -111,24 +124,23 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         saveButton.snp.makeConstraints { make in
             make.height.equalTo(50)
         }
+        
+        navigationItem.title = "식단"
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+            image: UIImage(systemName: "chevron.backward"),
+            style: .plain,
+            target: self,
+            action: #selector(backButtonTapped)
+        )
     }
     
     private func setBinding() {
-//        searchInputField.textObservable
-//            .compactMap { $0 }
-//            .distinctUntilChanged()
-//            .bind { text in
-//                print("📝 입력된 텍스트: \(text)")
-//            }
-//            .disposed(by: disposeBag)
-//        
-//        searchInputField.searchTap
-//            .bind {
-//                print("🔍 돋보기 아이콘 눌림!")
-//            }
-//            .disposed(by: disposeBag)
-//
-        dateRelay
+        
+        viewModel.currentFoodsRelay
+            .bind(to: addedFoodListView.foodItemsRelay)
+            .disposed(by: disposeBag)
+        
+        viewModel.dateRelay
             .map { [weak self] date in
                 guard let self else { return "" }
                 
@@ -151,7 +163,11 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                         guard let self else { return }
                         guard let foodData else { return }
                         
-                        viewModel.addedFoodsRelay.accept(self.viewModel.addedFoodsRelay.value + [foodData])
+                        let mealTime = viewModel.mealTimeRelay.value
+                        var current = viewModel.dietFoodsRelay.value
+                        current[mealTime.title, default: []].append(foodData.modelToDietFoodData())
+                        viewModel.dietFoodsRelay.accept(current)
+                        viewModel.mealTimeRelay.accept(mealTime)
                     })
                     .disposed(by: disposeBag)
                 
@@ -183,7 +199,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 })
             .disposed(by: disposeBag)
         
-        viewModel.addedFoodsRelay
+        viewModel.dietFoodsRelay
             .map { $0.count > 0 }
             .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
@@ -202,30 +218,43 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     guard let self else { return }
                     
                     
-                    let mealTime = mealTimePickerView.selectedMealTime
+                    let mealTime = mealTimePickerView.selectedMealTimeRelay.value
                     let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
-                    let dietFoods = viewModel.addedFoodsRelay.value.map { [weak self] food in
+                    let mealTimeString = viewModel.mealTimeRelay.value.title
+                    if let foods = viewModel.dietFoodsRelay.value[mealTimeString] {
+                        let dietFoods = foods.map { [weak self] food in
+                            if let servingSize = self?.addedFoodListView.cellServingSizeRelay.value[String(food.id)] {
+                                return FoodItemForCreateDietDTO(
+                                    foodId: food.id,
+                                    intake: servingSize
+                                )
+                            } else {
+                                return FoodItemForCreateDietDTO(
+                                    foodId: -1,
+                                    intake: -1
+                                )
+                            }
+                        }
                         
-                        if let servingSize = self?.addedFoodListView.cellServingSizeRelay.value[food.uuid] {
-                            FoodItemForCreateDietDTO(
-                                foodId: food.id,
-                                intake: servingSize
+                        let userId = viewModel.getUserId()
+                        Task {
+                            await self.viewModel.createDiet(
+                                mealType: mealTime,
+                                consumedAt: consumedAt,
+                                dietFoods: dietFoods,
+                                userId: userId
                             )
-                        } else {
-                            FoodItemForCreateDietDTO(foodId: -1, intake: -1)
                         }
                     }
-                    let userId = viewModel.getUserId()
-                    Task {
-                        await self.viewModel.createDiet(
-                            mealTime: mealTime,
-                            consumedAt: consumedAt,
-                            dietFoods: dietFoods,
-                            userId: userId
-                        )
-                }
+
+                    
             })
             .disposed(by: disposeBag)
+    }
+    
+    @objc private func backButtonTapped() {
+        navigationController?.popViewController(animated: true)
+        dismiss(animated: true)
     }
     
     private func isToday(_ date: Date) -> Bool {
