@@ -38,6 +38,16 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         label.text = "추가된 음식"
         return label
     }()
+    private var emptyLabelHeightConstraint: Constraint?
+    private let emptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "추가된 음식이 없습니다"
+        label.font = .systemFont(ofSize: 15, weight: .medium)
+        label.textColor = .systemGray
+        label.textAlignment = .center
+        label.isHidden = true
+        return label
+    }()
     private let tableView = UITableView()
     private var tableViewHeightConstraint: Constraint?
     
@@ -71,11 +81,19 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         
         self.addSubview(titleLabel)
         self.addSubview(tableView)
+        self.addSubview(emptyLabel)
         self.addSubview(sumOfNutritionValueView)
         
         titleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview().inset(20)
             make.leading.equalToSuperview()
+        }
+        
+        emptyLabel.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.top.equalTo(titleLabel.snp.bottom)
+            make.leading.trailing.equalToSuperview()
+            self.emptyLabelHeightConstraint = make.height.equalTo(0).constraint
         }
         
         tableView.snp.makeConstraints { make in
@@ -114,8 +132,15 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
 
 
         foodItemsRelay
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] items in
                 guard let self else { return }
+                let isEmpty = items.isEmpty
+                self.emptyLabel.isHidden = !isEmpty
+                
+                let emptyLabelHeight: CGFloat = isEmpty ? 40 : 0
+                self.emptyLabelHeightConstraint?.update(offset: emptyLabelHeight)
+                
                 let currentIDs = Set(items.map { String($0.id) })
                 var dict = self.cellNutritionRelay.value
                 dict.keys.filter { !currentIDs.contains($0) }.forEach { dict.removeValue(forKey: $0) }
@@ -123,10 +148,8 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
                 
                 self.foodItems = items
 
-                DispatchQueue.main.async {
                     self.tableView.reloadData()
                     self.updateTableViewHeight()
-                }
             })
             .disposed(by: disposeBag)
         

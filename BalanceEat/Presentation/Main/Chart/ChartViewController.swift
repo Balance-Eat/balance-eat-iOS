@@ -8,20 +8,10 @@
 import UIKit
 import SnapKit
 
-class ChartViewController: UIViewController {
+class ChartViewController: BaseViewController<ChartViewModel> {
     init() {
-        super.init(nibName: nil, bundle: nil)
-        
-        let label = UILabel()
-        label.text = "통계"
-        label.textAlignment = .center
-        label.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        
-        view.addSubview(label)
-        
-        label.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
+        let vm = ChartViewModel()
+        super.init(viewModel: vm)
     }
     
     required init?(coder: NSCoder) {
@@ -30,5 +20,16 @@ class ChartViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        setUpView()
+        setBinding()
+    }
+    
+    private func setUpView() {
+        
+    }
+    
+    private func setBinding() {
+        
     }
 }

@@ -142,7 +142,7 @@ enum DietEndPoints: Endpoint {
         switch self {
         case .createDiet(let mealTime, let consumedAt, let dietFoods, _):
             return [
-                "mealType": mealTime.title,
+                "mealType": mealTime.rawValue,
                 "consumedAt": consumedAt,
                 "dietFoods": dietFoods.map { $0.toDictionary() }
             ]

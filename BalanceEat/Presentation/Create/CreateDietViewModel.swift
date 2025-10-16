@@ -48,6 +48,7 @@ final class CreateDietViewModel: BaseViewModel {
                 
                 let mealTimeKey = mealTime.rawValue
                 let currentFoods = dietFoodsRelay.value[mealTimeKey] ?? []
+                print("mealTimeRelay: \(mealTimeKey), dietFoodsRelay: \(dietFoodsRelay.value)")
                 currentFoodsRelay.accept(currentFoods)
             })
             .disposed(by: disposeBag)

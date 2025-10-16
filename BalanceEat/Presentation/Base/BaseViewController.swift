@@ -53,7 +53,8 @@ class BaseViewController<VM: BaseViewModel>: UIViewController {
         contentView.addSubview(mainStackView)
         
         topContentView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            make.leading.trailing.equalToSuperview()
         }
         
         scrollView.snp.makeConstraints { make in

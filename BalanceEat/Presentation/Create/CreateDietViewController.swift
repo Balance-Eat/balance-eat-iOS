@@ -23,7 +23,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     
     private lazy var searchStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [
-            searchInputField
+            searchInputField,
 //            favoriteFoodGridView
         ])
         stackView.axis = .vertical
@@ -74,9 +74,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         
         let dietRepository = DietRepository()
         let dietUseCase = DietUseCase(repository: dietRepository)
-        
-        print("dietDatas: \(dietDatas)")
-        
+                
         let vm = CreateDietViewModel(dietUseCase: dietUseCase, userUseCase: userUseCase, dietDatas: dietDatas, date: date)
         super.init(viewModel: vm)
     }
@@ -108,7 +106,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     
     private func setUpView() {
         topContentView.snp.makeConstraints { make in
-            make.height.equalTo(0)
+            make.height.equalTo(1)
         }
         
         [dateLabel, mealTimeTitledView, searchMealTitledView, addedFoodListView, saveButton].forEach(mainStackView.addArrangedSubview(_:))
@@ -154,18 +152,20 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             .disposed(by: disposeBag)
         
         searchInputField.textField.rx.controlEvent(.editingDidBegin)
+            .observe(on: MainScheduler.instance)
             .bind { [weak self] in
                 guard let self else { return }
                 let searchFoodViewController = SearchFoodViewController()
                 
                 searchFoodViewController.selectedFoodDataRelay
+                    .observe(on: MainScheduler.instance)
                     .subscribe(onNext: { [weak self] foodData in
                         guard let self else { return }
                         guard let foodData else { return }
-                        
+                                                
                         let mealTime = viewModel.mealTimeRelay.value
                         var current = viewModel.dietFoodsRelay.value
-                        current[mealTime.title, default: []].append(foodData.modelToDietFoodData())
+                        current[mealTime.rawValue, default: []].append(foodData.modelToDietFoodData())
                         viewModel.dietFoodsRelay.accept(current)
                         viewModel.mealTimeRelay.accept(mealTime)
                     })
@@ -217,10 +217,9 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 onNext: { [weak self] in
                     guard let self else { return }
                     
-                    
                     let mealTime = mealTimePickerView.selectedMealTimeRelay.value
                     let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
-                    let mealTimeString = viewModel.mealTimeRelay.value.title
+                    let mealTimeString = viewModel.mealTimeRelay.value.rawValue
                     if let foods = viewModel.dietFoodsRelay.value[mealTimeString] {
                         let dietFoods = foods.map { [weak self] food in
                             if let servingSize = self?.addedFoodListView.cellServingSizeRelay.value[String(food.id)] {

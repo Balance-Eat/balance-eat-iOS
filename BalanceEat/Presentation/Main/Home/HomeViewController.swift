@@ -212,6 +212,14 @@ class HomeViewController: BaseViewController<HomeViewModel> {
                 navigationController?.pushViewController(CreateDietViewController(dietDatas: viewModel.dietResponseRelay.value ?? [], date: Date()), animated: true)
             })
             .disposed(by: disposeBag)
+        
+        todayAteMealLogListView.addDietButtonTapRelay
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                navigationController?.pushViewController(CreateDietViewController(dietDatas: [], date: Date()), animated: true)
+            })
+            .disposed(by: disposeBag)
     }
     
     private func updateUIForUserData(user: UserData) {
@@ -354,6 +362,7 @@ final class MealLogListView: UIView {
     
     let mealLogsRelay = BehaviorRelay<[MealLogView]>(value: [])
     let goToDietButtonTapRelay = PublishRelay<Void>()
+    let addDietButtonTapRelay = PublishRelay<Void>()
     private let logIsEmptyRelay = BehaviorRelay<Bool>(value: false)
     private let disposeBag = DisposeBag()
     
@@ -412,6 +421,10 @@ final class MealLogListView: UIView {
         
         goToDietButton.rx.tap
             .bind(to: goToDietButtonTapRelay)
+            .disposed(by: disposeBag)
+        
+        addDietButton.rx.tap
+            .bind(to: addDietButtonTapRelay)
             .disposed(by: disposeBag)
     }
     
