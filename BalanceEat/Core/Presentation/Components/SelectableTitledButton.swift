@@ -10,8 +10,20 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
+struct SelectableTitledButtonStyle {
+    let backgroundColor: UIColor?
+    let titleColor: UIColor
+    let borderColor: UIColor?
+    let gradientColors: [UIColor]?
+    
+    let selectedBackgroundColor: UIColor?
+    let selectedTitleColor: UIColor
+    let selectedBorderColor: UIColor?
+    let selectedGradientColors: [UIColor]?
+}
+
 final class SelectableTitledButton: UIView {
-    private var style: TitledButtonStyle?
+    private var style: SelectableTitledButtonStyle?
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -22,7 +34,7 @@ final class SelectableTitledButton: UIView {
     let isSelectedRelay = BehaviorRelay<Bool>(value: false)
     private let disposeBag = DisposeBag()
     
-    init(title: String, style: TitledButtonStyle) {
+    init(title: String, style: SelectableTitledButtonStyle) {
         super.init(frame: .zero)
         self.style = style
         setUpView(title: title)
@@ -72,21 +84,56 @@ final class SelectableTitledButton: UIView {
     private func bindSelectedState() {
         isSelectedRelay
             .bind { [weak self] isSelected in
-                guard let self = self else { return }
-                if isSelected {
-                    UIView.animate(withDuration: 0.25) {
-                        self.backgroundColor = .systemBlue.withAlphaComponent(0.05)
-                        self.titleLabel.textColor = .systemBlue
-                        self.layer.borderColor = UIColor.systemBlue.cgColor
-                    }
-                } else {
-                    UIView.animate(withDuration: 0.25) {
-                        self.backgroundColor = self.style?.backgroundColor
-                        self.titleLabel.textColor = self.style?.titleColor
-                        self.layer.borderColor = self.style?.borderColor?.cgColor ?? UIColor.clear.cgColor
+                guard let self = self, let style = self.style else { return }
+                UIView.animate(withDuration: 0.25) {
+                    if isSelected {
+                        self.backgroundColor = style.selectedBackgroundColor ?? style.backgroundColor
+                        self.titleLabel.textColor = style.selectedTitleColor
+                        self.layer.borderColor = style.selectedBorderColor?.cgColor ?? style.borderColor?.cgColor
+                        
+                        if let colors = style.selectedGradientColors {
+                            self.applyGradient(colors: colors)
+                        } else {
+                            self.removeGradient()
+                        }
+                    } else {
+                        self.backgroundColor = style.backgroundColor
+                        self.titleLabel.textColor = style.titleColor
+                        self.layer.borderColor = style.borderColor?.cgColor
+                        
+                        if let colors = style.gradientColors {
+                            self.applyGradient(colors: colors)
+                        } else {
+                            self.removeGradient()
+                        }
                     }
                 }
             }
             .disposed(by: disposeBag)
     }
+    
+    private var gradientLayer: CAGradientLayer?
+    
+    private func applyGradient(colors: [UIColor]) {
+        removeGradient()
+        let gradient = CAGradientLayer()
+        gradient.colors = colors.map { $0.cgColor }
+        gradient.startPoint = CGPoint(x: 0, y: 0.5)
+        gradient.endPoint = CGPoint(x: 1, y: 0.5)
+        gradient.frame = bounds
+        gradient.cornerRadius = layer.cornerRadius
+        layer.insertSublayer(gradient, at: 0)
+        gradientLayer = gradient
+    }
+    
+    private func removeGradient() {
+        gradientLayer?.removeFromSuperlayer()
+        gradientLayer = nil
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradientLayer?.frame = bounds
+    }
 }
+
