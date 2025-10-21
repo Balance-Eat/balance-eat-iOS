@@ -13,11 +13,11 @@ import RxCocoa
 class BaseViewModel {
     let loadingRelay = BehaviorRelay<Bool>(value: false)
     
-    let errorMessageRelay = BehaviorRelay<String?>(value: nil)
+    let toastMessageRelay = BehaviorRelay<String?>(value: nil)
     
     let disposeBag = DisposeBag()
     
     func handleError(_ error: Error, prefix: String = "") {
-        errorMessageRelay.accept("\(prefix)\(error.localizedDescription)")
+        toastMessageRelay.accept("\(prefix)\(error.localizedDescription)")
     }
 }

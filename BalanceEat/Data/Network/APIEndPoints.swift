@@ -113,6 +113,8 @@ enum UserEndPoints: Endpoint {
 
 enum DietEndPoints: Endpoint {
     case createDiet(mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String)
+    case updateDiet(dietId: Int, mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String)
+    case deleteDiet(dietId: Int, userId: String)
     case daily(date: String, userId: String)
     case monthly(yearMonth: String, userId: String)
     
@@ -120,6 +122,8 @@ enum DietEndPoints: Endpoint {
         switch self {
         case .createDiet:
             return "/v1/diets"
+        case .updateDiet(let dietId, _, _, _, _), .deleteDiet(let dietId, _):
+            return "/v1/diets/\(dietId)"
         case .daily:
             return "/v1/diets/daily"
         case .monthly:
@@ -131,6 +135,10 @@ enum DietEndPoints: Endpoint {
         switch self {
         case .createDiet:
             return .post
+        case .updateDiet:
+            return .put
+        case .deleteDiet:
+            return .delete
         case .daily:
             return .get
         case .monthly:
@@ -140,9 +148,15 @@ enum DietEndPoints: Endpoint {
     
     var parameters: [String : Any?]? {
         switch self {
-        case .createDiet(let mealTime, let consumedAt, let dietFoods, _):
+        case .createDiet(let mealType, let consumedAt, let dietFoods, _):
             return [
-                "mealType": mealTime.rawValue,
+                "mealType": mealType.rawValue,
+                "consumedAt": consumedAt,
+                "dietFoods": dietFoods.map { $0.toDictionary() }
+            ]
+        case .updateDiet(_, let mealType, let consumedAt, let dietFoods, _):
+            return [
+                "mealType": mealType.rawValue,
                 "consumedAt": consumedAt,
                 "dietFoods": dietFoods.map { $0.toDictionary() }
             ]
@@ -164,7 +178,7 @@ enum DietEndPoints: Endpoint {
     
     var headers: HTTPHeaders? {
         switch self {
-        case .daily(_, let userId), .createDiet(_, _, _, let userId), .monthly(_, let userId):
+        case .createDiet(_, _, _, let userId), .updateDiet(_, _, _, _, let userId), .deleteDiet(_, let userId), .daily(_, let userId), .monthly(_, let userId):
             return ["X-USER-ID": userId]
         }
     }

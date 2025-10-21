@@ -81,7 +81,7 @@ class BaseViewController<VM: BaseViewModel>: UIViewController {
             .bind(to: loadingView.isLoading)
             .disposed(by: disposeBag)
         
-        viewModel.errorMessageRelay
+        viewModel.toastMessageRelay
             .observe(on: MainScheduler.instance)
             .compactMap { $0 }
             .subscribe(onNext: { [weak self] message in

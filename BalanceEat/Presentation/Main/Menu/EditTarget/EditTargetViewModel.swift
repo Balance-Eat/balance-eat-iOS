@@ -31,7 +31,7 @@ final class EditTargetViewModel: BaseViewModel {
             loadingRelay.accept(false)
         case .failure(let failure):
             updateUserResultRelay.accept(false)
-            errorMessageRelay.accept("사용자 정보 수정 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("사용자 정보 수정 실패: \(failure.localizedDescription)")
             loadingRelay.accept(false)
         }
     }

@@ -27,6 +27,40 @@ struct DietRepository: DietRepositoryProtocol {
         }
     }
     
+    func updateDiet(dietId: Int, mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async -> Result<CreateDietResponseDTO, NetworkError> {
+        let endPoint = DietEndPoints.updateDiet(dietId: dietId, mealType: mealType, consumedAt: consumedAt, dietFoods: dietFoods, userId: userId)
+        let result = await apiClient.request(
+            endpoint: endPoint,
+            responseType: BaseResponse<CreateDietResponseDTO>.self
+        )
+        
+        switch result {
+        case .success(let response):
+            print("update diet success \(response)")
+            return .success(response.data)
+        case .failure(let error):
+            print("update diet failed: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
+    
+    func deleteDiet(dietId: Int, userId: String) async -> Result<Void, NetworkError> {
+        let endPoint = DietEndPoints.deleteDiet(dietId: dietId, userId: userId)
+        let result = await apiClient.request(
+            endpoint: endPoint,
+            responseType: EmptyResponse.self
+        )
+        
+        switch result {
+        case .success(let response):
+            print("delete diet success \(response)")
+            return .success(())
+        case .failure(let error):
+            print("delete diet failed: \(error.localizedDescription)")
+            return .failure(error)
+        }
+    }
+    
     func getDailyDiet(date: Date, userId: String) async -> Result<[DietDTO], NetworkError> {
         let endpoint = DietEndPoints.daily(date: date.toString(), userId: userId)
         let result = await apiClient.request(

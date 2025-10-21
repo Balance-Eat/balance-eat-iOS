@@ -71,6 +71,7 @@ final class APIClient {
                                         """
                     
                     print(errorMessage)
+                    print("query parameters: \(endpoint.queryParameters ?? [:])")
                     print("parameters: \(endpoint.parameters ?? [:])")
                     continuation.resume(returning: .failure(.requestFailed(serverMessage)))
                 }

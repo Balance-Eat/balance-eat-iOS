@@ -60,6 +60,15 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             gradientColors: [.systemBlue, .systemBlue.withAlphaComponent(0.5)]
         )
     )
+    private let deleteButton = TitledButton(
+        title: "삭제",
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .white,
+            borderColor: nil,
+            gradientColors: [.red, .red.withAlphaComponent(0.5)]
+        )
+    )
     
     private let favoriteFoods: [FavoriteFood] = [
         FavoriteFood(iconImage: .chickenChest, name: "닭가슴살", calorie: 165),
@@ -109,7 +118,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             make.height.equalTo(1)
         }
         
-        [dateLabel, mealTimeTitledView, searchMealTitledView, addedFoodListView, saveButton].forEach(mainStackView.addArrangedSubview(_:))
+        [dateLabel, mealTimeTitledView, searchMealTitledView, addedFoodListView, saveButton, deleteButton].forEach(mainStackView.addArrangedSubview(_:))
         
         mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
@@ -120,7 +129,11 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         }
         
         saveButton.snp.makeConstraints { make in
-            make.height.equalTo(50)
+            make.height.equalTo(40)
+        }
+        
+        deleteButton.snp.makeConstraints { make in
+            make.height.equalTo(40)
         }
         
         navigationItem.title = "식단"
@@ -135,6 +148,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     private func setBinding() {
         
         viewModel.currentFoodsRelay
+            .map { $0?.items ?? [] }
             .bind(to: addedFoodListView.foodItemsRelay)
             .disposed(by: disposeBag)
         
@@ -159,13 +173,24 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 
                 searchFoodViewController.selectedFoodDataRelay
                     .observe(on: MainScheduler.instance)
-                    .subscribe(onNext: { [weak self] foodData in
-                        guard let self else { return }
-                        guard let foodData else { return }
-                                                
-                        let mealTime = viewModel.mealTimeRelay.value
-                        var current = viewModel.dietFoodsRelay.value
-                        current[mealTime.rawValue, default: []].append(foodData.modelToDietFoodData())
+                    .subscribe(
+                        onNext: { [weak self] foodData in
+                            guard let self else { return }
+                            guard let foodData else { return }
+                            
+                            let mealTime = viewModel.mealTimeRelay.value
+                            var current = viewModel.dietFoodsRelay.value
+                            current[
+                                mealTime.rawValue,
+                                default: DietData(
+                                    id: -1,
+                                    consumeDate: "",
+                                    consumedAt: "",
+                                    mealType: mealTime,
+                                    items: []
+                                )
+                            ].items.append(foodData.modelToDietFoodData())
+                    
                         viewModel.dietFoodsRelay.accept(current)
                         viewModel.mealTimeRelay.accept(mealTime)
                     })
@@ -217,11 +242,11 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 onNext: { [weak self] in
                     guard let self else { return }
                     
-                    let mealTime = mealTimePickerView.selectedMealTimeRelay.value
-                    let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
-                    let mealTimeString = viewModel.mealTimeRelay.value.rawValue
-                    if let foods = viewModel.dietFoodsRelay.value[mealTimeString] {
-                        let dietFoods = foods.map { [weak self] food in
+                    let mealType = viewModel.mealTimeRelay.value
+                    let todayConsumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
+                    let mealTypeString = mealType.rawValue
+                    if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
+                        let dietFoods = diet.items.map { [weak self] food in
                             if let servingSize = self?.addedFoodListView.cellServingSizeRelay.value[String(food.id)] {
                                 return FoodItemForCreateDietDTO(
                                     foodId: food.id,
@@ -236,18 +261,62 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                         }
                         
                         let userId = viewModel.getUserId()
-                        Task {
-                            await self.viewModel.createDiet(
-                                mealType: mealTime,
-                                consumedAt: consumedAt,
-                                dietFoods: dietFoods,
-                                userId: userId
-                            )
+                        
+                        if viewModel.currentFoodsRelay.value?.id == -1 {
+                            Task {
+                                await self.viewModel.createDiet(
+                                    mealType: mealType,
+                                    consumedAt: todayConsumedAt,
+                                    dietFoods: dietFoods,
+                                    userId: userId
+                                )
+                            }
+                        } else {
+                            let consumedAt = diet.consumedAt
+                            Task {
+                                await self.viewModel.updateDiet(
+                                    dietId: diet.id,
+                                    mealType: mealType,
+                                    consumedAt: consumedAt,
+                                    dietFoods: dietFoods,
+                                    userId: userId
+                                )
+                            }
                         }
                     }
-
-                    
             })
+            .disposed(by: disposeBag)
+        
+        deleteButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                let mealTypeString = viewModel.mealTimeRelay.value.rawValue
+                let userId = viewModel.getUserId()
+                if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
+                    let alert = UIAlertController(
+                        title: "식단 삭제",
+                        message: "식단을 삭제하시겠습니까?",
+                        preferredStyle: .alert
+                    )
+                    
+                    let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+                    let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
+                        Task {
+                            await self.viewModel.deleteDiet(dietId: diet.id, userId: userId)
+                        }
+                    }
+                    
+                    alert.addAction(cancelAction)
+                    alert.addAction(deleteAction)
+                    
+                    self.present(alert, animated: true)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.deleteButtonIsEnabledRelay
+            .bind(to: deleteButton.rx.isEnabled)
             .disposed(by: disposeBag)
     }
     

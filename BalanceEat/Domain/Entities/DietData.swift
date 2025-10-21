@@ -12,5 +12,5 @@ struct DietData {
     let consumeDate: String
     let consumedAt: String
     let mealType: MealType
-    let items: [DietFoodData]
+    var items: [DietFoodData]
 }

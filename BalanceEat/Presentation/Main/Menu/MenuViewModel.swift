@@ -33,7 +33,7 @@ final class MenuViewModel: BaseViewModel {
             userRelay.accept(user)
             loadingRelay.accept(false)
         case .failure(let failure):
-            errorMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
             loadingRelay.accept(false)
         }
     }
@@ -45,7 +45,7 @@ final class MenuViewModel: BaseViewModel {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
-            errorMessageRelay.accept("UUID 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("UUID 불러오기 실패: \(failure.localizedDescription)")
             return ""
         }
         

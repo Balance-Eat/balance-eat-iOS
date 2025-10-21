@@ -34,7 +34,7 @@ final class HomeViewModel: BaseViewModel {
             saveUserId(user.id)
             loadingRelay.accept(false)
         case .failure(let failure):
-            errorMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
             loadingRelay.accept(false)
         }
     }
@@ -46,7 +46,7 @@ final class HomeViewModel: BaseViewModel {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
-            errorMessageRelay.accept("UUID 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("UUID 불러오기 실패: \(failure.localizedDescription)")
             return ""
         }
         
@@ -54,7 +54,7 @@ final class HomeViewModel: BaseViewModel {
     
     private func saveUserId(_ userId: Int) {
         if case .failure(let error) = userUseCase.saveUserId(Int64(userId)) {
-            errorMessageRelay.accept("userId 저장 실패: \(error.localizedDescription)")
+            toastMessageRelay.accept("userId 저장 실패: \(error.localizedDescription)")
         }
     }
     
@@ -73,7 +73,7 @@ final class HomeViewModel: BaseViewModel {
             dietResponseRelay.accept(dietDataList)
             loadingRelay.accept(false)
         case .failure(let failure):
-            errorMessageRelay.accept("일일 식단 정보 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("일일 식단 정보 불러오기 실패: \(failure.localizedDescription)")
             loadingRelay.accept(false)
         }
     }
