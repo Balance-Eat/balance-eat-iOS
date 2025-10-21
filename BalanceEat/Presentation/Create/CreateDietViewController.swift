@@ -224,8 +224,8 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 })
             .disposed(by: disposeBag)
         
-        viewModel.dietFoodsRelay
-            .map { $0.count > 0 }
+        viewModel.currentFoodsRelay
+            .map { $0?.items.count ?? 0 > 0 }
             .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
         

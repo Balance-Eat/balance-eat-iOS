@@ -16,13 +16,10 @@ enum StepperMode {
 }
 
 final class StepperView: UIView {
-    var stepValue: Double
+    var stepValue: Double = 1
     var unit: String = ""
-    var servingSize: Double {
-        didSet {
-            amountLabel.text = "\(Int(servingSize))\(unit)"
-        }
-    }
+    var servingSize: Double = 0
+    let foodServingSize: Double = 0
     let stepperModeRelay: BehaviorRelay<StepperMode> = .init(value: .servingSize)
     let amountSizeRelay: BehaviorRelay<Double> = .init(value: 0)
     private let disposeBag = DisposeBag()
@@ -64,9 +61,7 @@ final class StepperView: UIView {
         return button
     }()
     
-    init(stepValue: Double, servingSize: Double) {
-        self.stepValue = stepValue
-        self.servingSize = servingSize
+    init() {
         super.init(frame: .zero)
         
         setUpView()

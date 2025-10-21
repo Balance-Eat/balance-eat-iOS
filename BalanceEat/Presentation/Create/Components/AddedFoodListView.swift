@@ -172,7 +172,6 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         
         let foodItem = foodItems[indexPath.row]
         cell.configure(
-            servingSize: foodItem.intake,
             foodData: foodItem
         )
         
@@ -249,7 +248,7 @@ final class AddedFoodCell: UITableViewCell {
     
     private let twoOptionPickerView = TwoOptionPickerView(firstText: "1인분", secondText: "단위")
     
-    private let stepperView = StepperView(stepValue: 1, servingSize: 100)
+    private let stepperView = StepperView()
     
     private let nutritionalInfoView: TotalNutritionalInfoView
     
@@ -353,66 +352,11 @@ final class AddedFoodCell: UITableViewCell {
         }
     }
     
-//    private func setBinding() {
-//        twoOptionPickerView.selectedOption
-//            .subscribe(onNext: { [weak self] selectedOption in
-//                guard let self else { return }
-//                
-//                switch selectedOption {
-//                case .first:
-//                    stepperView.stepValue = 1
-//                    stepperView.stepperModeRelay.accept(.servingSize)
-//                case .second:
-//                    stepperView.stepValue = 1
-//                    stepperView.stepperModeRelay.accept(.amountSize)
-//                }
-//            })
-//            .disposed(by: disposeBag)
-//        
-//        closeButton.rx.tap
-//            .bind(to: closeButtonTapped)
-//            .disposed(by: disposeBag)
-//        
-//        stepperView.amountSizeRelay
-//            .subscribe(onNext: { [weak self] amount in
-//                guard let self else { return }
-//                guard let foodData = self.foodData else { return }
-//                
-//                let ratio = amount / servingSize
-//                
-//                nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates * ratio)
-//                nutritionalInfoView.proteinRelay.accept(foodData.protein * ratio)
-//                nutritionalInfoView.fatRelay.accept(foodData.fat * ratio)
-//            })
-//            .disposed(by: disposeBag)
-//        
-//        
-//        Observable.combineLatest(
-//            nutritionalInfoView.carbonRelay,
-//            nutritionalInfoView.proteinRelay,
-//            nutritionalInfoView.fatRelay
-//        ).subscribe(onNext: { [weak self] (carbon, protein, fat) in
-//            guard let self else { return }
-//            let calorieRelayValue = 4 * carbon + 4 * protein + 9 * fat
-//            nutritionalInfoView.calorieRelay.accept(calorieRelayValue)
-//        })
-//        .disposed(by: disposeBag)
-//        
-//        Observable.combineLatest(
-//            nutritionalInfoView.calorieRelay,
-//            nutritionalInfoView.carbonRelay,
-//            nutritionalInfoView.proteinRelay,
-//            nutritionalInfoView.fatRelay
-//        )
-//        .bind(to: nutritionRelay)
-//        .disposed(by: disposeBag)
-//    }
-    
-    func configure(servingSize: Double, foodData: DietFoodData) {
+    func configure(foodData: DietFoodData) {
         prepareForReuse()
         
         foodNameLabel.text = foodData.name
-        self.servingSize = servingSize
+        self.servingSize = foodData.intake
         self.foodData = foodData
         
         stepperView.unit = foodData.unit
@@ -432,10 +376,10 @@ final class AddedFoodCell: UITableViewCell {
                 
                 switch selectedOption {
                 case .first:
-                    stepperView.stepValue = 1
+                    stepperView.stepValue = servingSize / foodData.intake
                     stepperView.stepperModeRelay.accept(.servingSize)
                 case .second:
-                    stepperView.stepValue = 1
+                    stepperView.stepValue = servingSize / foodData.intake
                     stepperView.stepperModeRelay.accept(.amountSize)
                 }
             })
