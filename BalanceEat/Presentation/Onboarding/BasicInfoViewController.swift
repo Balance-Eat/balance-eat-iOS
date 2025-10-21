@@ -82,7 +82,11 @@ class BasicInfoViewController: UIViewController {
                 backgroundColor: .white,
                 titleColor: .black,
                 borderColor: .lightGray.withAlphaComponent(0.4),
-                gradientColors: nil
+                gradientColors: nil,
+                selectedBackgroundColor: .blue.withAlphaComponent(0.1),
+                selectedTitleColor: .blue,
+                selectedBorderColor: .blue,
+                selectedGradientColors: nil
             )
         )
         let femaleButton = SelectableTitledButton(
@@ -91,7 +95,11 @@ class BasicInfoViewController: UIViewController {
                 backgroundColor: .white,
                 titleColor: .black,
                 borderColor: .lightGray.withAlphaComponent(0.4),
-                gradientColors: nil
+                gradientColors: nil,
+                selectedBackgroundColor: .blue.withAlphaComponent(0.1),
+                selectedTitleColor: .blue,
+                selectedBorderColor: .blue,
+                selectedGradientColors: nil
             )
         )
         let genderButtons = [maleButton, femaleButton]

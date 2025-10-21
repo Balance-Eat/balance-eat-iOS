@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+enum NutritionStat: Codable {
+    case calorie
+    case carbohydrate
+    case protein
+    case fat
+    case weight
+}

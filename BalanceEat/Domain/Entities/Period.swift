@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+enum Period: String, Codable {
+    case daily = "DAILY"
+    case weekly = "WEEKLY"
+    case monthly = "MONTHLY"
+}
