@@ -244,3 +244,42 @@ enum FoodEndPoints: Endpoint {
         }
     }
 }
+
+enum StatsEndPoints: Endpoint {
+    case getStats(period: Period, userId: String)
+    
+    var path: String {
+        switch self {
+        case .getStats:
+            "/v1/stats"
+        }
+    }
+    
+    var method: Alamofire.HTTPMethod {
+        switch self {
+        case .getStats:
+            .get
+        }
+    }
+    
+    var parameters: [String : Any?]? {
+        switch self {
+        default:
+            return nil
+        }
+    }
+    
+    var queryParameters: [String : Any]? {
+        switch self {
+        case .getStats(let period, _):
+            return ["type": period.rawValue]
+        }
+    }
+    
+    var headers: Alamofire.HTTPHeaders? {
+        switch self {
+        case .getStats(_, let userId):
+            return ["X-USER-ID": userId]
+        }
+    }
+}

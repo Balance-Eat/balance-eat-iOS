@@ -13,9 +13,14 @@ import RxCocoa
 class ChartViewController: BaseViewController<ChartViewModel> {
     private let headerView = ChartHeaderView()
     private let statStackView = ChartStatStackView()
+    private let periodChangeView = PeriodChangeView()
     
     init() {
-        let vm = ChartViewModel()
+        let userRepository = UserRepository()
+        let userUseCase = UserUseCase(repository: userRepository)
+        let statsRepository = StatsRepository()
+        let statsUseCase = StatsUseCase(repository: statsRepository)
+        let vm = ChartViewModel(userUseCase: userUseCase, statsUseCase: statsUseCase)
         super.init(viewModel: vm)
     }
     
@@ -40,7 +45,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     
     private func setUpView() {
         
-        [statStackView].forEach(mainStackView.addArrangedSubview(_:))
+        [statStackView, periodChangeView].forEach(mainStackView.addArrangedSubview(_:))
         
         mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
@@ -48,13 +53,33 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     }
     
     private func setBinding() {
-        Observable.combineLatest(headerView.periodRelay, headerView.nutritionStatRelay)
-            .subscribe(onNext: { [weak self] period, nutritionStat in
+        headerView.periodRelay
+            .subscribe(onNext: { [weak self] period in
                 guard let self else { return }
                 
-                statStackView.statRelay.accept(nutritionStat)
+                if let stats = viewModel.cachedStats[period.rawValue] {
+                    viewModel.currentStatsRelay.accept(stats)
+                } else {
+                    Task {
+                        await self.viewModel.getStats(period: period)
+                    }
+                }
             })
             .disposed(by: disposeBag)
+        
+        Observable.combineLatest(viewModel.currentStatsRelay, headerView.nutritionStatTypeRelay)
+            .subscribe(onNext: { [weak self] stats, nutritionStatType in
+                guard let self else { return }
+                
+                statStackView.statsRelay.accept(stats)
+                statStackView.nutritionStatTypeRelay.accept(nutritionStatType)
+                
+                periodChangeView.statsRelay.accept(stats)
+                periodChangeView.nutritionStatRelay.accept(nutritionStatType)
+            })
+            .disposed(by: disposeBag)
+        
+        
     }
 }
 
@@ -63,7 +88,7 @@ final class ChartHeaderView: UIView {
     private let chartNutritionStatsSelectView = ChartNutritionStatsSelectView()
     
     let periodRelay: BehaviorRelay<Period> = .init(value: .daily)
-    let nutritionStatRelay: BehaviorRelay<NutritionStat> = .init(value: .calorie)
+    let nutritionStatTypeRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
     private let disposeBag = DisposeBag()
     
     init() {
@@ -104,7 +129,7 @@ final class ChartHeaderView: UIView {
             .disposed(by: disposeBag)
         
         chartNutritionStatsSelectView.nutritionRelay
-            .bind(to: nutritionStatRelay)
+            .bind(to: nutritionStatTypeRelay)
             .disposed(by: disposeBag)
     }
     
@@ -277,7 +302,7 @@ final class ChartNutritionStatsSelectView: UIView {
     )
     private lazy var nutritionButtons = [calorieButton, carbohydrateButton, proteinButton, fatButton, weightButton]
     
-    let nutritionRelay: BehaviorRelay<NutritionStat> = .init(value: .calorie)
+    let nutritionRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
     private let disposeBag = DisposeBag()
     
     init() {
@@ -342,10 +367,11 @@ final class ChartStatStackView: UIView {
     private let maxStatAmountView = ChartStatAmountView(title: "최고", isMax: true)
     private let minStatAmountView = ChartStatAmountView(title: "최저", isMin: true)
     
-    let averageAmountRelay: BehaviorRelay<Double> = .init(value: 0)
-    let maxAmountRelay: BehaviorRelay<Double> = .init(value: 0)
-    let minAmountRelay: BehaviorRelay<Double> = .init(value: 0)
-    let statRelay: BehaviorRelay<NutritionStat> = .init(value: .calorie)
+    let statsRelay: BehaviorRelay<[StatsData]> = .init(value: [])
+    private let averageAmountRelay: BehaviorRelay<Double> = .init(value: 0)
+    private let maxAmountRelay: BehaviorRelay<Double> = .init(value: 0)
+    private let minAmountRelay: BehaviorRelay<Double> = .init(value: 0)
+    let nutritionStatTypeRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
     private let disposeBag = DisposeBag()
     
     init() {
@@ -385,12 +411,58 @@ final class ChartStatStackView: UIView {
             .bind(to: minStatAmountView.amountRelay)
             .disposed(by: disposeBag)
         
-        statRelay
-            .subscribe(onNext: { [weak self] stat in
+        Observable.combineLatest(statsRelay, nutritionStatTypeRelay)
+            .subscribe(onNext: { [weak self] stats, nutritionStatType in
                 guard let self else { return }
+                var sum: Double = 0
+                var max: Double = 0
+                var min: Double = 0
+                
+                switch nutritionStatType {
+                case .calorie:
+                    sum = stats.reduce(0) { $0 + $1.totalCalories }
+                    max = stats.map(\.totalCalories).max() ?? 0
+                    min = stats.map(\.totalCalories).min() ?? 0
+                    
+                    averageAmountRelay.accept(sum / Double(stats.count))
+                    maxAmountRelay.accept(max)
+                    minAmountRelay.accept(min)
+                case .carbohydrate:
+                    sum = stats.reduce(0) { $0 + $1.totalCarbohydrates }
+                    max = stats.map(\.totalCarbohydrates).max() ?? 0
+                    min = stats.map(\.totalCarbohydrates).min() ?? 0
+                    
+                    averageAmountRelay.accept(sum / Double(stats.count))
+                    maxAmountRelay.accept(max)
+                    minAmountRelay.accept(min)
+                case .protein:
+                    sum = stats.reduce(0) { $0 + $1.totalProtein }
+                    max = stats.map(\.totalProtein).max() ?? 0
+                    min = stats.map(\.totalProtein).min() ?? 0
+                    
+                    averageAmountRelay.accept(sum / Double(stats.count))
+                    maxAmountRelay.accept(max)
+                    minAmountRelay.accept(min)
+                case .fat:
+                    sum = stats.reduce(0) { $0 + $1.totalFat }
+                    max = stats.map(\.totalFat).max() ?? 0
+                    min = stats.map(\.totalFat).min() ?? 0
+                    
+                    averageAmountRelay.accept(sum / Double(stats.count))
+                    maxAmountRelay.accept(max)
+                    minAmountRelay.accept(min)
+                case .weight:
+                    sum = stats.reduce(0) { $0 + $1.weight }
+                    max = stats.map(\.weight).max() ?? 0
+                    min = stats.map(\.weight).min() ?? 0
+                    
+                    averageAmountRelay.accept(sum / Double(stats.count))
+                    maxAmountRelay.accept(max)
+                    minAmountRelay.accept(min)
+                }
                 
                 [averageStatAmountView, maxStatAmountView, minStatAmountView].forEach {
-                    $0.statRelay.accept(stat)
+                    $0.statRelay.accept(nutritionStatType)
                 }
             })
             .disposed(by: disposeBag)
@@ -420,7 +492,7 @@ final class ChartStatAmountView: BalanceEatContentView {
     }()
     
     let amountRelay: BehaviorRelay<Double> = .init(value: 0)
-    let statRelay: BehaviorRelay<NutritionStat> = .init(value: .calorie)
+    let statRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
     private let disposeBag = DisposeBag()
     
     init(title: String, isMax: Bool = false, isMin: Bool = false) {
@@ -469,4 +541,130 @@ final class ChartStatAmountView: BalanceEatContentView {
             })
             .disposed(by: disposeBag)
     }
+}
+
+final class PeriodChangeView: BalanceEatContentView {
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .semibold)
+        label.textColor = .black
+        label.text = "기간 대비 변화"
+        return label
+    }()
+    private let periodChangeLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .black
+        return label
+    }()
+    private let differenceLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 11, weight: .semibold)
+        return label
+    }()
+    private let differenceContainerView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 12
+        view.layer.masksToBounds = true
+        return view
+    }()
+    
+    let statsRelay: BehaviorRelay<[StatsData]> = .init(value: [])
+    let nutritionStatRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
+    private let disposeBag = DisposeBag()
+    
+    override init() {
+        super.init()
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        differenceContainerView.addSubview(differenceLabel)
+        
+        differenceLabel.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(6)
+        }
+        
+        [titleLabel, periodChangeLabel, differenceContainerView].forEach {
+            addSubview($0)
+        }
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview().inset(16)
+        }
+        
+        differenceContainerView.snp.makeConstraints { make in
+            make.top.trailing.equalToSuperview().inset(16)
+        }
+        
+        periodChangeLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            make.leading.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().inset(16)
+        }
+    }
+    
+    private func setBinding() {
+        Observable.combineLatest(statsRelay, nutritionStatRelay)
+            .subscribe(onNext: { [weak self] statsDatas, nutritionStat in
+                guard let self else { return }
+                let firstDate = extractMonthAndDay(from: statsDatas.first?.date ?? "")
+                var firstNutritionAmount: Double = 0
+                let lastDate = extractMonthAndDay(from: statsDatas.last?.date ?? "")
+                var lastNutritionAmount: Double = 0
+                
+                switch nutritionStat {
+                case .calorie:
+                    firstNutritionAmount = statsDatas.first?.totalCalories ?? 0
+                    lastNutritionAmount = statsDatas.last?.totalCalories ?? 0
+                    periodChangeLabel.text = "\(firstDate): \(firstNutritionAmount)kcal → \(lastDate): \(lastNutritionAmount)kcal"
+                case .carbohydrate:
+                    firstNutritionAmount = statsDatas.first?.totalCarbohydrates ?? 0
+                    lastNutritionAmount = statsDatas.last?.totalCarbohydrates ?? 0
+                    periodChangeLabel.text = "\(firstDate): \(firstNutritionAmount)g → \(lastDate): \(lastNutritionAmount)g"
+                case .protein:
+                    firstNutritionAmount = statsDatas.first?.totalProtein ?? 0
+                    lastNutritionAmount = statsDatas.last?.totalProtein ?? 0
+                    periodChangeLabel.text = "\(firstDate): \(firstNutritionAmount)g → \(lastDate): \(lastNutritionAmount)g"
+                case .fat:
+                    firstNutritionAmount = statsDatas.first?.totalFat ?? 0
+                    lastNutritionAmount = statsDatas.last?.totalFat ?? 0
+                    periodChangeLabel.text = "\(firstDate): \(firstNutritionAmount)g → \(lastDate): \(lastNutritionAmount)g"
+                case .weight:
+                    firstNutritionAmount = statsDatas.first?.weight ?? 0
+                    lastNutritionAmount = statsDatas.last?.weight ?? 0
+                    periodChangeLabel.text = "\(firstDate): \(firstNutritionAmount)kg → \(lastDate): \(lastNutritionAmount)kg"
+                }
+                
+                let diff = lastNutritionAmount - firstNutritionAmount
+                
+                if diff > 0 {
+                    self.differenceLabel.text = String(format: "%.1f%@ 증가", diff, nutritionStat.unit)
+                    self.differenceLabel.textColor = .systemBlue
+                    self.differenceContainerView.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+                } else if diff < 0 {
+                    self.differenceLabel.text = String(format: "%.1f%@ 감소", abs(diff), nutritionStat.unit)
+                    self.differenceLabel.textColor = .systemRed
+                    self.differenceContainerView.backgroundColor = UIColor.systemRed.withAlphaComponent(0.1)
+                } else {
+                    self.differenceLabel.text = "변화 없음"
+                    self.differenceLabel.textColor = .systemGray
+                    self.differenceContainerView.backgroundColor = UIColor.systemGray.withAlphaComponent(0.1)
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    private func extractMonthAndDay(from dateString: String) -> String {
+        let components = dateString.split(separator: "-")
+        guard components.count == 3 else { return "" }
+        return "\(components[1])-\(components[2])"
+    }
+
 }
