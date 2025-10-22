@@ -11,6 +11,7 @@
 		492980422E8CCA8B00CC1FA9 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 492980412E8CCA8B00CC1FA9 /* Toast */; };
 		4965DEAA2E5220BD006D7CDA /* UUIDV7 in Frameworks */ = {isa = PBXBuildFile; productRef = 4965DEA92E5220BD006D7CDA /* UUIDV7 */; };
 		4965DEB52E5619D5006D7CDA /* BalanceEat.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4965DEAD2E560D89006D7CDA /* BalanceEat.xcdatamodeld */; };
+		4972B0242EA917B500E8F770 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 4972B0232EA917B500E8F770 /* DGCharts */; };
 		49808CFF2E51F9D6003ACBCF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 49808CFE2E51F9D6003ACBCF /* Alamofire */; };
 		49BF00AB2E1E301500876EC3 /* FlexLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AA2E1E301500876EC3 /* FlexLayout */; };
 		49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AD2E1E303200876EC3 /* PinLayout */; };
@@ -100,6 +101,7 @@
 				4965DEAA2E5220BD006D7CDA /* UUIDV7 in Frameworks */,
 				490295E12E51F79200BE288B /* Alamofire in Frameworks */,
 				49BF00B12E1E309400876EC3 /* RxCocoa in Frameworks */,
+				4972B0242EA917B500E8F770 /* DGCharts in Frameworks */,
 				49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */,
 				49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */,
 				49808CFF2E51F9D6003ACBCF /* Alamofire in Frameworks */,
@@ -180,6 +182,7 @@
 				49808CFE2E51F9D6003ACBCF /* Alamofire */,
 				4965DEA92E5220BD006D7CDA /* UUIDV7 */,
 				492980412E8CCA8B00CC1FA9 /* Toast */,
+				4972B0232EA917B500E8F770 /* DGCharts */,
 			);
 			productName = BanlanceEat;
 			productReference = 49BF00722E1E2FC900876EC3 /* BalanceEat.app */;
@@ -272,6 +275,7 @@
 				49808CFD2E51F9D6003ACBCF /* XCRemoteSwiftPackageReference "Alamofire" */,
 				4965DEA82E5220BD006D7CDA /* XCRemoteSwiftPackageReference "UUIDV7" */,
 				492980402E8CCA8B00CC1FA9 /* XCRemoteSwiftPackageReference "Toast-Swift" */,
+				4972B0222EA917B500E8F770 /* XCRemoteSwiftPackageReference "Charts" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 49BF00732E1E2FC900876EC3 /* Products */;
@@ -653,6 +657,14 @@
 				kind = branch;
 			};
 		};
+		4972B0222EA917B500E8F770 /* XCRemoteSwiftPackageReference "Charts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/danielgindi/Charts.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
 		49808CFD2E51F9D6003ACBCF /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -717,6 +729,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4965DEA82E5220BD006D7CDA /* XCRemoteSwiftPackageReference "UUIDV7" */;
 			productName = UUIDV7;
+		};
+		4972B0232EA917B500E8F770 /* DGCharts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4972B0222EA917B500E8F770 /* XCRemoteSwiftPackageReference "Charts" */;
+			productName = DGCharts;
 		};
 		49808CFE2E51F9D6003ACBCF /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;

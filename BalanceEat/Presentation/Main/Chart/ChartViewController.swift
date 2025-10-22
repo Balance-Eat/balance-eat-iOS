@@ -9,11 +9,13 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
+import DGCharts
 
 class ChartViewController: BaseViewController<ChartViewModel> {
     private let headerView = ChartHeaderView()
     private let statStackView = ChartStatStackView()
     private let periodChangeView = PeriodChangeView()
+    private let statsGraphView = StatsGraphView()
     
     init() {
         let userRepository = UserRepository()
@@ -45,10 +47,14 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     
     private func setUpView() {
         
-        [statStackView, periodChangeView].forEach(mainStackView.addArrangedSubview(_:))
+        [statStackView, periodChangeView, statsGraphView].forEach(mainStackView.addArrangedSubview(_:))
         
         mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
+        }
+        
+        statsGraphView.snp.makeConstraints { make in
+            make.height.equalTo(300)
         }
     }
     
@@ -68,6 +74,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
             .disposed(by: disposeBag)
         
         Observable.combineLatest(viewModel.currentStatsRelay, headerView.nutritionStatTypeRelay)
+            .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] stats, nutritionStatType in
                 guard let self else { return }
                 
@@ -76,6 +83,9 @@ class ChartViewController: BaseViewController<ChartViewModel> {
                 
                 periodChangeView.statsRelay.accept(stats)
                 periodChangeView.nutritionStatRelay.accept(nutritionStatType)
+                
+                statsGraphView.statsRelay.accept(stats)
+                statsGraphView.nutritionStatTypeRelay.accept(nutritionStatType)
             })
             .disposed(by: disposeBag)
         
@@ -667,4 +677,131 @@ final class PeriodChangeView: BalanceEatContentView {
         return "\(components[1])-\(components[2])"
     }
 
+}
+
+final class StatsGraphView: BalanceEatContentView {
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16, weight: .semibold)
+        label.textColor = .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    private let lineChartView: LineChartView = {
+        let chart = LineChartView()
+        chart.translatesAutoresizingMaskIntoConstraints = false
+        return chart
+    }()
+    
+    let statsRelay: BehaviorRelay<[StatsData]> = .init(value: [])
+    let nutritionStatTypeRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
+    private let disposeBag = DisposeBag()
+    
+    override init() {
+        super.init()
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        addSubview(titleLabel)
+        addSubview(lineChartView)
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(24)
+            make.leading.equalToSuperview().inset(16)
+        }
+        
+        lineChartView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(12)
+            make.leading.trailing.bottom.equalToSuperview().inset(16)
+        }
+    }
+    
+    private func setBinding() {
+        Observable.combineLatest(statsRelay, nutritionStatTypeRelay)
+            .subscribe(onNext: { [weak self] stats, nutritionStatType in
+                guard let self else { return }
+                
+                var entries: [ChartDataEntry] = []
+                let labels = stats.map { [weak self] stat in
+                    guard let self else { return "" }
+                    return extractMonthAndDay(from: stat.date)
+                }
+                
+                for i in 0..<stats.count {
+                    switch nutritionStatType {
+                    case .calorie:
+                        entries.append(ChartDataEntry(x: Double(i), y: stats[i].totalCalories))
+                    case .carbohydrate:
+                        entries.append(ChartDataEntry(x: Double(i), y: stats[i].totalCarbohydrates))
+                    case .protein:
+                        entries.append(ChartDataEntry(x: Double(i), y: stats[i].totalProtein))
+                    case .fat:
+                        entries.append(ChartDataEntry(x: Double(i), y: stats[i].totalFat))
+                    case .weight:
+                        entries.append(ChartDataEntry(x: Double(i), y: stats[i].weight))
+                    }
+                }
+                
+                var label: String
+                var color: UIColor
+                
+                switch nutritionStatType {
+                    case .calorie:
+                    label = "칼로리"
+                    color = .calorieText
+                    titleLabel.text = "칼로리 추이"
+                case .carbohydrate:
+                    label = "탄수화물"
+                    color = .carbonText
+                    titleLabel.text = "탄수화물 추이"
+                case .protein:
+                    label = "단백질"
+                    color = .proteinText
+                    titleLabel.text = "단백질 추이"
+                case .fat:
+                    label = "지방"
+                    color = .fatText
+                    titleLabel.text = "지방 추이"
+                case .weight:
+                    label = "체중"
+                    color = .yellow
+                    titleLabel.text = "체중 추이"
+                }
+                
+                let dataSet = LineChartDataSet(entries: entries, label: label)
+                dataSet.colors = [color]
+                dataSet.circleColors = [.systemBlue]
+                dataSet.lineWidth = 2
+                dataSet.circleRadius = 5
+                dataSet.mode = .cubicBezier
+                
+                let data = LineChartData(dataSet: dataSet)
+                lineChartView.data = data
+                
+                lineChartView.xAxis.valueFormatter = IndexAxisValueFormatter(values: labels)
+                lineChartView.xAxis.granularity = 1
+                lineChartView.xAxis.labelPosition = .bottom
+                
+                lineChartView.rightAxis.enabled = false
+                lineChartView.animate(xAxisDuration: 1.0, yAxisDuration: 1.0)
+                
+                let count = Double(labels.count)
+                lineChartView.xAxis.axisMinimum = -0.5
+                lineChartView.xAxis.axisMaximum = count - 0.5
+            })
+            .disposed(by: disposeBag)
+    }
+
+    private func extractMonthAndDay(from dateString: String) -> String {
+        let components = dateString.split(separator: "-")
+        guard components.count == 3 else { return "" }
+        return "\(components[1])-\(components[2])"
+    }
 }
