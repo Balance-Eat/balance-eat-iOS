@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+struct AchievementRateStat {
+    let date: String
+    let percent: Double
+}

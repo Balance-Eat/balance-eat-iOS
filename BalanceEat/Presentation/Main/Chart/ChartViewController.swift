@@ -16,6 +16,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     private let statStackView = ChartStatStackView()
     private let periodChangeView = PeriodChangeView()
     private let statsGraphView = StatsGraphView()
+    private let achievementRateListView = AchievementRateListView()
     
     init() {
         let userRepository = UserRepository()
@@ -36,6 +37,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
         setupHeaderView()
         setUpView()
         setBinding()
+        getUser()
     }
     
     private func setupHeaderView() {
@@ -47,7 +49,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     
     private func setUpView() {
         
-        [statStackView, periodChangeView, statsGraphView].forEach(mainStackView.addArrangedSubview(_:))
+        [statStackView, periodChangeView, statsGraphView, achievementRateListView].forEach(mainStackView.addArrangedSubview(_:))
         
         mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
@@ -86,10 +88,21 @@ class ChartViewController: BaseViewController<ChartViewModel> {
                 
                 statsGraphView.statsRelay.accept(stats)
                 statsGraphView.nutritionStatTypeRelay.accept(nutritionStatType)
+                
+                achievementRateListView.statsRelay.accept(stats)
+                achievementRateListView.nutritionStatTypeRelay.accept(nutritionStatType)
             })
             .disposed(by: disposeBag)
         
-        
+        viewModel.userDataRelay
+            .bind(to: achievementRateListView.userDataRelay)
+            .disposed(by: disposeBag)
+    }
+    
+    private func getUser() {
+        Task {
+            await viewModel.getUser()
+        }
     }
 }
 
@@ -204,6 +217,8 @@ final class ChartPeriodSelectView: UIView {
     }
     
     private func setUpView() {
+        dailyButton.isSelectedRelay.accept(true)
+        
         let stackView = UIStackView(arrangedSubviews: periodButtons)
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
@@ -327,6 +342,8 @@ final class ChartNutritionStatsSelectView: UIView {
     }
     
     private func setUpView() {
+        calorieButton.isSelectedRelay.accept(true)
+        
         let stackView = UIStackView(arrangedSubviews: nutritionButtons)
         stackView.axis = .horizontal
         stackView.distribution = .fillEqually
@@ -803,5 +820,179 @@ final class StatsGraphView: BalanceEatContentView {
         let components = dateString.split(separator: "-")
         guard components.count == 3 else { return "" }
         return "\(components[1])-\(components[2])"
+    }
+}
+
+final class AchievementRateListView: BalanceEatContentView {
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .bold)
+        label.textColor = .black
+        label.text = "목표 달성률"
+        return label
+    }()
+    private let tableView = UITableView()
+    private var tableHeightConstraint: Constraint?
+    
+    let userDataRelay: BehaviorRelay<UserData?> = .init(value: nil)
+    let statsRelay: BehaviorRelay<[StatsData]> = .init(value: [])
+    let nutritionStatTypeRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
+    
+    let achievementRateStatsRelay: BehaviorRelay<[AchievementRateStat]> = .init(value: [])
+    private let disposeBag = DisposeBag()
+    
+    override init() {
+        super.init()
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        [titleLabel, tableView].forEach(addSubview(_:))
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.equalToSuperview().inset(16)
+            make.leading.equalToSuperview().inset(16)
+        }
+        
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(8)
+            make.leading.trailing.bottom.equalToSuperview().inset(4)
+            self.tableHeightConstraint = make.height.equalTo(0).constraint
+        }
+        
+        tableView.backgroundColor = .clear
+        tableView.register(AchievementRateCell.self, forCellReuseIdentifier: "AchievementRateCell")
+        tableView.separatorStyle = .none
+        tableView.isScrollEnabled = false
+    }
+    
+    private func setBinding() {
+        Observable.combineLatest(statsRelay, nutritionStatTypeRelay, userDataRelay)
+            .subscribe(onNext: { [weak self] stats, nutritionStatType, userData in
+                guard let self else { return }
+                
+                var achievementRateStats: [AchievementRateStat] = []
+                
+                for stat in stats {
+                    var percent: Double = 0.0
+                                        
+                    switch nutritionStatType {
+                    case .calorie:
+                        percent = (stat.totalCalories / Double((userData?.targetCalorie ?? 1))) * 100
+                    case .carbohydrate:
+                        percent = (stat.totalCarbohydrates / (userData?.targetCarbohydrates ?? 1)) * 100
+                    case .protein:
+                        percent = (stat.totalProtein / (userData?.targetProtein ?? 1)) * 100
+                    case .fat:
+                        percent = (stat.totalFat / (userData?.targetFat ?? 1)) * 100
+                    case .weight:
+                        percent = (stat.weight / (userData?.targetWeight ?? 1)) * 100
+                    }
+                    
+                    let achievementRateStat = AchievementRateStat(date: extractMonthAndDay(from: stat.date), percent: percent)
+                    achievementRateStats.append(achievementRateStat)
+                }
+                
+                achievementRateStatsRelay.accept(achievementRateStats)
+            })
+            .disposed(by: disposeBag)
+        
+        achievementRateStatsRelay
+            .bind(to: tableView.rx.items(
+                cellIdentifier: "AchievementRateCell",
+                cellType: AchievementRateCell.self)
+            ) { _, stat, cell in
+                cell.configure(stat: stat)
+            }
+            .disposed(by: disposeBag)
+        
+        tableView.rx.observe(CGSize.self, "contentSize")
+            .compactMap { $0?.height }
+            .distinctUntilChanged()
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] height in
+                self?.tableHeightConstraint?.update(offset: height)
+                self?.layoutIfNeeded()
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    private func extractMonthAndDay(from dateString: String) -> String {
+        let components = dateString.split(separator: "-")
+        guard components.count == 3 else { return "" }
+        return "\(components[1])-\(components[2])"
+    }
+}
+
+final class AchievementRateCell: UITableViewCell {
+    private let dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .black
+        return label
+    }()
+    private let percentLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .bold)
+        label.textColor = .green
+        label.textAlignment = .right
+        return label
+    }()
+    private let progressView: UIProgressView = {
+        let progressView = UIProgressView(progressViewStyle: .default)
+        progressView.layer.cornerRadius = 4
+        progressView.clipsToBounds = true
+        progressView.trackTintColor = .systemGray5
+        return progressView
+    }()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setUpView()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        self.backgroundColor = .clear
+        
+        let labelStack = UIStackView(arrangedSubviews: [dateLabel, percentLabel])
+        labelStack.axis = .horizontal
+        labelStack.distribution = .fillEqually
+        
+        let contentStack = UIStackView(arrangedSubviews: [labelStack, progressView])
+        contentStack.axis = .vertical
+        contentStack.spacing = 6
+        
+        contentView.addSubview(contentStack)
+        contentStack.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(12)
+        }
+        
+        progressView.snp.makeConstraints { make in
+            make.height.equalTo(8)
+        }
+    }
+    
+    func configure(stat: AchievementRateStat) {
+        dateLabel.text = stat.date
+        percentLabel.text = "\(Int(stat.percent))%"
+        
+        let progress = Float(stat.percent / 100)
+        progressView.setProgress(progress, animated: false)
+        
+        if stat.percent > 100 {
+            progressView.progressTintColor = .systemRed
+        } else {
+            progressView.progressTintColor = .systemGreen
+        }
     }
 }

@@ -32,7 +32,7 @@ final class ChartViewModel: BaseViewModel {
         }
     }
     
-    private func getUser() async {
+    func getUser() async {
         let uuid = getUserUUID()
         
         loadingRelay.accept(true)
