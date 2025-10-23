@@ -194,7 +194,29 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
         
         let measurementTipsView = MeasurementTipsView()
         
-        [showTargetGuideButton, weightEditTargetItemView, smiEditTargetItemView, fatPercentageEditTargetItemView, goalSummaryView, saveButton, resetButton, warningContainerView, measurementTipsView].forEach {
+        let weightEditTargetContentView = EditDataContentView(
+            systemImageString: EditTargetItemType.weight.systemImage,
+            imageBackgroundColor: EditTargetItemType.weight.color,
+            titleText: EditTargetItemType.weight.title,
+            subtitleText: EditTargetItemType.weight.subtitle,
+            subView: weightEditTargetItemView
+        )
+        let smiEditTargetContentView = EditDataContentView(
+            systemImageString: EditTargetItemType.smi.systemImage,
+            imageBackgroundColor: EditTargetItemType.smi.color,
+            titleText: EditTargetItemType.smi.title,
+            subtitleText: EditTargetItemType.smi.subtitle,
+            subView: smiEditTargetItemView
+        )
+        let fatPercentageEditTargetContentView = EditDataContentView(
+            systemImageString: EditTargetItemType.fatPercentage.systemImage,
+            imageBackgroundColor: EditTargetItemType.fatPercentage.color,
+            titleText: EditTargetItemType.fatPercentage.title,
+            subtitleText: EditTargetItemType.fatPercentage.subtitle,
+            subView: fatPercentageEditTargetItemView
+        )
+        
+        [showTargetGuideButton, weightEditTargetContentView, smiEditTargetContentView, fatPercentageEditTargetContentView, goalSummaryView, saveButton, resetButton, warningContainerView, measurementTipsView].forEach {
             mainStackView.addArrangedSubview($0)
         }
         
@@ -466,36 +488,11 @@ enum EditTargetItemType {
     }
 }
 
-final class EditTargetItemView: BalanceEatContentView {
+final class EditTargetItemView: UIView {
     private let editTargetItemType: EditTargetItemType
     
     private lazy var currentField = InputFieldWithIcon(placeholder: "", unit: editTargetItemType == .fatPercentage ? "%" : "kg", isFat: editTargetItemType == .fatPercentage)
     private lazy var targetField = InputFieldWithIcon(placeholder: "", unit: editTargetItemType == .fatPercentage ? "%" : "kg", isFat: editTargetItemType == .fatPercentage)
-    
-    private let titleIconImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage())
-        imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .white
-        return imageView
-    }()
-    private let imageBackgroundView: UIView = {
-        let view = UIView()
-        view.layer.cornerRadius = 16
-        return view
-    }()
-    
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.textColor = .black
-        return label
-    }()
-    private let subtitleLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 12, weight: .regular)
-        label.textColor = .black
-        return label
-    }()
     
     var currentText: BehaviorRelay<String?> = BehaviorRelay(value: nil)
     var targetText: BehaviorRelay<String?> = BehaviorRelay(value: nil)
@@ -504,7 +501,7 @@ final class EditTargetItemView: BalanceEatContentView {
     init(editTargetItemType: EditTargetItemType) {
         self.editTargetItemType = editTargetItemType
     
-        super.init()
+        super.init(frame: .zero)
         setUpView()
     }
     
@@ -520,33 +517,6 @@ final class EditTargetItemView: BalanceEatContentView {
             stackView.spacing = 16
             return stackView
         }()
-        titleIconImageView.image = UIImage(systemName: editTargetItemType.systemImage)
-        
-        imageBackgroundView.backgroundColor = editTargetItemType.color
-        imageBackgroundView.clipsToBounds = true
-        imageBackgroundView.addSubview(titleIconImageView)
-        
-        titleIconImageView.snp.makeConstraints { make in
-            make.width.height.equalTo(24)
-            make.edges.equalToSuperview().inset(10)
-        }
-        
-        titleLabel.text = editTargetItemType.title
-        
-        subtitleLabel.text = editTargetItemType.subtitle
-        subtitleLabel.setContentCompressionResistancePriority(.required, for: .vertical)
-
-        let labelStackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
-        labelStackView.axis = .vertical
-        labelStackView.spacing = 4
-        
-        let titleStackView = UIStackView(arrangedSubviews: [imageBackgroundView, labelStackView])
-        titleStackView.axis = .horizontal
-        titleStackView.spacing = 12
-        
-        
-        mainStackView.addArrangedSubview(titleStackView)
-        
         
         let currentTitledInputUserInfoView = TitledInputInfoView(title: "현재 \(editTargetItemType.title)", inputView: currentField, useBalanceEatWrapper: false)
         
@@ -624,7 +594,7 @@ final class EditTargetItemView: BalanceEatContentView {
         addSubview(mainStackView)
         
         mainStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(16)
+            make.edges.equalToSuperview()
         }
     }
     
