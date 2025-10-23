@@ -76,7 +76,10 @@ final class SelectableTitledButton: UIView {
         tapGesture.rx.event
             .bind { [weak self] _ in
                 guard let self = self else { return }
-                self.isSelectedRelay.accept(!self.isSelectedRelay.value)
+                
+                if !isSelectedRelay.value {
+                    isSelectedRelay.accept(!self.isSelectedRelay.value)
+                }
             }
             .disposed(by: disposeBag)
     }
