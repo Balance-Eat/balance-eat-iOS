@@ -949,7 +949,7 @@ final class AchievementRateCell: UITableViewCell {
     private let percentLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .bold)
-        label.textColor = .green
+        label.textColor = .systemGreen
         label.textAlignment = .right
         return label
     }()
