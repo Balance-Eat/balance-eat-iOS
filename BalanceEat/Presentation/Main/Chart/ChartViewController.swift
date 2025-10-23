@@ -826,7 +826,7 @@ final class StatsGraphView: BalanceEatContentView {
 final class AchievementRateListView: BalanceEatContentView {
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 14, weight: .bold)
+        label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textColor = .black
         label.text = "목표 달성률"
         return label
