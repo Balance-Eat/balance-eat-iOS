@@ -17,6 +17,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     private let periodChangeView = PeriodChangeView()
     private let statsGraphView = StatsGraphView()
     private let achievementRateListView = AchievementRateListView()
+    private let analysisInsightView = AnalysisInsightView()
     
     init() {
         let userRepository = UserRepository()
@@ -49,7 +50,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     
     private func setUpView() {
         
-        [statStackView, periodChangeView, statsGraphView, achievementRateListView].forEach(mainStackView.addArrangedSubview(_:))
+        [statStackView, periodChangeView, statsGraphView, achievementRateListView, analysisInsightView].forEach(mainStackView.addArrangedSubview(_:))
         
         mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
@@ -91,11 +92,19 @@ class ChartViewController: BaseViewController<ChartViewModel> {
                 
                 achievementRateListView.statsRelay.accept(stats)
                 achievementRateListView.nutritionStatTypeRelay.accept(nutritionStatType)
+                
+                analysisInsightView.statsRelay.accept(stats)
+                analysisInsightView.nutritionStatTypeRelay.accept(nutritionStatType)
             })
             .disposed(by: disposeBag)
         
         viewModel.userDataRelay
-            .bind(to: achievementRateListView.userDataRelay)
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] userData in
+                guard let self else { return }
+                achievementRateListView.userDataRelay.accept(userData)
+                analysisInsightView.userDataRelay.accept(userData)
+            })
             .disposed(by: disposeBag)
     }
     
@@ -994,5 +1003,121 @@ final class AchievementRateCell: UITableViewCell {
         } else {
             progressView.progressTintColor = .systemGreen
         }
+    }
+}
+
+final class AnalysisInsightView: UIView {
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16, weight: .semibold)
+        label.textColor = .blue.withAlphaComponent(0.8)
+        label.text = "💡 분석 인사이트"
+        return label
+    }()
+    private let contentLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .blue
+        label.numberOfLines = 0
+        return label
+    }()
+    
+    let userDataRelay: BehaviorRelay<UserData?> = .init(value: nil)
+    let statsRelay: BehaviorRelay<[StatsData]> = .init(value: [])
+    let nutritionStatTypeRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
+    private let disposeBag = DisposeBag()
+    
+    init() {
+        super.init(frame: .zero)
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        self.backgroundColor = .blue.withAlphaComponent(0.03)
+        self.layer.cornerRadius = 8
+        self.layer.borderWidth = 1
+        self.layer.borderColor = UIColor.blue.withAlphaComponent(0.1).cgColor
+        
+        [titleLabel, contentLabel].forEach(addSubview(_:))
+        
+        titleLabel.snp.makeConstraints { make in
+            make.top.leading.equalToSuperview().inset(16)
+        }
+        
+        contentLabel.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(12)
+            make.leading.trailing.bottom.equalToSuperview().inset(16)
+        }
+    }
+    
+    private func setBinding() {
+        Observable.combineLatest(statsRelay, nutritionStatTypeRelay, userDataRelay)
+            .subscribe(onNext: { [weak self] stats, nutritionStatType, userData in
+                guard let self else { return }
+                
+                var average: Double = 0
+                var target: Double = 0
+                var isInTargetCount: Int = 0
+                
+                switch nutritionStatType {
+                case .calorie:
+                    average = stats.map(\.totalCalories).reduce(0, +) / Double(stats.count)
+                    target = Double(userData?.targetCalorie ?? 1)
+                    
+                    stats.forEach { stat in
+                        if stat.totalCalories <= target {
+                            isInTargetCount += 1
+                        }
+                    }
+                case .carbohydrate:
+                    average = stats.map(\.totalCarbohydrates).reduce(0, +) / Double(stats.count)
+                    target = Double(userData?.targetCarbohydrates ?? 1)
+                    
+                    stats.forEach { stat in
+                        if stat.totalCarbohydrates <= target {
+                            isInTargetCount += 1
+                        }
+                    }
+                case .protein:
+                    average = stats.map(\.totalProtein).reduce(0, +) / Double(stats.count)
+                    target = Double(userData?.targetProtein ?? 1)
+                    
+                    stats.forEach { stat in
+                        if stat.totalProtein <= target {
+                            isInTargetCount += 1
+                        }
+                    }
+                case .fat:
+                    average = stats.map(\.totalFat).reduce(0, +) / Double(stats.count)
+                    target = Double(userData?.targetFat ?? 1)
+                    
+                    stats.forEach { stat in
+                        if stat.totalFat <= target {
+                            isInTargetCount += 1
+                        }
+                    }
+                case .weight:
+                    average = stats.map(\.weight).reduce(0, +) / Double(stats.count)
+                    target = Double(userData?.targetWeight ?? 1)
+                    
+                    stats.forEach { stat in
+                        if stat.weight <= target {
+                            isInTargetCount += 1
+                        }
+                    }
+                }
+                let contentString = """
+                                • 평균 \(String(format: "%.0f", average))\(nutritionStatType.unit)로 목표 대비 \(String(format: "%.1f", abs((average - target) / target) * 100))% 초과입니다.
+                                • \(isInTargetCount)일이 목표 범위 내에 있습니다.
+                                """
+                contentLabel.setTextWithLineSpacing(contentString, lineSpacing: 6)
+            })
+            .disposed(by: disposeBag)
     }
 }
