@@ -88,12 +88,21 @@ class MenuViewController: BaseViewController<MenuViewModel> {
             })
             .disposed(by: disposeBag)
         
+        basicInfoMenuItemView.onTap = { [weak self] in
+            guard let self else { return }
+            guard let userData = viewModel.userRelay.value else { return }
+            
+            navigationController?.pushViewController(EditBasicInfoViewController(userData: userData), animated: true)
+        }
+        
         editTargetMenuItemView.onTap = { [weak self] in
             guard let self else { return }
             guard let userData = viewModel.userRelay.value else { return }
             
             navigationController?.pushViewController(EditTargetViewController(userData: userData), animated: true)
         }
+        
+        
     }
     
     private func getDatas() {
