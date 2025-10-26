@@ -15,7 +15,7 @@ struct TitledButtonStyle {
     let gradientColors: [UIColor]?
 }
 
-final class TitledButton: UIButton {
+class TitledButton: UIButton {
     
     private var style: TitledButtonStyle?
     private var gradientLayer: CAGradientLayer?
