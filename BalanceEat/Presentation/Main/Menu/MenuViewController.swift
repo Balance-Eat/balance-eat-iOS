@@ -117,7 +117,7 @@ class MenuViewController: BaseViewController<MenuViewModel> {
     }
     
     private func updateUIForUserData(user: UserData) {
-        profileInfoView.updateView(name: user.name, goal: "다이어트", currentWeight: user.weight, targetWeight: user.targetWeight)
+        profileInfoView.updateView(name: user.name, goal: user.goalType.description, currentWeight: user.weight, targetWeight: user.targetWeight)
     }
     
     private func createMenuStackView(title: String, views: [UIView]) -> UIStackView {
