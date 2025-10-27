@@ -483,6 +483,10 @@ final class GoalPickerView: UIView {
         rootFlex.pin.all()
         rootFlex.flex.layout(mode: .adjustHeight)
     }
+    
+    func setSelectedType(type: GoalType) {
+        self.selectedType = type
+    }
 }
 
 final class GoalCardView: UIView {

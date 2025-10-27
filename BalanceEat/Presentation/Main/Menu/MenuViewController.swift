@@ -26,7 +26,7 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         title: "목표 수치 편집",
         subtitle: "체중, 골격근량, 체지방률 목표 조정"
     )
-    private let activityLevelMenuItemView = MenuItemView(
+    private let targetTypeAndActivityLevelMenuItemView = MenuItemView(
         icon: UIImage(systemName: "flame.fill") ?? UIImage(),
         iconTintColor: .red,
         iconBackgroundColor: .red.withAlphaComponent(0.15),
@@ -70,7 +70,7 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         let personalInfoMenuStackView = createMenuStackView(title: "개인 정보", views: [
             basicInfoMenuItemView,
             editTargetMenuItemView,
-            activityLevelMenuItemView
+            targetTypeAndActivityLevelMenuItemView
         ])
         
         [personalInfoMenuStackView].forEach(mainStackView.addArrangedSubview)
@@ -102,7 +102,12 @@ class MenuViewController: BaseViewController<MenuViewModel> {
             navigationController?.pushViewController(EditTargetViewController(userData: userData), animated: true)
         }
         
-        
+        targetTypeAndActivityLevelMenuItemView.onTap = { [weak self] in
+            guard let self else { return }
+            guard let userData = viewModel.userRelay.value else { return }
+            
+            navigationController?.pushViewController(EditTargetTypeAndActivityLevelViewController(userData: userData), animated: true)
+        }
     }
     
     private func getDatas() {

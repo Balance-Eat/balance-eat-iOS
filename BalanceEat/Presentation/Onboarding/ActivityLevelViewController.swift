@@ -231,6 +231,10 @@ final class ActivityLevelPickerView: UIView {
         rootFlex.pin.all()
         rootFlex.flex.layout(mode: .adjustHeight)
     }
+    
+    func setSelectedLevel(activityLevel: ActivityLevel) {
+        self.selectedLevel = activityLevel
+    }
 }
 
 final class ActivityLevelCardView: UIView {
