@@ -17,7 +17,7 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         iconTintColor: .systemBlue,
         iconBackgroundColor: .systemBlue.withAlphaComponent(0.15),
         title: "기본 정보 수정",
-        subtitle: "이름, 성별, 나이 키 변경"
+        subtitle: "이름, 성별, 나이, 키 변경"
     )
     private let editTargetMenuItemView = MenuItemView(
         icon: UIImage(systemName: "person.crop.circle") ?? UIImage(),
@@ -30,8 +30,8 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         icon: UIImage(systemName: "flame.fill") ?? UIImage(),
         iconTintColor: .red,
         iconBackgroundColor: .red.withAlphaComponent(0.15),
-        title: "활동량 설정",
-        subtitle: "일상 활동량 조정"
+        title: "목표 유형 및 활동량 설정",
+        subtitle: "목표와 일상 활동량 조정"
     )
     
     init() {
