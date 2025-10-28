@@ -24,7 +24,7 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         iconTintColor: .systemGreen,
         iconBackgroundColor: .systemGreen.withAlphaComponent(0.15),
         title: "목표 수치 편집",
-        subtitle: "체중, 골격근량, 체지방률 목표 조정"
+        subtitle: "체중, 골격근량, 체지방률 및 목표 섭취량 조정"
     )
     private let targetTypeAndActivityLevelMenuItemView = MenuItemView(
         icon: UIImage(systemName: "flame.fill") ?? UIImage(),

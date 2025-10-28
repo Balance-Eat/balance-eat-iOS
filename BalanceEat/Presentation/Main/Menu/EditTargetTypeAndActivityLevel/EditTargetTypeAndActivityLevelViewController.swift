@@ -180,6 +180,47 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
             })
             .disposed(by: disposeBag)
         
+        saveButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                guard let userData = viewModel.userRelay.value else {
+                    return
+                }
+                
+                let goal = userData.goalType
+                let activityLevel = userData.activityLevel
+                
+                let userDTO = UserDTO(
+                    id: userData.id ,
+                    uuid: userData.uuid,
+                    name: userData.name,
+                    gender: userData.gender,
+                    age: userData.age,
+                    height: userData.height,
+                    weight: userData.weight,
+                    goalType: goal,
+                    email: userData.email,
+                    activityLevel: activityLevel,
+                    smi: userData.smi,
+                    fatPercentage: userData.fatPercentage,
+                    targetWeight: userData.targetWeight,
+                    targetCalorie: userData.targetCalorie,
+                    targetSmi: userData.targetSmi,
+                    targetFatPercentage: userData.targetFatPercentage,
+                    targetCarbohydrates: userData.targetCarbohydrates,
+                    targetProtein: userData.targetProtein,
+                    targetFat: userData.targetFat,
+                    providerId: userData.providerId,
+                    providerType: userData.providerType
+                )
+                
+                Task {
+                    await self.viewModel.updateUser(userDTO: userDTO)
+                }
+            })
+            .disposed(by: disposeBag)
+        
         resetButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
