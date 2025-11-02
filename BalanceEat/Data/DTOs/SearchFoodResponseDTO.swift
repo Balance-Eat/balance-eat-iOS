@@ -19,6 +19,7 @@ struct FoodDTOForSearch: Codable {
     let uuid: String
     let name: String
     let userId: Int
+    let intake: Double
     let servingSize: Double
     let unit: String
     let carbohydrates: Double
@@ -34,6 +35,7 @@ struct FoodDTOForSearch: Codable {
             id: self.id,
             uuid: self.uuid,
             name: self.name,
+            intake: self.intake,
             servingSize: self.servingSize,
             unit: self.unit,
             carbohydrates: self.carbohydrates,

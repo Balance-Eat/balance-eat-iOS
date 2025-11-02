@@ -11,6 +11,7 @@ struct FoodData {
     let id: Int
     let uuid: String
     let name: String
+    let intake: Double
     let servingSize: Double
     let unit: String
     let carbohydrates: Double
@@ -25,6 +26,7 @@ struct FoodData {
             id: self.id,
             uuid: self.uuid,
             name: self.name,
+            intake: self.intake,
             servingSize: self.servingSize,
             unit: self.unit,
             carbohydrates: self.carbohydrates,
@@ -39,7 +41,8 @@ struct FoodData {
         DietFoodData(
             id: self.id,
             name: self.name,
-            intake: self.servingSize,
+            intake: self.intake,
+            servingSize: self.servingSize,
             unit: self.unit,
             calories: self.carbohydrates * 4 + self.protein * 4 + self.fat * 9,
             carbohydrates: self.carbohydrates,

@@ -18,8 +18,8 @@ enum StepperMode {
 final class StepperView: UIView {
     var stepValue: Double = 1
     var unit: String = ""
-    var servingSize: Double = 0
-    let foodServingSize: Double = 0
+    var intake: Double = 0
+    var servingSize: Double = 1
     let stepperModeRelay: BehaviorRelay<StepperMode> = .init(value: .servingSize)
     let amountSizeRelay: BehaviorRelay<Double> = .init(value: 0)
     private let disposeBag = DisposeBag()
@@ -125,10 +125,10 @@ final class StepperView: UIView {
                 
                 switch mode {
                 case .servingSize:
-                    textField.text = "1"
+                    textField.text = "\(Int(intake / servingSize))"
                     amountLabel.text = "\(Int(servingSize))\(unit)"
                 case .amountSize:
-                    textField.text = String(Int(servingSize))
+                    textField.text = String(Int(intake))
                     amountLabel.text = unit
                 }
                 textField.sendActions(for: .editingChanged)

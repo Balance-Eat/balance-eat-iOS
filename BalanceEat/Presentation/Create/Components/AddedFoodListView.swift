@@ -53,7 +53,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     
     private lazy var sumOfNutritionValueView = SumOfNutritionValueView(title: "총 영양소")
     
-    /// (Calorie, Carbon, Protein, Fat, ServingSize)
+    /// (Calorie, Carbon, Protein, Fat)
     private let cellNutritionRelay = BehaviorRelay<[String: (Double, Double, Double, Double)]>(value: [:])
     let cellServingSizeRelay = BehaviorRelay<[String: Double]>(value: [:])
     
@@ -228,7 +228,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
 
 final class AddedFoodCell: UITableViewCell {
     private var foodData: DietFoodData?
-    private var servingSize: Double = 0
+    private var intake: Double = 0
     
     private let containerView = UIView()
     
@@ -356,11 +356,12 @@ final class AddedFoodCell: UITableViewCell {
         prepareForReuse()
         
         foodNameLabel.text = foodData.name
-        self.servingSize = foodData.intake
+        self.intake = foodData.intake
         self.foodData = foodData
         
         stepperView.unit = foodData.unit
-        stepperView.servingSize = servingSize
+        stepperView.intake = intake
+        stepperView.servingSize = foodData.servingSize
         
         nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates)
         nutritionalInfoView.proteinRelay.accept(foodData.protein)
@@ -376,10 +377,10 @@ final class AddedFoodCell: UITableViewCell {
                 
                 switch selectedOption {
                 case .first:
-                    stepperView.stepValue = servingSize / foodData.intake
+                    stepperView.stepValue = intake / foodData.intake
                     stepperView.stepperModeRelay.accept(.servingSize)
                 case .second:
-                    stepperView.stepValue = servingSize / foodData.intake
+                    stepperView.stepValue = intake / foodData.intake
                     stepperView.stepperModeRelay.accept(.amountSize)
                 }
             })
@@ -394,8 +395,8 @@ final class AddedFoodCell: UITableViewCell {
                 guard let self else { return }
                 guard let foodData = self.foodData else { return }
                 
-                let ratio = amount / servingSize
-                
+                let ratio = amount / intake
+                                
                 nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates * ratio)
                 nutritionalInfoView.proteinRelay.accept(foodData.protein * ratio)
                 nutritionalInfoView.fatRelay.accept(foodData.fat * ratio)

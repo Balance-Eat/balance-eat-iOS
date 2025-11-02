@@ -10,6 +10,7 @@ struct DietFoodData {
     let id: Int
     let name: String
     let intake: Double
+    let servingSize: Double
     let unit: String
     let calories: Double
     let carbohydrates: Double

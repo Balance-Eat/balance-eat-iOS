@@ -18,6 +18,7 @@ struct FoodItemForDietDTO: Codable {
     let foodId: Int
     let foodName: String
     let intake: Double
+    let servingSize: Double
     let unit: String
     let calories: Double
     let carbohydrates: Double
@@ -55,6 +56,7 @@ extension FoodItemForDietDTO {
             id: foodId,
             name: foodName,
             intake: intake,
+            servingSize: servingSize,
             unit: unit,
             calories: calories,
             carbohydrates: carbohydrates,
