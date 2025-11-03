@@ -16,7 +16,7 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
     private let activityLevelPickerView = ActivityLevelPickerView()
     private let estimatedDailyCalorieView = EstimatedDailyCalorieView(title: "예상 일일 소모 칼로리")
     
-    private let saveButton = MenuSaveButton()
+    private let goToNutritionSettingButton = GoToNutritionSettingButton()
     
     private let resetButton = MenuResetButton()
     
@@ -24,6 +24,8 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
     
     
     private let valueChangedRelay = BehaviorRelay<Bool>(value: false)
+    
+    private var bottomConstraint: Constraint?
     
     init(userData: UserData) {
         let userRepository = UserRepository()
@@ -42,6 +44,8 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
         super.viewDidLoad()
         
         setUpView()
+        setUpKeyboardDismissGesture()
+        observeKeyboard()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -64,6 +68,10 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
         
         mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(20)
+        }
+        
+        scrollView.snp.makeConstraints { make in
+            self.bottomConstraint = make.bottom.equalToSuperview().inset(0).constraint
         }
         
         let goalPickViewContentView = EditDataContentView(
@@ -108,7 +116,7 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
             ]
         )
         
-        saveButton.snp.makeConstraints { make in
+        goToNutritionSettingButton.snp.makeConstraints { make in
             make.height.equalTo(44)
         }
         
@@ -116,9 +124,9 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
             make.height.equalTo(44)
         }
                 
-        [goalPickViewContentView, activityLevelPickerViewContentView, estimatedDailyCalorieView, saveButton, resetButton, menuEditedWarningView, menuTipView].forEach(mainStackView.addArrangedSubview(_:))
+        [goalPickViewContentView, activityLevelPickerViewContentView, estimatedDailyCalorieView, goToNutritionSettingButton, resetButton, menuEditedWarningView, menuTipView].forEach(mainStackView.addArrangedSubview(_:))
         
-        navigationItem.title = "기본 정보 수정"
+        navigationItem.title = "목표, 활동량 설정"
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.backward"),
             style: .plain,
@@ -144,6 +152,7 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
             .disposed(by: disposeBag)
         
         viewModel.targetCaloriesObservable
+            .map { Int($0) }
             .bind(to: self.estimatedDailyCalorieView.calorieRelay)
             .disposed(by: disposeBag)
         
@@ -157,10 +166,10 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
         .bind(to: valueChangedRelay)
         .disposed(by: disposeBag)
         
-        valueChangedRelay
-            .map { !$0 }
-            .bind(to: saveButton.rx.isEnabled)
-            .disposed(by: disposeBag)
+//        valueChangedRelay
+//            .map { !$0 }
+//            .bind(to: goToNutritionSettingButton.rx.isEnabled)
+//            .disposed(by: disposeBag)
         
         valueChangedRelay
             .bind(to: menuEditedWarningView.rx.isHidden)
@@ -170,54 +179,46 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
             .bind(to: resetButton.rx.isHidden)
             .disposed(by: disposeBag)
         
-        viewModel.updateUserResultRelay
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] updateUserResult in
-                guard let self else { return }
-                if updateUserResult {
-                    navigationController?.popViewController(animated: true)
-                }
-            })
-            .disposed(by: disposeBag)
-        
-        saveButton.rx.tap
+        goToNutritionSettingButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 
-                guard let userData = viewModel.userRelay.value else {
-                    return
-                }
+//                guard let userData = viewModel.userRelay.value else {
+//                    return
+//                }
+//                
+//                let goal = userData.goalType
+//                let activityLevel = userData.activityLevel
+//                
+//                let userDTO = UserDTO(
+//                    id: userData.id ,
+//                    uuid: userData.uuid,
+//                    name: userData.name,
+//                    gender: userData.gender,
+//                    age: userData.age,
+//                    height: userData.height,
+//                    weight: userData.weight,
+//                    goalType: goal,
+//                    email: userData.email,
+//                    activityLevel: activityLevel,
+//                    smi: userData.smi,
+//                    fatPercentage: userData.fatPercentage,
+//                    targetWeight: userData.targetWeight,
+//                    targetCalorie: userData.targetCalorie,
+//                    targetSmi: userData.targetSmi,
+//                    targetFatPercentage: userData.targetFatPercentage,
+//                    targetCarbohydrates: userData.targetCarbohydrates,
+//                    targetProtein: userData.targetProtein,
+//                    targetFat: userData.targetFat,
+//                    providerId: userData.providerId,
+//                    providerType: userData.providerType
+//                )
+//                
+//                Task {
+//                    await self.viewModel.updateUser(userDTO: userDTO)
+//                }
                 
-                let goal = userData.goalType
-                let activityLevel = userData.activityLevel
-                
-                let userDTO = UserDTO(
-                    id: userData.id ,
-                    uuid: userData.uuid,
-                    name: userData.name,
-                    gender: userData.gender,
-                    age: userData.age,
-                    height: userData.height,
-                    weight: userData.weight,
-                    goalType: goal,
-                    email: userData.email,
-                    activityLevel: activityLevel,
-                    smi: userData.smi,
-                    fatPercentage: userData.fatPercentage,
-                    targetWeight: userData.targetWeight,
-                    targetCalorie: userData.targetCalorie,
-                    targetSmi: userData.targetSmi,
-                    targetFatPercentage: userData.targetFatPercentage,
-                    targetCarbohydrates: userData.targetCarbohydrates,
-                    targetProtein: userData.targetProtein,
-                    targetFat: userData.targetFat,
-                    providerId: userData.providerId,
-                    providerType: userData.providerType
-                )
-                
-                Task {
-                    await self.viewModel.updateUser(userDTO: userDTO)
-                }
+                navigationController?.pushViewController(EditNutritionViewController(vm: viewModel), animated: true)
             })
             .disposed(by: disposeBag)
         
@@ -236,5 +237,45 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
         dismiss(animated: true)
+    }
+    
+    private func setUpKeyboardDismissGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    private func observeKeyboard() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+    }
+
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let frame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let keyboardHeight = frame.height
+        
+        bottomConstraint?.update(inset: keyboardHeight)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        bottomConstraint?.update(inset: 0)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
 }

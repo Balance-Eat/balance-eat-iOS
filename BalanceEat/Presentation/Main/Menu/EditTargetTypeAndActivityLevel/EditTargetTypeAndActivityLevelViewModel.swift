@@ -34,9 +34,13 @@ final class EditTargetTypeAndActivityLevelViewModel: BaseViewModel {
                 }
             }
     }
+    let targetCaloriesRelay = BehaviorRelay<Double>(value: 0)
+    let userCarbonRelay = BehaviorRelay<Double>(value: 0)
+    let userProteinRelay = BehaviorRelay<Double>(value: 0)
+    let userFatRelay = BehaviorRelay<Double>(value: 0)
     
-    var targetCaloriesObservable: Observable<Int> {
-        Observable.combineLatest(BMRObservable, selectedGoalRelay, selectedActivityLevel) { bmr, goal, activityLevel -> Int in
+    var targetCaloriesObservable: Observable<Double> {
+        Observable.combineLatest(BMRObservable, selectedGoalRelay, selectedActivityLevel) { bmr, goal, activityLevel -> Double in
             let activityCoef = activityLevel.coefficient
             var goalDiff = 0
             
@@ -52,7 +56,7 @@ final class EditTargetTypeAndActivityLevelViewModel: BaseViewModel {
                     break
                 }
             }
-            return Int(Double(bmr) * activityCoef) + goalDiff
+            return Double(bmr) * activityCoef + Double(goalDiff)
         }
     }
     
@@ -61,6 +65,11 @@ final class EditTargetTypeAndActivityLevelViewModel: BaseViewModel {
     init(userData: UserData, userUseCase: UserUseCaseProtocol) {
         self.userRelay.accept(userData)
         self.userUseCase = userUseCase
+        super.init()
+        
+        targetCaloriesObservable
+            .bind(to: targetCaloriesRelay)
+            .disposed(by: disposeBag)
     }
     
     func updateUser(userDTO: UserDTO) async {
