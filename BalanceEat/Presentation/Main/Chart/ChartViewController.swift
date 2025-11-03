@@ -334,7 +334,7 @@ final class ChartNutritionStatsSelectView: UIView {
             selectedGradientColors: nil
         )
     )
-    private lazy var nutritionButtons = [calorieButton, carbohydrateButton, proteinButton, fatButton, weightButton]
+    private lazy var nutritionButtons = [calorieButton, carbohydrateButton, proteinButton, fatButton]
     
     let nutritionRelay: BehaviorRelay<NutritionStatType> = .init(value: .calorie)
     private let disposeBag = DisposeBag()
@@ -386,8 +386,8 @@ final class ChartNutritionStatsSelectView: UIView {
                             nutritionRelay.accept(.protein)
                         case fatButton:
                             nutritionRelay.accept(.fat)
-                        case weightButton:
-                            nutritionRelay.accept(.weight)
+//                        case weightButton:
+//                            nutritionRelay.accept(.weight)
                         default:
                             break
                         }
@@ -487,14 +487,14 @@ final class ChartStatStackView: UIView {
                     averageAmountRelay.accept(sum / Double(stats.count))
                     maxAmountRelay.accept(max)
                     minAmountRelay.accept(min)
-                case .weight:
-                    sum = stats.reduce(0) { $0 + $1.weight }
-                    max = stats.map(\.weight).max() ?? 0
-                    min = stats.map(\.weight).min() ?? 0
-                    
-                    averageAmountRelay.accept(sum / Double(stats.count))
-                    maxAmountRelay.accept(max)
-                    minAmountRelay.accept(min)
+//                case .weight:
+//                    sum = stats.reduce(0) { $0 + $1.weight }
+//                    max = stats.map(\.weight).max() ?? 0
+//                    min = stats.map(\.weight).min() ?? 0
+//                    
+//                    averageAmountRelay.accept(sum / Double(stats.count))
+//                    maxAmountRelay.accept(max)
+//                    minAmountRelay.accept(min)
                 }
                 
                 [averageStatAmountView, maxStatAmountView, minStatAmountView].forEach {
@@ -571,8 +571,8 @@ final class ChartStatAmountView: BalanceEatContentView {
                     unitLabel.text = "kcal"
                 case .carbohydrate, .protein, .fat:
                     unitLabel.text = "g"
-                case .weight:
-                    unitLabel.text = "kg"
+//                case .weight:
+//                    unitLabel.text = "kg"
                 }
             })
             .disposed(by: disposeBag)
@@ -672,10 +672,10 @@ final class PeriodChangeView: BalanceEatContentView {
                     firstNutritionAmount = statsDatas.first?.totalFat ?? 0
                     lastNutritionAmount = statsDatas.last?.totalFat ?? 0
                     periodChangeLabel.text = "\(firstDate): \(firstNutritionAmount)g → \(lastDate): \(lastNutritionAmount)g"
-                case .weight:
-                    firstNutritionAmount = statsDatas.first?.weight ?? 0
-                    lastNutritionAmount = statsDatas.last?.weight ?? 0
-                    periodChangeLabel.text = "\(firstDate): \(firstNutritionAmount)kg → \(lastDate): \(lastNutritionAmount)kg"
+//                case .weight:
+//                    firstNutritionAmount = statsDatas.first?.weight ?? 0
+//                    lastNutritionAmount = statsDatas.last?.weight ?? 0
+//                    periodChangeLabel.text = "\(firstDate): \(firstNutritionAmount)kg → \(lastDate): \(lastNutritionAmount)kg"
                 }
                 
                 let diff = lastNutritionAmount - firstNutritionAmount
@@ -770,8 +770,8 @@ final class StatsGraphView: BalanceEatContentView {
                         entries.append(ChartDataEntry(x: Double(i), y: stats[i].totalProtein))
                     case .fat:
                         entries.append(ChartDataEntry(x: Double(i), y: stats[i].totalFat))
-                    case .weight:
-                        entries.append(ChartDataEntry(x: Double(i), y: stats[i].weight))
+//                    case .weight:
+//                        entries.append(ChartDataEntry(x: Double(i), y: stats[i].weight))
                     }
                 }
                 
@@ -795,10 +795,10 @@ final class StatsGraphView: BalanceEatContentView {
                     label = "지방"
                     color = .fatText
                     titleLabel.text = "지방 추이"
-                case .weight:
-                    label = "체중"
-                    color = .yellow
-                    titleLabel.text = "체중 추이"
+//                case .weight:
+//                    label = "체중"
+//                    color = .yellow
+//                    titleLabel.text = "체중 추이"
                 }
                 
                 let dataSet = LineChartDataSet(entries: entries, label: label)
@@ -900,8 +900,8 @@ final class AchievementRateListView: BalanceEatContentView {
                         percent = (stat.totalProtein / (userData?.targetProtein ?? 1)) * 100
                     case .fat:
                         percent = (stat.totalFat / (userData?.targetFat ?? 1)) * 100
-                    case .weight:
-                        percent = (stat.weight / (userData?.targetWeight ?? 1)) * 100
+//                    case .weight:
+//                        percent = (stat.weight / (userData?.targetWeight ?? 1)) * 100
                     }
                     
                     let achievementRateStat = AchievementRateStat(date: extractMonthAndDay(from: stat.date), percent: percent)
@@ -1102,15 +1102,15 @@ final class AnalysisInsightView: UIView {
                             isInTargetCount += 1
                         }
                     }
-                case .weight:
-                    average = stats.map(\.weight).reduce(0, +) / Double(stats.count)
-                    target = Double(userData?.targetWeight ?? 1)
-                    
-                    stats.forEach { stat in
-                        if stat.weight <= target {
-                            isInTargetCount += 1
-                        }
-                    }
+//                case .weight:
+//                    average = stats.map(\.weight).reduce(0, +) / Double(stats.count)
+//                    target = Double(userData?.targetWeight ?? 1)
+//                    
+//                    stats.forEach { stat in
+//                        if stat.weight <= target {
+//                            isInTargetCount += 1
+//                        }
+//                    }
                 }
                 let contentString = """
                                 • 평균 \(String(format: "%.0f", average))\(nutritionStatType.unit)로 목표 대비 \(String(format: "%.1f", abs((average - target) / target) * 100))% 초과입니다.

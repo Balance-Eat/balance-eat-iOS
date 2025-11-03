@@ -12,7 +12,7 @@ enum NutritionStatType: Codable {
     case carbohydrate
     case protein
     case fat
-    case weight
+//    case weight
     
     var unit: String {
         switch self {
@@ -20,7 +20,7 @@ enum NutritionStatType: Codable {
         case .carbohydrate: return "g"
         case .protein: return "g"
         case .fat: return "g"
-        case .weight: return "kg"
+//        case .weight: return "kg"
         }
     }
 }
