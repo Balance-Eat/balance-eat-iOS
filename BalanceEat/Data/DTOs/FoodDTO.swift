@@ -11,9 +11,9 @@ struct FoodDTO: Codable {
     let id: Int
     let uuid: String
     let name: String
-    let intake: Double
     let servingSize: Double
     let unit: String
+    let perServingCalories: Double
     let carbohydrates: Double
     let protein: Double
     let fat: Double
@@ -25,9 +25,9 @@ struct FoodDTO: Codable {
             id: self.id,
             uuid: self.uuid,
             name: self.name,
-            intake: self.intake,
             servingSize: self.servingSize,
             unit: self.unit,
+            perServingCalories: self.perServingCalories,
             carbohydrates: self.carbohydrates,
             protein: self.protein,
             fat: self.fat,

@@ -11,9 +11,9 @@ struct FoodData {
     let id: Int
     let uuid: String
     let name: String
-    let intake: Double
     let servingSize: Double
     let unit: String
+    let perServingCalories: Double
     let carbohydrates: Double
     let protein: Double
     let fat: Double
@@ -26,9 +26,9 @@ struct FoodData {
             id: self.id,
             uuid: self.uuid,
             name: self.name,
-            intake: self.intake,
             servingSize: self.servingSize,
             unit: self.unit,
+            perServingCalories: self.perServingCalories,
             carbohydrates: self.carbohydrates,
             protein: self.protein,
             fat: self.fat,
@@ -37,14 +37,14 @@ struct FoodData {
         )
     }
     
-    func modelToDietFoodData() -> DietFoodData {
+    func modelToDietFoodData(intake: Double) -> DietFoodData {
         DietFoodData(
             id: self.id,
             name: self.name,
-            intake: self.intake,
+            intake: intake,
             servingSize: self.servingSize,
             unit: self.unit,
-            calories: self.carbohydrates * 4 + self.protein * 4 + self.fat * 9,
+            calories: self.perServingCalories,
             carbohydrates: self.carbohydrates,
             protein: self.protein,
             fat: self.fat

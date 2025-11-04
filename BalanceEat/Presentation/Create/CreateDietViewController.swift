@@ -189,8 +189,8 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                                     mealType: mealTime,
                                     items: []
                                 )
-                            ].items.append(foodData.modelToDietFoodData())
-                    
+                            ].items.append(foodData.modelToDietFoodData(intake: foodData.servingSize))
+                                                
                         viewModel.dietFoodsRelay.accept(current)
                         viewModel.mealTimeRelay.accept(mealTime)
                     })
@@ -243,7 +243,8 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     guard let self else { return }
                     
                     let mealType = viewModel.mealTimeRelay.value
-                    let todayConsumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
+                    let consumedAt = viewModel.dateRelay.value.toString(format: "yyyy-MM-dd'T'HH:mm:ss")
+//                    let todayConsumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
                     let mealTypeString = mealType.rawValue
                     if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
                         let dietFoods = diet.items.map { [weak self] food in
@@ -266,7 +267,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                             Task {
                                 await self.viewModel.createDiet(
                                     mealType: mealType,
-                                    consumedAt: todayConsumedAt,
+                                    consumedAt: consumedAt,
                                     dietFoods: dietFoods,
                                     userId: userId
                                 )
