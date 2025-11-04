@@ -14,5 +14,4 @@ struct StatsData {
     let totalCarbohydrates: Double
     let totalProtein: Double
     let totalFat: Double
-    let weight: Double
 }

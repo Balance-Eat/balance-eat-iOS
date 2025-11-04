@@ -14,7 +14,6 @@ struct StatsResponseDTO: Codable {
     let totalCarbohydrates: Double
     let totalProtein: Double
     let totalFat: Double
-    let weight: Double
     
     func DTOToModel() -> StatsData {
         StatsData(
@@ -23,8 +22,7 @@ struct StatsResponseDTO: Codable {
             totalCalories: self.totalCalories,
             totalCarbohydrates: self.totalCarbohydrates,
             totalProtein: self.totalProtein,
-            totalFat: self.totalFat,
-            weight: self.weight
+            totalFat: self.totalFat
         )
     }
 }
