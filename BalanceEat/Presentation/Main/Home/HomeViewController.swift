@@ -46,16 +46,10 @@ class HomeViewController: BaseViewController<HomeViewModel> {
     }()
     
     private lazy var nowBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(
-        title: "현재 체성분",
-        weight: 0,
-        smi: nil,
-        fatPercentage: nil
+        title: "현재 체성분"
     )
     private lazy var targetBodyStatusCardView: BodyStatusCardView = BodyStatusCardView(
         title: "목표 체성분",
-        weight: 0,
-        smi: nil,
-        fatPercentage: nil,
         isTarget: true
     )
     
@@ -167,14 +161,6 @@ class HomeViewController: BaseViewController<HomeViewModel> {
     }
     
     private func setBinding() {
-        viewModel.userResponseRelay
-            .compactMap { $0 }
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] user in
-                guard let self else { return }
-                self.updateUIForUserData(user: user)
-            })
-            .disposed(by: disposeBag)
         
         viewModel.dietResponseRelay
             .compactMap { $0 }
@@ -220,39 +206,49 @@ class HomeViewController: BaseViewController<HomeViewModel> {
                 navigationController?.pushViewController(CreateDietViewController(dietDatas: [], date: Date()), animated: true)
             })
             .disposed(by: disposeBag)
-    }
-    
-    private func updateUIForUserData(user: UserData) {
-        if let label = (welcomeLabelStackView.arrangedSubviews.first as? UILabel) {
-            label.text = "안녕하세요, \(user.name)님!"
-        }
+        
+        viewModel.userNameRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] name in
+                guard let self else { return }
+                if let label = (welcomeLabelStackView.arrangedSubviews.first as? UILabel) {
+                    label.text = "안녕하세요, \(name)님!"
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        Observable.combineLatest(viewModel.userNowBodyStatusRelay, viewModel.userTargetBodyStatusRelay)
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] bodyStatus, targetBodyStatus in
+                guard let self else { return }
+                            
+                nowBodyStatusCardView.weightRelay.accept(bodyStatus.0)
+                nowBodyStatusCardView.smiRelay.accept(bodyStatus.1)
+                nowBodyStatusCardView.fatPercentageRelay.accept(bodyStatus.2)
+                
+                let weightDiff = targetBodyStatus.0 - bodyStatus.0
+                
+                let smiDiff: Double? = {
+                    if let target = targetBodyStatus.1, let current = bodyStatus.1 {
+                        return target - current
+                    }
+                    return nil
+                }()
 
-        nowBodyStatusCardView.update(
-            weight: user.weight,
-            smi: user.smi,
-            fatPercentage: user.fatPercentage
-        )
-
-        let smiDiff: Double? = {
-            if let target = user.targetSmi, let current = user.smi {
-                return target - current
-            }
-            return nil
-        }()
-
-        let fatDiff: Double? = {
-            if let target = user.targetFatPercentage, let current = user.fatPercentage {
-                return target - current
-            }
-            return nil
-        }()
-
-        targetBodyStatusCardView.update(
-            weight: user.targetWeight - user.weight,
-            smi: smiDiff,
-            fatPercentage: fatDiff
-        )
-
+                let fatDiff: Double? = {
+                    if let target = targetBodyStatus.2, let current = bodyStatus.2 {
+                        return target - current
+                    }
+                    return nil
+                }()
+                
+                targetBodyStatusCardView.weightRelay.accept(weightDiff)
+                targetBodyStatusCardView.smiRelay.accept(smiDiff)
+                targetBodyStatusCardView.fatPercentageRelay.accept(fatDiff)
+            })
+            .disposed(by: disposeBag)
+        
+        
     }
     
     private func updateUIForDailyDietDate(dietList: [DietData]) {

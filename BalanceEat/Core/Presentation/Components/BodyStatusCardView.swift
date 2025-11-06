@@ -12,9 +12,6 @@ import RxCocoa
 
 final class BodyStatusCardView: UIView {
     private let title: String
-    private var weight: Double
-    private var smi: Double?
-    private var fatPercentage: Double?
     private let isTarget: Bool
     
     private let containerView: BalanceEatContentView = BalanceEatContentView()
@@ -35,7 +32,7 @@ final class BodyStatusCardView: UIView {
     }()
     
     private lazy var weightLabel: StatusLabel = {
-        let label = StatusLabel(number: weight, unit: "kg", isWeight: true, isTarget: isTarget)
+        let label = StatusLabel(unit: "kg", isWeight: true, isTarget: isTarget)
         return label
     }()
     
@@ -53,8 +50,8 @@ final class BodyStatusCardView: UIView {
         return stackView
     }()
     
-    private lazy var smiLabel = StatusLabel(number: smi, unit: "kg", isTarget: isTarget)
-    private lazy var fatLabel = StatusLabel(number: fatPercentage, unit: "%", isTarget: isTarget)
+    private lazy var smiLabel = StatusLabel(unit: "kg", isTarget: isTarget)
+    private lazy var fatLabel = StatusLabel(unit: "%", isTarget: isTarget)
     
     private lazy var smiView: UIStackView = {
         let titleLabel = UILabel()
@@ -80,14 +77,14 @@ final class BodyStatusCardView: UIView {
         return stack
     }()
     
+    let weightRelay: BehaviorRelay<Double> = .init(value: 0)
+    let smiRelay: BehaviorRelay<Double?> = .init(value: nil)
+    let fatPercentageRelay: BehaviorRelay<Double?> = .init(value: nil)
     let goToEditTapRelay = PublishRelay<Void>()
     private let disposeBag = DisposeBag()
     
-    init(title: String, weight: Double, smi: Double?, fatPercentage: Double?, isTarget: Bool = false) {
+    init(title: String, isTarget: Bool = false) {
         self.title = title
-        self.weight = weight
-        self.smi = smi
-        self.fatPercentage = fatPercentage
         self.isTarget = isTarget
         super.init(frame: .zero)
         
@@ -146,21 +143,23 @@ final class BodyStatusCardView: UIView {
         goToEditButton.rx.tap
             .bind(to: goToEditTapRelay)
             .disposed(by: disposeBag)
-    }
-    
-    func update(weight: Double, smi: Double?, fatPercentage: Double?) {
-        self.weight = weight
-        self.smi = smi
-        self.fatPercentage = fatPercentage
-
-        weightLabel.updateNumber(number: weight)
-        smiLabel.updateNumber(number: smi ?? 0)
-        fatLabel.updateNumber(number: fatPercentage ?? 0)
+        
+        weightRelay
+            .bind(to: weightLabel.numberRelay)
+            .disposed(by: disposeBag)
+        
+        smiRelay
+            .bind(to: smiLabel.numberRelay)
+            .disposed(by: disposeBag)
+        
+        fatPercentageRelay
+            .bind(to: fatLabel.numberRelay)
+            .disposed(by: disposeBag)
+            
     }
 }
 
 final class StatusLabel: UILabel {
-    private var number: Double?
     private let unit: String
     private let isWeight: Bool
     private let isTarget: Bool
@@ -178,14 +177,18 @@ final class StatusLabel: UILabel {
         formatter.maximumFractionDigits = 1
         return formatter
     }()
+    
+    let numberRelay: BehaviorRelay<Double?> = .init(value: nil)
+    private let disposeBag = DisposeBag()
 
-    init(number: Double?, unit: String, isWeight: Bool = false, isTarget: Bool = false) {
-        self.number = number
+    init(unit: String, isWeight: Bool = false, isTarget: Bool = false) {
         self.unit = unit
         self.isWeight = isWeight
         self.isTarget = isTarget
         super.init(frame: .zero)
+        
         setupLabel()
+        setBinding()
     }
 
     required init?(coder: NSCoder) {
@@ -194,16 +197,16 @@ final class StatusLabel: UILabel {
 
     private func setupLabel() {
         var prefix = ""
-        if isTarget && number ?? 0 > 0 {
+        if isTarget && numberRelay.value ?? 0 > 0 {
             prefix = "+"
         }
         let numberString: String
-        if number == nil {
+        if numberRelay.value == nil {
             numberString = "-"
-        } else if let formatted = numberFormatter.string(from: NSNumber(value: number ?? 0)) {
+        } else if let formatted = numberFormatter.string(from: NSNumber(value: numberRelay.value ?? 0)) {
             numberString = formatted
         } else {
-            numberString = "\(number ?? 0)"
+            numberString = "\(numberRelay.value ?? 0)"
         }
 
         let fullText = "\(prefix)\(numberString)\(unit)"
@@ -221,9 +224,15 @@ final class StatusLabel: UILabel {
 
         self.attributedText = attributedText
     }
-
-    func updateNumber(number: Double) {
-        self.number = number
-        setupLabel()
+    
+    private func setBinding() {
+        numberRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] number in
+                guard let self else { return }
+                
+                setupLabel()
+            })
+            .disposed(by: disposeBag)
     }
 }

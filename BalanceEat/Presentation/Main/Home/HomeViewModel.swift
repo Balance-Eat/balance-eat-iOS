@@ -16,9 +16,30 @@ final class HomeViewModel: BaseViewModel {
     let userResponseRelay = BehaviorRelay<UserData?>(value: nil)
     let dietResponseRelay = BehaviorRelay<[DietData]?>(value: nil)
     
+    let userNameRelay: BehaviorRelay<String> = .init(value: "")
+    /// (weight, smi, fatPercentage)
+    let userNowBodyStatusRelay: BehaviorRelay<(Double, Double?, Double?)> = .init(value: (0, nil, nil))
+    let userTargetBodyStatusRelay: BehaviorRelay<(Double, Double?, Double?)> = .init(value: (0, nil, nil))
+    
     init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {
         self.userUseCase = userUseCase
         self.dietUseCase = dietUseCase
+        
+        super.init()
+        setBinding()
+    }
+    
+    private func setBinding() {
+        userResponseRelay
+            .subscribe(onNext: { [weak self] user in
+                guard let self else { return }
+                
+                userNameRelay.accept(user?.name ?? "")
+                
+                userNowBodyStatusRelay.accept((user?.weight ?? 0, user?.smi, user?.fatPercentage))
+                userTargetBodyStatusRelay.accept((user?.targetWeight ?? 0, user?.targetSmi, user?.targetFatPercentage))
+            })
+            .disposed(by: disposeBag)
     }
     
     func getUser() async {
