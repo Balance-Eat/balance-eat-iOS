@@ -106,7 +106,7 @@ class HomeViewController: BaseViewController<HomeViewModel> {
             make.height.equalTo(1)
         }
         
-        [welcomeBackgroundView, bodyStatusStackView, todayCalorieView, proteinRemindCardView, todayAteMealLogListView].forEach(mainStackView.addArrangedSubview(_:))
+        [welcomeBackgroundView, bodyStatusStackView, todayCalorieView, todayAteMealLogListView].forEach(mainStackView.addArrangedSubview(_:))
         
         welcomeBackgroundView.addSubview(welcomeLabelStackView)
         welcomeBackgroundView.colors = [
@@ -137,14 +137,8 @@ class HomeViewController: BaseViewController<HomeViewModel> {
             make.leading.trailing.equalToSuperview().inset(20)
         }
         
-        proteinRemindCardView.snp.makeConstraints { make in
-            make.top.equalTo(todayCalorieView.snp.bottom).inset(-40)
-            make.leading.trailing.equalToSuperview().inset(20)
-//            make.bottom.equalToSuperview().inset(20)
-        }
-        
         todayAteMealLogListView.snp.makeConstraints { make in
-            make.top.equalTo(proteinRemindCardView.snp.bottom).inset(-40)
+//            make.top.equalTo(proteinRemindCardView.snp.bottom).inset(-40)
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)
         }
