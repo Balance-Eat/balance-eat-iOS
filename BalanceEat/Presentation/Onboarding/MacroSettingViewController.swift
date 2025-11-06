@@ -215,6 +215,7 @@ class MacroSettingViewController: UIViewController {
                 var protein: Double = 0
                 var fat: Double = 0
                 
+                
                 switch goal {
                 case .diet:
                     protein = (data.weight ?? 0) * 2
@@ -226,7 +227,7 @@ class MacroSettingViewController: UIViewController {
                     carbon = (calories - protein * 4 - fat * 9) / 4
                 case .maintain:
                     protein = (data.weight ?? 0) * 1.7
-                    fat = calories * 0.2
+                    fat = calories * 0.2 / 9
                     carbon = (calories - protein * 4 - fat * 9) / 4
                 case .none:
                     break
@@ -235,7 +236,7 @@ class MacroSettingViewController: UIViewController {
                 initialCarbon = carbon
                 initialProtein = protein
                 initialFat = fat
-                
+                            
                 editNutritionInfoView.setCarbonText(text: String(format: "%.0f", carbon))
                 editNutritionInfoView.setProteinText(text: String(format: "%.0f", protein))
                 editNutritionInfoView.setFatText(text: String(format: "%.0f", fat))
