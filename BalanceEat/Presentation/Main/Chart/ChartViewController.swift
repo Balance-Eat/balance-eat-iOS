@@ -12,6 +12,7 @@ import RxCocoa
 import DGCharts
 
 class ChartViewController: BaseViewController<ChartViewModel> {
+    private let refreshControl = UIRefreshControl()
     private let headerView = ChartHeaderView()
     private let statStackView = ChartStatStackView()
     private let periodChangeView = PeriodChangeView()
@@ -49,6 +50,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     }
     
     private func setUpView() {
+        scrollView.refreshControl = refreshControl
         
         [statStackView, periodChangeView, statsGraphView, achievementRateListView, analysisInsightView].forEach(mainStackView.addArrangedSubview(_:))
         
@@ -74,6 +76,21 @@ class ChartViewController: BaseViewController<ChartViewModel> {
                     }
                 }
             })
+            .disposed(by: disposeBag)
+        
+        refreshControl.rx.controlEvent(.valueChanged)
+            .bind { [weak self] in
+                guard let self else { return }
+                
+                let period = headerView.periodRelay.value
+                Task {
+                    await self.viewModel.getStats(period: period)
+                    
+                    DispatchQueue.main.async { [weak self] in
+                        self?.refreshControl.endRefreshing()
+                    }
+                }
+            }
             .disposed(by: disposeBag)
         
         Observable.combineLatest(viewModel.currentStatsRelay, headerView.nutritionStatTypeRelay)
