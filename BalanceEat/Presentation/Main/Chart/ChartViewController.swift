@@ -823,7 +823,7 @@ final class StatsGraphView: BalanceEatContentView {
                 dataSet.circleColors = [.systemBlue]
                 dataSet.lineWidth = 2
                 dataSet.circleRadius = 5
-                dataSet.mode = .cubicBezier
+                dataSet.mode = .horizontalBezier
                 
                 let data = LineChartData(dataSet: dataSet)
                 lineChartView.data = data
