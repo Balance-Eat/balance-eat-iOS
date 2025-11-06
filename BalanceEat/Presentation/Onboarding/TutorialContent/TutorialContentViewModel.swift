@@ -13,22 +13,28 @@ final class TutorialContentViewModel {
     private let userUseCase: UserUseCase
     
     let onCreateUserSuccessRelay: PublishRelay<Void> = .init()
-    let onCreateUserFailureRelay: PublishRelay<String> = .init()
+    
+    let loadingRelay = BehaviorRelay<Bool>(value: false)
+    
+    let toastMessageRelay = BehaviorRelay<String?>(value: nil)
     
     init(userUseCase: UserUseCase) {
         self.userUseCase = userUseCase
     }
     
     func createUser(createUserDTO: UserDTO) async {
+        loadingRelay.accept(true)
+        
         let createUserResponse = await userUseCase.createUser(userDTO: createUserDTO)
         
         switch createUserResponse {
         case .success():
             saveUserUUID(createUserDTO.uuid)
             onCreateUserSuccessRelay.accept(())
-            
+            loadingRelay.accept(false)
         case .failure(let failure):
-            onCreateUserFailureRelay.accept(failure.localizedDescription)
+            loadingRelay.accept(false)
+            toastMessageRelay.accept("유저 생성에 실패했습니다. \(failure.description)")
         }
     }
     

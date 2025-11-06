@@ -32,12 +32,12 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
     
     private var bottomConstraint: Constraint?
     
-    private let currentWeightRelay = BehaviorRelay<Double>(value: 0)
-    private let targetWeightRelay = BehaviorRelay<Double>(value: 0)
-    private let currentSMIRelay = BehaviorRelay<Double>(value: 0)
-    private let targetSMIRelay = BehaviorRelay<Double>(value: 0)
-    private let currentFatPercentageRelay = BehaviorRelay<Double>(value: 0)
-    private let targetFatPercentageRelay = BehaviorRelay<Double>(value: 0)
+    private let currentWeightRelay = BehaviorRelay<Double?>(value: nil)
+    private let targetWeightRelay = BehaviorRelay<Double?>(value: nil)
+    private let currentSMIRelay = BehaviorRelay<Double?>(value: 0)
+    private let targetSMIRelay = BehaviorRelay<Double?>(value: 0)
+    private let currentFatPercentageRelay = BehaviorRelay<Double?>(value: 0)
+    private let targetFatPercentageRelay = BehaviorRelay<Double?>(value: 0)
     private let carbonRelay = BehaviorRelay<Double>(value: 0)
     private let proteinRelay = BehaviorRelay<Double>(value: 0)
     private let fatRelay = BehaviorRelay<Double>(value: 0)
@@ -224,43 +224,43 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
     
     private func setBinding() {
         weightEditTargetItemView.currentText
-            .map { text -> Double in
-                Double(text ?? "") ?? 0
+            .map { text -> Double? in
+                Double(text ?? "")
             }
             .bind(to: currentWeightRelay)
             .disposed(by: disposeBag)
         
         weightEditTargetItemView.targetText
-            .map { text -> Double in
-                Double(text ?? "") ?? 0
+            .map { text -> Double? in
+                Double(text ?? "")
             }
             .bind(to: targetWeightRelay)
             .disposed(by: disposeBag)
         
         smiEditTargetItemView.currentText
-            .map { text -> Double in
-                Double(text ?? "") ?? 0
+            .map { text -> Double? in
+                Double(text ?? "")
             }
             .bind(to: currentSMIRelay)
             .disposed(by: disposeBag)
         
         smiEditTargetItemView.targetText
-            .map { text -> Double in
-                Double(text ?? "") ?? 0
+            .map { text -> Double? in
+                Double(text ?? "")
             }
             .bind(to: targetSMIRelay)
             .disposed(by: disposeBag)
         
         fatPercentageEditTargetItemView.currentText
-            .map { text -> Double in
-                Double(text ?? "") ?? 0
+            .map { text -> Double? in
+                Double(text ?? "")
             }
             .bind(to: currentFatPercentageRelay)
             .disposed(by: disposeBag)
         
         fatPercentageEditTargetItemView.targetText
-            .map { text -> Double in
-                Double(text ?? "") ?? 0
+            .map { text -> Double? in
+                Double(text ?? "")
             }
             .bind(to: targetFatPercentageRelay)
             .disposed(by: disposeBag)
@@ -272,8 +272,8 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
                     
                     let currentUser = userData
                     
-                    let edittedCurrentWeight = currentWeightRelay.value
-                    let edittedTargetWeight = targetWeightRelay.value
+                    let edittedCurrentWeight = currentWeightRelay.value ?? 0
+                    let edittedTargetWeight = targetWeightRelay.value ?? 0
                     let edittedCurrentSMI = currentSMIRelay.value
                     let edittedTargetSMI = targetSMIRelay.value
                     let edittedCurrentFatPercentage = currentFatPercentageRelay.value
@@ -871,16 +871,16 @@ final class GoalSummaryView: UIView {
         return stackView
     }()
     
-    private let currentWeightRelay: BehaviorRelay<Double>
-    private let targetWeightRelay: BehaviorRelay<Double>
-    private let currentSMIRelay: BehaviorRelay<Double>
-    private let targetSMIRelay: BehaviorRelay<Double>
-    private let currentFatPercentageRelay: BehaviorRelay<Double>
-    private let targetFatPercentageRelay: BehaviorRelay<Double>
+    private let currentWeightRelay: BehaviorRelay<Double?>
+    private let targetWeightRelay: BehaviorRelay<Double?>
+    private let currentSMIRelay: BehaviorRelay<Double?>
+    private let targetSMIRelay: BehaviorRelay<Double?>
+    private let currentFatPercentageRelay: BehaviorRelay<Double?>
+    private let targetFatPercentageRelay: BehaviorRelay<Double?>
     
     private let disposeBag = DisposeBag()
     
-    init(currentWeightRelay: BehaviorRelay<Double>, targetWeightRelay: BehaviorRelay<Double>, currentSMIRelay: BehaviorRelay<Double>, targetSMIRelay: BehaviorRelay<Double>, currentFatPercentageRelay: BehaviorRelay<Double>, targetFatPercentageRelay: BehaviorRelay<Double>) {
+    init(currentWeightRelay: BehaviorRelay<Double?>, targetWeightRelay: BehaviorRelay<Double?>, currentSMIRelay: BehaviorRelay<Double?>, targetSMIRelay: BehaviorRelay<Double?>, currentFatPercentageRelay: BehaviorRelay<Double?>, targetFatPercentageRelay: BehaviorRelay<Double?>) {
         self.currentWeightRelay = currentWeightRelay
         self.targetWeightRelay = targetWeightRelay
         self.currentSMIRelay = currentSMIRelay
@@ -944,7 +944,7 @@ final class GoalSummaryContentView: UIView {
     
     private let disposeBag = DisposeBag()
     
-    init(editTargetItemType: EditTargetItemType, currentRelay: BehaviorRelay<Double>, targetRelay: BehaviorRelay<Double>) {
+    init(editTargetItemType: EditTargetItemType, currentRelay: BehaviorRelay<Double?>, targetRelay: BehaviorRelay<Double?>) {
         super.init(frame: .zero)
         
         self.backgroundColor = .white
@@ -957,7 +957,9 @@ final class GoalSummaryContentView: UIView {
         Observable.combineLatest(currentRelay, targetRelay)
             .subscribe(onNext: { [weak self] current, target in
                 guard let self else { return }
-
+                guard let current else { return }
+                guard let target else { return }
+                
                 let diff = target - current
 
                 self.changeLabel.text = "\(current.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", current) : String(current))\(editTargetItemType.unit) → \(target.truncatingRemainder(dividingBy: 1) == 0 ? String(format: "%.0f", target) : String(target))\(editTargetItemType.unit)"
@@ -1081,3 +1083,4 @@ final class GoalSummaryNutritionContentView: UIView {
         
     }
 }
+
