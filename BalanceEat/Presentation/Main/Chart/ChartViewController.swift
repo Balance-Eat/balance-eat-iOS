@@ -772,9 +772,27 @@ final class StatsGraphView: BalanceEatContentView {
                 guard let self else { return }
                 
                 var entries: [ChartDataEntry] = []
-                let labels = stats.map { [weak self] stat in
+                let labels = stats.enumerated().map { [weak self] (index, stat) in
                     guard let self else { return "" }
-                    return extractMonthAndDay(from: stat.date)
+                    
+                    let isLast = index == stats.count - 1
+                    
+                    switch stat.type {
+                    case .daily:
+                        if isLast {
+                            return "오늘"
+                        }
+                    case .weekly:
+                        if isLast {
+                            return "이번 주"
+                        }
+                    case .monthly:
+                        if isLast {
+                            return "이번 달"
+                        }
+                    }
+                    
+                    return extractMonthAndDay(period: stat.type, from: stat.date)
                 }
                 
                 for i in 0..<stats.count {
@@ -842,10 +860,15 @@ final class StatsGraphView: BalanceEatContentView {
             .disposed(by: disposeBag)
     }
 
-    private func extractMonthAndDay(from dateString: String) -> String {
+    private func extractMonthAndDay(period: Period, from dateString: String) -> String {
         let components = dateString.split(separator: "-")
         guard components.count == 3 else { return "" }
-        return "\(components[1])-\(components[2])"
+        
+        if period == .monthly {
+            return "\(components[0].suffix(2))-\(components[1])"
+        } else {
+            return "\(components[1])-\(components[2])"
+        }
     }
 }
 
