@@ -152,7 +152,6 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
             .disposed(by: disposeBag)
         
         viewModel.targetCaloriesObservable
-            .map { Int($0) }
             .bind(to: self.estimatedDailyCalorieView.calorieRelay)
             .disposed(by: disposeBag)
         

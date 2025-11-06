@@ -34,15 +34,15 @@ final class TutorialPageViewModel {
                 }
             }
     }
-    let targetCaloriesRelay = BehaviorRelay<Int>(value: 0)
-    let userCarbonRelay = BehaviorRelay<Float>(value: 0)
-    let userProteinRelay = BehaviorRelay<Float>(value: 0)
-    let userFatRelay = BehaviorRelay<Float>(value: 0)
+    let targetCaloriesRelay = BehaviorRelay<Double>(value: 0)
+    let userCarbonRelay = BehaviorRelay<Double>(value: 0)
+    let userProteinRelay = BehaviorRelay<Double>(value: 0)
+    let userFatRelay = BehaviorRelay<Double>(value: 0)
     
-    var targetCaloriesObservable: Observable<Int> {
-        Observable.combineLatest(BMRObservable, goalTypeRelay, dataRelay) { bmr, goal, data -> Int in
+    var targetCaloriesObservable: Observable<Double> {
+        Observable.combineLatest(BMRObservable, goalTypeRelay, dataRelay) { bmr, goal, data -> Double in
             guard let activityCoef = data.activityLevel?.coefficient else { return 0 }
-            var goalDiff = 0
+            var goalDiff: Double = 0
             
             if data.activityLevel != ActivityLevel.none {
                 switch goal {
@@ -56,7 +56,7 @@ final class TutorialPageViewModel {
                     break
                 }
             }
-            return Int(Double(bmr) * activityCoef) + goalDiff
+            return Double(bmr) * activityCoef + goalDiff
         }
     }
     

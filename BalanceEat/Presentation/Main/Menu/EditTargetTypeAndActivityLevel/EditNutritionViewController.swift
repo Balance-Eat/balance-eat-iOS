@@ -200,7 +200,7 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
                     smi: userData.smi,
                     fatPercentage: userData.fatPercentage,
                     targetWeight: userData.targetWeight,
-                    targetCalorie: Int(viewModel.targetCaloriesRelay.value),
+                    targetCalorie: viewModel.targetCaloriesRelay.value,
                     targetSmi: userData.targetSmi,
                     targetFatPercentage: userData.targetFatPercentage,
                     targetCarbohydrates: viewModel.userCarbonRelay.value,

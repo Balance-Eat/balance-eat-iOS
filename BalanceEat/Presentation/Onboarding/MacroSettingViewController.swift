@@ -38,20 +38,35 @@ class MacroSettingViewController: UIViewController {
         return label
     }()
     
+    private let editNutritionInfoView = EditNutritionInfoView()
+    
     private let resetButton = ResetToRecommendValueButton()
+    
+    private let nextButton = TitledButton(
+        title: "입력 완료",
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .white,
+            borderColor: nil,
+            gradientColors: [.systemGreen, .systemGreen.withAlphaComponent(0.5)]
+        )
+    )
+    
+    let estimatedDailyCalorieView = EstimatedDailyCalorieView(title: "하루 권장 섭취 칼로리")
     
     private let targetCaloriesRelayForCarbonProtein: BehaviorRelay<CGFloat> = .init(value: 2000 / 4)
     private let targetCaloriesRelayForFat: BehaviorRelay<CGFloat> = .init(value: 2000 / 9)
     
-    private var initialCarbon: Float = 0
-    private var initialProtein: Float = 0
-    private var initialFat: Float = 0
+    private var initialCarbon: Double = 0
+    private var initialProtein: Double = 0
+    private var initialFat: Double = 0
     
     let inputCompleted = PublishRelay<Void>()
     
     init () {
         super.init(nibName: nil, bundle: nil)
         setUpView()
+        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -81,165 +96,181 @@ class MacroSettingViewController: UIViewController {
             make.bottom.equalToSuperview().inset(16)
         }
         
-        let carbonSlider = NutritionSettingSlider(
-            title: "탄수화물",
-            sliderThumbColor: .carbonText,
-            sliderBackgroundColor: .carbonText.withAlphaComponent(0.1),
-            maximumValueRelay: targetCaloriesRelayForCarbonProtein
-        )
-        
-        let proteinSlider = NutritionSettingSlider(
-            title: "단백질",
-            sliderThumbColor: .proteinText,
-            sliderBackgroundColor: .proteinText.withAlphaComponent(0.1),
-            maximumValueRelay: targetCaloriesRelayForCarbonProtein
-        )
-        
-        let fatSlider = NutritionSettingSlider(
-            title: "지방",
-            sliderThumbColor: .fatText,
-            sliderBackgroundColor: .fatText.withAlphaComponent(0.1),
-            maximumValueRelay: targetCaloriesRelayForFat
-        )
-        
-        let estimatedDailyCalorieView = EstimatedDailyCalorieView(title: "하루 권장 섭취 칼로리")
+//        let carbonSlider = NutritionSettingSlider(
+//            title: "탄수화물",
+//            sliderThumbColor: .carbonText,
+//            sliderBackgroundColor: .carbonText.withAlphaComponent(0.1),
+//            maximumValueRelay: targetCaloriesRelayForCarbonProtein
+//        )
+//        
+//        let proteinSlider = NutritionSettingSlider(
+//            title: "단백질",
+//            sliderThumbColor: .proteinText,
+//            sliderBackgroundColor: .proteinText.withAlphaComponent(0.1),
+//            maximumValueRelay: targetCaloriesRelayForCarbonProtein
+//        )
+//        
+//        let fatSlider = NutritionSettingSlider(
+//            title: "지방",
+//            sliderThumbColor: .fatText,
+//            sliderBackgroundColor: .fatText.withAlphaComponent(0.1),
+//            maximumValueRelay: targetCaloriesRelayForFat
+//        )
         
         let nutritionGuideView = NutritionGuideView()
         
-        let nextButton = TitledButton(
-            title: "입력 완료",
-            style: .init(
-                backgroundColor: nil,
-                titleColor: .white,
-                borderColor: nil,
-                gradientColors: [.systemGreen, .systemGreen.withAlphaComponent(0.5)]
-            )
-        )
+        
         nextButton.snp.makeConstraints { make in
             make.height.equalTo(44)
         }
         
+        resetButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
+        
+        
+        
+        [editNutritionInfoView, resetButton, nutritionGuideView, nextButton].forEach(mainStackView.addArrangedSubview)
+        
+        
+        
+//        viewModel.targetCaloriesRelay
+//            .map { CGFloat($0 / 4) }
+//            .bind(to: self.targetCaloriesRelayForCarbonProtein)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.targetCaloriesRelay
+//            .map { CGFloat($0 / 9) }
+//            .bind(to: self.targetCaloriesRelayForFat)
+//            .disposed(by: disposeBag)
+        
+//        carbonSlider.userValueRelay
+//            .map { $0 * 4 }
+//            .bind(to: viewModel.userCarbonRelay)
+//            .disposed(by: disposeBag)
+//        
+//        proteinSlider.userValueRelay
+//            .map { $0 * 4 }
+//            .bind(to: viewModel.userProteinRelay)
+//            .disposed(by: disposeBag)
+//        
+//        fatSlider.userValueRelay
+//            .map { $0 * 9 }
+//            .bind(to: viewModel.userFatRelay)
+//            .disposed(by: disposeBag)
+        
+//        viewModel.userCarbonRelay
+//            .map { Float($0 / 4) }
+//            .bind(to: carbonSlider.displayValueRelay)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.userProteinRelay
+//            .map { Float($0 / 4) }
+//            .bind(to: proteinSlider.displayValueRelay)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.userFatRelay
+//            .map { Float($0 / 9) }
+//            .bind(to: fatSlider.displayValueRelay)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.userCarbonRelay
+//            .map { Int($0 / 4) }
+//            .bind(to: carbonSlider.weightRelay)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.userProteinRelay
+//            .map { Int($0 / 4) }
+//            .bind(to: proteinSlider.weightRelay)
+//            .disposed(by: disposeBag)
+//        
+//        viewModel.userFatRelay
+//            .map { Int($0 / 9) }
+//            .bind(to: fatSlider.weightRelay)
+//            .disposed(by: disposeBag)
+//
+    }
+    
+    private func setBinding() {
         nextButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 self?.inputCompleted.accept(())
             })
             .disposed(by: disposeBag)
         
-        [carbonSlider, proteinSlider, fatSlider, estimatedDailyCalorieView, resetButton, nutritionGuideView, nextButton].forEach(mainStackView.addArrangedSubview)
+        resetButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self = self else { return }
+                editNutritionInfoView.setCarbonText(text: String(format: "%.0f", initialCarbon))
+                editNutritionInfoView.setProteinText(text: String(format: "%.0f", initialProtein))
+                editNutritionInfoView.setFatText(text: String(format: "%.0f", initialFat))
+            })
+            .disposed(by: disposeBag)
         
         Observable.combineLatest(viewModel.targetCaloriesRelay, viewModel.goalTypeRelay, viewModel.dataRelay)
             .subscribe(onNext: { [weak self] calories, goal, data in
                 guard let self = self else { return }
                 
-                var carbon: Float = 4
-                var protein: Float = 4
-                var fat: Float = 9
+                var carbon: Double = 0
+                var protein: Double = 0
+                var fat: Double = 0
                 
                 switch goal {
                 case .diet:
-                    protein = protein * Float(data.weight ?? 0) * 2
-                    fat = Float(calories) * 0.2
-                    carbon = Float(calories) - protein - fat
+                    protein = (data.weight ?? 0) * 2
+                    fat = calories * 0.2 / 9
+                    carbon = (calories - protein * 4 - fat * 9) / 4
                 case .bulkUp:
-                    protein = protein * Float(data.weight ?? 0) * 2
-                    fat = Float(calories) * 0.2
-                    carbon = Float(calories) - protein - fat
+                    protein = (data.weight ?? 0) * 2
+                    fat = calories * 0.2 / 9
+                    carbon = (calories - protein * 4 - fat * 9) / 4
                 case .maintain:
-                    protein = protein * Float(data.weight ?? 0) * 1.7
-                    fat = Float(calories) * 0.2
-                    carbon = Float(calories) - protein - fat
+                    protein = (data.weight ?? 0) * 1.7
+                    fat = calories * 0.2
+                    carbon = (calories - protein * 4 - fat * 9) / 4
                 case .none:
                     break
                 }
                 
-                self.initialCarbon = carbon
-                self.initialProtein = protein
-                self.initialFat = fat
+                initialCarbon = carbon
+                initialProtein = protein
+                initialFat = fat
                 
-                self.viewModel.userCarbonRelay.accept(carbon)
-                self.viewModel.userProteinRelay.accept(protein)
-                self.viewModel.userFatRelay.accept(fat)
+                editNutritionInfoView.setCarbonText(text: String(format: "%.0f", carbon))
+                editNutritionInfoView.setProteinText(text: String(format: "%.0f", protein))
+                editNutritionInfoView.setFatText(text: String(format: "%.0f", fat))
             })
             .disposed(by: disposeBag)
         
         viewModel.targetCaloriesRelay
-            .map { "일일 \($0)kcal 기준으로\n 탄수화물, 단백질, 지방 비율을 결정합니다." }
+            .map { "일일 \(String(format: "%.0f", $0))kcal 기준으로\n 탄수화물, 단백질, 지방 비율을 결정합니다." }
             .bind(to: self.subtitleLabel.rx.text)
             .disposed(by: disposeBag)
         
-        viewModel.targetCaloriesRelay
-            .map { CGFloat($0 / 4) }
-            .bind(to: self.targetCaloriesRelayForCarbonProtein)
-            .disposed(by: disposeBag)
-        
-        viewModel.targetCaloriesRelay
-            .map { CGFloat($0 / 9) }
-            .bind(to: self.targetCaloriesRelayForFat)
-            .disposed(by: disposeBag)
-        
-        carbonSlider.userValueRelay
-            .map { $0 * 4 }
+        editNutritionInfoView.carbonRelay
             .bind(to: viewModel.userCarbonRelay)
             .disposed(by: disposeBag)
         
-        proteinSlider.userValueRelay
-            .map { $0 * 4 }
+        editNutritionInfoView.proteinRelay
             .bind(to: viewModel.userProteinRelay)
             .disposed(by: disposeBag)
         
-        fatSlider.userValueRelay
-            .map { $0 * 9 }
+        editNutritionInfoView.fatRelay
             .bind(to: viewModel.userFatRelay)
             .disposed(by: disposeBag)
         
-        viewModel.userCarbonRelay
-            .map { Float($0 / 4) }
-            .bind(to: carbonSlider.displayValueRelay)
-            .disposed(by: disposeBag)
-        
-        viewModel.userProteinRelay
-            .map { Float($0 / 4) }
-            .bind(to: proteinSlider.displayValueRelay)
-            .disposed(by: disposeBag)
-        
-        viewModel.userFatRelay
-            .map { Float($0 / 9) }
-            .bind(to: fatSlider.displayValueRelay)
-            .disposed(by: disposeBag)
-        
-        viewModel.userCarbonRelay
-            .map { Int($0 / 4) }
-            .bind(to: carbonSlider.weightRelay)
-            .disposed(by: disposeBag)
-        
-        viewModel.userProteinRelay
-            .map { Int($0 / 4) }
-            .bind(to: proteinSlider.weightRelay)
-            .disposed(by: disposeBag)
-        
-        viewModel.userFatRelay
-            .map { Int($0 / 9) }
-            .bind(to: fatSlider.weightRelay)
-            .disposed(by: disposeBag)
-        
-        Observable.combineLatest(
-            viewModel.userCarbonRelay,
-            viewModel.userProteinRelay,
-            viewModel.userFatRelay
-        ) { carbon, protein, fat -> Int in
-            return Int(carbon + protein + fat)
-        }
-        .bind(to: estimatedDailyCalorieView.calorieRelay)
-        .disposed(by: disposeBag)
-        
-        resetButton.rx.tap
-            .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
-                self.viewModel.userCarbonRelay.accept(self.initialCarbon)
-                self.viewModel.userProteinRelay.accept(self.initialProtein)
-                self.viewModel.userFatRelay.accept(self.initialFat)
-            })
-            .disposed(by: disposeBag)
+//        Observable.combineLatest(
+//            viewModel.userCarbonRelay,
+//            viewModel.userProteinRelay,
+//            viewModel.userFatRelay
+//        ) { carbon, protein, fat -> Double in
+//            let carbonCal = carbon * 4
+//            let proteinCal = protein * 4
+//            let fatCal = fat * 9
+//            return Double(carbonCal + proteinCal + fatCal)
+//        }
+//        .bind(to: estimatedDailyCalorieView.calorieRelay)
+//        .disposed(by: disposeBag)
     }
 
 }

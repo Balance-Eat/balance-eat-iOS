@@ -90,9 +90,9 @@ class TutorialPageViewController: UIViewController {
                     targetCalorie: viewModel.targetCaloriesRelay.value,
                     targetSmi: data.targetSmi,
                     targetFatPercentage: data.targetFatPercentage,
-                    targetCarbohydrates: (Double(viewModel.userCarbonRelay.value) / 4),
-                    targetProtein: (Double(viewModel.userProteinRelay.value) / 4),
-                    targetFat: (Double(viewModel.userFatRelay.value) / 9),
+                    targetCarbohydrates: (Double(viewModel.userCarbonRelay.value)),
+                    targetProtein: (Double(viewModel.userProteinRelay.value)),
+                    targetFat: (Double(viewModel.userFatRelay.value)),
                     providerId: nil,
                     providerType: nil
                 )

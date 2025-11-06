@@ -20,7 +20,7 @@ struct UserResponseDTO: Codable {
     let smi: Double?
     let fatPercentage: Double?
     let targetWeight: Double
-    let targetCalorie: Int
+    let targetCalorie: Double
     let targetSmi: Double?
     let targetFatPercentage: Double?
     let targetCarbohydrates: Double?

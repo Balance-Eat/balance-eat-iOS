@@ -30,7 +30,7 @@ final class EstimatedDailyCalorieView: UIView {
         return label
     }()
     
-    let calorieRelay: PublishRelay<Int> = PublishRelay<Int>()
+    let calorieRelay: PublishRelay<Double> = PublishRelay<Double>()
     let disposeBag = DisposeBag()
     
     init(title: String) {
@@ -45,7 +45,7 @@ final class EstimatedDailyCalorieView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func formatNumberWithComma(_ number: Int) -> String {
+    private func formatNumberWithComma(_ number: Double) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         return formatter.string(from: NSNumber(value: number)) ?? ""
@@ -92,7 +92,7 @@ final class EstimatedDailyCalorieView: UIView {
     private func setUpBinding() {
         calorieRelay.subscribe(onNext: { [weak self] calorie in
             guard let self = self else { return }
-            self.setCalorieLabelText(self.formatNumberWithComma(calorie))
+            self.setCalorieLabelText(String(format: "%.0f", calorie))
         })
         .disposed(by: disposeBag)
     }

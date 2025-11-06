@@ -21,7 +21,7 @@ struct UserDTO: Codable {
     let smi: Double?
     let fatPercentage: Double?
     let targetWeight: Double?
-    let targetCalorie: Int?
+    let targetCalorie: Double?
     let targetSmi: Double?
     let targetFatPercentage: Double?
     let targetCarbohydrates: Double?
@@ -30,7 +30,7 @@ struct UserDTO: Codable {
     let providerId: String?
     let providerType: String?
     
-    init(id: Int? = nil, uuid: String, name: String, gender: Gender, age: Int, height: Double, weight: Double, goalType: GoalType, email: String?, activityLevel: ActivityLevel?, smi: Double?, fatPercentage: Double?, targetWeight: Double?, targetCalorie: Int?, targetSmi: Double?, targetFatPercentage: Double?, targetCarbohydrates: Double?, targetProtein: Double?, targetFat: Double?, providerId: String?, providerType: String?) {
+    init(id: Int? = nil, uuid: String, name: String, gender: Gender, age: Int, height: Double, weight: Double, goalType: GoalType, email: String?, activityLevel: ActivityLevel?, smi: Double?, fatPercentage: Double?, targetWeight: Double?, targetCalorie: Double?, targetSmi: Double?, targetFatPercentage: Double?, targetCarbohydrates: Double?, targetProtein: Double?, targetFat: Double?, providerId: String?, providerType: String?) {
         self.id = id
         self.uuid = uuid
         self.name = name

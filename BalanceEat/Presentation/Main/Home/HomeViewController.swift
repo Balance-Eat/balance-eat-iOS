@@ -263,7 +263,7 @@ class HomeViewController: BaseViewController<HomeViewModel> {
         
         todayCalorieView.update(
             currentCalorie: Int(currentCalorie),
-            targetCalorie: viewModel.userResponseRelay.value?.targetCalorie ?? 0,
+            targetCalorie: Int(viewModel.userResponseRelay.value?.targetCalorie ?? 0),
             currentCarbohydrate: Int(currentCarbonhydrate),
             targetCarbohydrate: Int(viewModel.userResponseRelay.value?.targetCarbohydrates ?? 0),
             currentProtein: Int(currentProtein),
