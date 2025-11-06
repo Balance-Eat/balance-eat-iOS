@@ -126,10 +126,6 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
                 initialProtein = protein
                 initialFat = fat
                 
-                viewModel.userCarbonRelay.accept(carbon)
-                viewModel.userProteinRelay.accept(protein)
-                viewModel.userFatRelay.accept(fat)
-                
                 editNutritionInfoView.setCarbonText(text: String(format: "%.0f", carbon))
                 editNutritionInfoView.setProteinText(text: String(format: "%.0f", protein))
                 editNutritionInfoView.setFatText(text: String(format: "%.0f", fat))
@@ -223,9 +219,9 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
         resetButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                viewModel.userCarbonRelay.accept(initialCarbon)
-                viewModel.userProteinRelay.accept(initialProtein)
-                viewModel.userFatRelay.accept(initialFat)
+                editNutritionInfoView.setCarbonText(text: String(format: "%.0f", initialCarbon))
+                editNutritionInfoView.setProteinText(text: String(format: "%.0f", initialProtein))
+                editNutritionInfoView.setFatText(text: String(format: "%.0f", initialFat))
             })
             .disposed(by: disposeBag)
     }
