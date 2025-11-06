@@ -289,7 +289,7 @@ class TargetInfoViewController: UIViewController {
     
     private func currentWeightView() -> UIView {
         let view = UIView()
-        view.backgroundColor = .systemGray6
+        view.backgroundColor = .cyan.withAlphaComponent(0.3)
         view.layer.cornerRadius = 8
         
         let titleLabel = UILabel()

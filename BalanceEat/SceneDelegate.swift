@@ -26,16 +26,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let getUserUUIDResult = useCase.getUserUUID()
         let navigationController: UINavigationController
         
-        switch getUserUUIDResult {
-        case .success(let uuid):
-            print("uuid: \(uuid)")
-            let mainViewController = MainViewController(uuid: uuid)
-            navigationController = UINavigationController(rootViewController: mainViewController)
-            
-        case .failure(let error):
-            let onboardingViewController = OnboardingStartViewController()
-            navigationController = UINavigationController(rootViewController: onboardingViewController)
-        }
+        
+        let onboardingViewController = OnboardingStartViewController()
+        navigationController = UINavigationController(rootViewController: onboardingViewController)
+        
+//        switch getUserUUIDResult {
+//        case .success(let uuid):
+//            print("uuid: \(uuid)")
+//            let mainViewController = MainViewController(uuid: uuid)
+//            navigationController = UINavigationController(rootViewController: mainViewController)
+//            
+//        case .failure(let error):
+//            let onboardingViewController = OnboardingStartViewController()
+//            navigationController = UINavigationController(rootViewController: onboardingViewController)
+//        }
 //        let loginViewController = LoginViewController()
 //        let navigationController = UINavigationController(rootViewController: loginViewController)
         
