@@ -48,6 +48,8 @@ class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewModel> {
     
     private let menuEditedWarningView = MenuEditedWarningView()
     
+    private var bottomConstraint: Constraint?
+    
     private let nameRelay: BehaviorRelay<String> = BehaviorRelay(value: "")
     private let genderRelay: BehaviorRelay<Gender> = BehaviorRelay(value: .none)
     private let ageRelay: BehaviorRelay<Int> = BehaviorRelay(value: 0)
@@ -72,6 +74,8 @@ class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewModel> {
         
         setUpView()
         setBinding()
+        setUpKeyboardDismissGesture()
+        observeKeyboard()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -91,6 +95,10 @@ class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewModel> {
     private func setUpView() {
         topContentView.snp.makeConstraints { make in
             make.height.equalTo(0)
+        }
+        
+        scrollView.snp.makeConstraints { make in
+            self.bottomConstraint = make.bottom.equalToSuperview().inset(0).constraint
         }
         
         mainStackView.snp.remakeConstraints { make in
@@ -340,6 +348,46 @@ class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewModel> {
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
         dismiss(animated: true)
+    }
+    
+    private func setUpKeyboardDismissGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    private func observeKeyboard() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+    }
+
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let frame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let keyboardHeight = frame.height
+        
+        bottomConstraint?.update(inset: keyboardHeight)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        bottomConstraint?.update(inset: 0)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
 }
 
