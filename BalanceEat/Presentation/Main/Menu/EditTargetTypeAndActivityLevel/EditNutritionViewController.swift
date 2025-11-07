@@ -185,6 +185,10 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
                 
                 let goal = viewModel.selectedGoalRelay.value
                 let activityLevel = viewModel.selectedActivityLevel.value
+                let targetCarbonCal = viewModel.userCarbonRelay.value * 4
+                let targetProteinCal = viewModel.userProteinRelay.value * 4
+                let targetFatCal = viewModel.userFatRelay.value * 9
+                let targetCalorie = targetCarbonCal + targetProteinCal + targetFatCal
                 
                 let userDTO = UserDTO(
                     id: userData.id ,
@@ -200,7 +204,7 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
                     smi: userData.smi,
                     fatPercentage: userData.fatPercentage,
                     targetWeight: userData.targetWeight,
-                    targetCalorie: viewModel.targetCaloriesRelay.value,
+                    targetCalorie: targetCalorie,
                     targetSmi: userData.targetSmi,
                     targetFatPercentage: userData.targetFatPercentage,
                     targetCarbohydrates: viewModel.userCarbonRelay.value,

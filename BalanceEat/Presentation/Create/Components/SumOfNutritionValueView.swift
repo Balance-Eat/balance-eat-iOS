@@ -133,4 +133,8 @@ final class SumOfNutritionValueView: UIView {
             .bind(to: subTitleLabel.rx.text)
             .disposed(by: disposeBag)
     }
+    
+    func editSubtitleText(_ text: String) {
+        subTitleLabel.text = text
+    }
 }

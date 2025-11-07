@@ -47,6 +47,7 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
         super.viewWillAppear(animated)
         
         Task {
+            await viewModel.getUser()
             await viewModel.getMonthlyDiets()
         }
     }
@@ -134,6 +135,15 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
         todayAteMealLogListView.goToDietButtonTapRelay
             .subscribe(onNext: { [weak self] in
                 self?.goToDiet()
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.userDataRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] userData in
+                guard let self else { return }
+                
+                sumOfNutritionValueView.editSubtitleText("목표 : \(String(format: "%.0f", userData?.targetCalorie ?? 0))kcal")
             })
             .disposed(by: disposeBag)
     }
