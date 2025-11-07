@@ -490,6 +490,7 @@ final class EditAgeField: UIView {
         textField.placeholder = "나이"
         textField.clearButtonMode = .whileEditing
         textField.textAlignment = .center
+        textField.keyboardType = .decimalPad
         return textField
     }()
     private let subTitleLabel: UILabel = {
@@ -576,6 +577,7 @@ final class EditHeightField: UIView {
         textField.placeholder = "키"
         textField.clearButtonMode = .whileEditing
         textField.textAlignment = .center
+        textField.keyboardType = .decimalPad
         return textField
     }()
     private let subTitleLabel: UILabel = {
