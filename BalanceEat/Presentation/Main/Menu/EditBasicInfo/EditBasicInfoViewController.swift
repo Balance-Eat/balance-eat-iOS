@@ -443,15 +443,21 @@ final class EditNameField: UIView {
             .subscribe(onNext: { [weak self] text in
                 guard let self else { return }
                 
-                if text.count > 15 {
-                    let limitedText = String(text.prefix(15))
+                let pattern = "[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]"
+                        let filteredText = text.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+                        
+                        
+                
+                let limitedText = String(filteredText.prefix(15))
+                
+                if self.textField.text != limitedText {
                     self.textField.text = limitedText
                 }
                 
-                let textCount = "\(text.count > 15 ? 15 : text.count)/15"
+                let textCount = "\(limitedText.count)/15"
                 self.textCountLabel.text = textCount
                 
-                textRelay.accept(text)
+                textRelay.accept(limitedText)
             })
             .disposed(by: disposeBag)
         
