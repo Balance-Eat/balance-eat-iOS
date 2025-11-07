@@ -55,7 +55,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     
     /// (Calorie, Carbon, Protein, Fat)
     private let cellNutritionRelay = BehaviorRelay<[String: (Double, Double, Double, Double)]>(value: [:])
-    let cellServingSizeRelay = BehaviorRelay<[String: Double]>(value: [:])
+    let cellIntakeRelay = BehaviorRelay<[String: Double]>(value: [:])
     
     let deletedFoodItem = PublishRelay<DietFoodData>()
     private let disposeBag = DisposeBag()
@@ -189,12 +189,14 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             })
             .disposed(by: cell.disposeBag)
         
-        cell.servingSizeRelay
-            .subscribe(onNext: { [weak self] servingSize in
+        cell.intakeRelay
+            .subscribe(onNext: { [weak self] intake in
                 guard let self else { return }
-                var dict = self.cellServingSizeRelay.value
-                dict[String(foodItem.id)] = servingSize
-                self.cellServingSizeRelay.accept(dict)
+                var dict = self.cellIntakeRelay.value
+                dict[String(foodItem.id)] = intake
+                self.cellIntakeRelay.accept(dict)
+                
+                
             })
             .disposed(by: cell.disposeBag)
         
@@ -275,7 +277,7 @@ final class AddedFoodCell: UITableViewCell {
     }()
     
     let nutritionRelay = BehaviorRelay<(Double, Double, Double, Double)>(value: (0,0,0,0))
-    let servingSizeRelay = BehaviorRelay<Double>(value: 0)
+    let intakeRelay = BehaviorRelay<Double>(value: 0)
     let closeButtonTapped = PublishRelay<Void>()
     
     var disposeBag = DisposeBag()
@@ -390,7 +392,7 @@ final class AddedFoodCell: UITableViewCell {
             .bind(to: closeButtonTapped)
             .disposed(by: disposeBag)
         
-        stepperView.amountSizeRelay
+        stepperView.intakeRelay
             .subscribe(onNext: { [weak self] amount in
                 guard let self else { return }
                 guard let foodData = self.foodData else { return }
@@ -401,7 +403,7 @@ final class AddedFoodCell: UITableViewCell {
                 nutritionalInfoView.proteinRelay.accept(foodData.protein * ratio)
                 nutritionalInfoView.fatRelay.accept(foodData.fat * ratio)
                 
-                servingSizeRelay.accept(amount)
+                intakeRelay.accept(amount)
             })
             .disposed(by: disposeBag)
         

@@ -21,7 +21,7 @@ final class StepperView: UIView {
     var intake: Double = 0
     var servingSize: Double = 1
     let stepperModeRelay: BehaviorRelay<StepperMode> = .init(value: .servingSize)
-    let amountSizeRelay: BehaviorRelay<Double> = .init(value: 0)
+    let intakeRelay: BehaviorRelay<Double> = .init(value: 0)
     private let disposeBag = DisposeBag()
     
     private let mainStackView: UIStackView = {
@@ -150,7 +150,7 @@ final class StepperView: UIView {
                     return Double(text) ?? 0
                 }
             }
-            .bind(to: amountSizeRelay)
+            .bind(to: intakeRelay)
             .disposed(by: disposeBag)
     }
 }

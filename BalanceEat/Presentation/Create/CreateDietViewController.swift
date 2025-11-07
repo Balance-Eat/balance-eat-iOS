@@ -245,6 +245,10 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             })
             .disposed(by: disposeBag)
         
+        addedFoodListView.cellIntakeRelay
+            .bind(to: viewModel.intakeRelay)
+            .disposed(by: disposeBag)
+        
         saveButton.rx.tap
             .subscribe(
                 onNext: { [weak self] in
@@ -256,7 +260,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     let mealTypeString = mealType.rawValue
                     if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
                         let dietFoods = diet.items.map { [weak self] food in
-                            if let servingSize = self?.addedFoodListView.cellServingSizeRelay.value[String(food.id)] {
+                            if let servingSize = self?.addedFoodListView.cellIntakeRelay.value[String(food.id)] {
                                 return FoodItemForCreateDietDTO(
                                     foodId: food.id,
                                     intake: servingSize
@@ -330,8 +334,28 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     }
     
     @objc private func backButtonTapped() {
-        navigationController?.popViewController(animated: true)
-        dismiss(animated: true)
+        if viewModel.dataChangedRelay.value {
+            let alert = UIAlertController(
+                title: "알림",
+                message: "변경된 식단이 저장되지 않았습니다. 나가시겠습니까?",
+                preferredStyle: .alert
+            )
+            
+            let confirmAction = UIAlertAction(title: "확인", style: .default) { [weak self] _ in
+                guard let self else { return }
+                
+                goToBack()
+            }
+            
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+            
+            alert.addAction(confirmAction)
+            alert.addAction(cancelAction)
+            
+            present(alert, animated: true, completion: nil)
+        } else {
+            goToBack()
+        }
     }
     
     private func isToday(_ date: Date) -> Bool {
@@ -343,5 +367,10 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "yyyy년 MM월 dd일 '식단'"
         return formatter.string(from: date)
+    }
+    
+    private func goToBack() {
+        navigationController?.popViewController(animated: true)
+        dismiss(animated: true)
     }
 }

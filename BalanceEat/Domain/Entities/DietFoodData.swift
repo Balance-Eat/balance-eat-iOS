@@ -9,7 +9,7 @@ import Foundation
 struct DietFoodData: Equatable {
     let id: Int
     let name: String
-    let intake: Double
+    var intake: Double
     let servingSize: Double
     let unit: String
     let calories: Double

@@ -14,9 +14,11 @@ final class CreateDietViewModel: BaseViewModel {
     private let userUseCase: UserUseCaseProtocol
     
     var originalDietFoodDatas: [String: DietData] = [:]
+    
     let dietFoodsRelay = BehaviorRelay<[String: DietData]>(value: [:])
+    let intakeRelay = BehaviorRelay<[String: Double]>(value: [:])
     let currentFoodsRelay = BehaviorRelay<DietData?>(value: nil)
-    let createDietSuccessRelay = PublishRelay<Void>()
+    let saveDietSuccessRelay = PublishRelay<Void>()
     let mealTimeRelay = BehaviorRelay<MealType>(value: .breakfast)
     let dateRelay: BehaviorRelay<Date> = BehaviorRelay(value: Date())
     
@@ -83,12 +85,21 @@ final class CreateDietViewModel: BaseViewModel {
             })
             .disposed(by: disposeBag)
         
-        Observable.combineLatest(currentFoodsRelay, mealTimeRelay)
-            .subscribe(onNext: { [weak self] currentFoods, mealTime in
+        Observable.combineLatest(currentFoodsRelay, mealTimeRelay, intakeRelay)
+            .subscribe(onNext: { [weak self] currentFoods, mealTime, intake in
                 guard let self else { return }
                 
+                var isIntakeCorrect: Bool = true
+                
+                for item in currentFoods?.items ?? [] {
+                    if item.intake != intake[String(item.id)] {
+                        isIntakeCorrect = false
+                        break
+                    }
+                }
+                
                 let mealTimeKey = mealTime.rawValue
-                if originalDietFoodDatas[mealTimeKey]?.items == currentFoods?.items {
+                if originalDietFoodDatas[mealTimeKey]?.items == currentFoods?.items && isIntakeCorrect {
                     dataChangedRelay.accept(false)
                 } else {
                     dataChangedRelay.accept(true)
@@ -96,7 +107,7 @@ final class CreateDietViewModel: BaseViewModel {
             })
             .disposed(by: disposeBag)
         
-        createDietSuccessRelay
+        saveDietSuccessRelay
             .subscribe(onNext: { [weak self] _ in
                 guard let self else { return }
                 
@@ -119,7 +130,7 @@ final class CreateDietViewModel: BaseViewModel {
         
         switch createDietResponse {
         case .success(_):
-            createDietSuccessRelay.accept(())
+            saveDietSuccessRelay.accept(())
             loadingRelay.accept(false)
             toastMessageRelay.accept("식단 저장을 완료했습니다.")
         case .failure(let failure):
@@ -135,8 +146,8 @@ final class CreateDietViewModel: BaseViewModel {
         
         switch updateDietResponse {
         case .success(_):
+            saveDietSuccessRelay.accept(())
             loadingRelay.accept(false)
-            
             toastMessageRelay.accept("식단 수정을 완료했습니다.")
         case .failure(let failure):
             toastMessageRelay.accept(failure.localizedDescription)
