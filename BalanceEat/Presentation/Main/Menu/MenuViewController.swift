@@ -184,7 +184,7 @@ final class ProfileInfoView: UIView {
     }()
     
     private lazy var mainStack: UIStackView = {
-        let stack = UIStackView(arrangedSubviews: [profileImageView, textStack])
+        let stack = UIStackView(arrangedSubviews: [textStack])
         stack.axis = .horizontal
         stack.spacing = 12
         stack.alignment = .center
