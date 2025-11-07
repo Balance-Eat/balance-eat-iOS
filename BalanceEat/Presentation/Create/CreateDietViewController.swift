@@ -180,6 +180,11 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                             
                             let mealTime = viewModel.mealTimeRelay.value
                             var current = viewModel.dietFoodsRelay.value
+                            
+                            if current[mealTime.rawValue]?.items.contains(where: { $0.id == foodData.id }) == true {
+                                viewModel.toastMessageRelay.accept("이미 선택된 음식입니다.")
+                                return
+                            }
                             current[
                                 mealTime.rawValue,
                                 default: DietData(
