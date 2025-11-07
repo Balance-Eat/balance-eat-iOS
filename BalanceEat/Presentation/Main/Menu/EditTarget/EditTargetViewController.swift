@@ -634,6 +634,9 @@ final class EditTargetItemView: UIView {
 }
 
 final class EditNutritionInfoView: UIView {
+    private let carbonField = InputFieldWithIcon(placeholder: "", unit: "g")
+    private let proteinField = InputFieldWithIcon(placeholder: "", unit: "g")
+    private let fatField = InputFieldWithIcon(placeholder: "", unit: "g")
     private let calorieLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 24, weight: .bold)
@@ -641,10 +644,15 @@ final class EditNutritionInfoView: UIView {
         label.textAlignment = .center
         return label
     }()
-    
-    private let carbonField = InputFieldWithIcon(placeholder: "", unit: "g")
-    private let proteinField = InputFieldWithIcon(placeholder: "", unit: "g")
-    private let fatField = InputFieldWithIcon(placeholder: "", unit: "g")
+    private let explanationLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .gray
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        label.text = "예상 일일 소모 칼로리를 토대로 추천드리는 값입니다.\n예상 일일 소모 칼로리와 다를 수 있습니다."
+        return label
+    }()
     
     let carbonRelay: BehaviorRelay<Double> = .init(value: 0)
     let proteinRelay: BehaviorRelay<Double> = .init(value: 0)
@@ -674,7 +682,7 @@ final class EditNutritionInfoView: UIView {
         let proteinTitledInputInfoView = TitledInputInfoView(title: "단백질", inputView: proteinField, useBalanceEatWrapper: false)
         let fatTitledInputInfoView = TitledInputInfoView(title: "지방", inputView: fatField, useBalanceEatWrapper: false)
         
-        [carbonTitledInputInfoView, proteinTitledInputInfoView, fatTitledInputInfoView, calorieLabel].forEach(mainStackView.addArrangedSubview(_:))
+        [carbonTitledInputInfoView, proteinTitledInputInfoView, fatTitledInputInfoView, calorieLabel, explanationLabel].forEach(mainStackView.addArrangedSubview(_:))
         
         addSubview(mainStackView)
         
