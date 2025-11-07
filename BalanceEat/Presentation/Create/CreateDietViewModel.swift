@@ -99,7 +99,7 @@ final class CreateDietViewModel: BaseViewModel {
                 }
                 
                 let mealTimeKey = mealTime.rawValue
-                if originalDietFoodDatas[mealTimeKey]?.items == currentFoods?.items && isIntakeCorrect {
+                if originalDietFoodDatas[mealTimeKey]?.items ?? [] == currentFoods?.items ?? [] && isIntakeCorrect {
                     dataChangedRelay.accept(false)
                 } else {
                     dataChangedRelay.accept(true)
@@ -199,6 +199,7 @@ final class CreateDietViewModel: BaseViewModel {
     private func resetCurrentDiet() {
         let mealTypeString = mealTimeRelay.value.rawValue
         
+        originalDietFoodDatas[mealTypeString] = nil
         var current = dietFoodsRelay.value
         current[mealTypeString] = nil
         dietFoodsRelay.accept(current)
