@@ -1043,6 +1043,7 @@ final class AchievementRateCell: UITableViewCell {
     
     private func setUpView() {
         self.backgroundColor = .clear
+        selectionStyle = .none
         
         let labelStack = UIStackView(arrangedSubviews: [dateLabel, percentLabel])
         labelStack.axis = .horizontal
