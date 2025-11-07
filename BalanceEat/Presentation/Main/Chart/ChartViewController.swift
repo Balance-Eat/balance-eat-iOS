@@ -42,6 +42,12 @@ class ChartViewController: BaseViewController<ChartViewModel> {
         getUser()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        getStats()
+    }
+    
     private func setupHeaderView() {
         topContentView.addSubview(headerView)
         headerView.snp.makeConstraints { make in
@@ -82,14 +88,7 @@ class ChartViewController: BaseViewController<ChartViewModel> {
             .bind { [weak self] in
                 guard let self else { return }
                 
-                let period = headerView.periodRelay.value
-                Task {
-                    await self.viewModel.getStats(period: period)
-                    
-                    DispatchQueue.main.async { [weak self] in
-                        self?.refreshControl.endRefreshing()
-                    }
-                }
+                getStats()
             }
             .disposed(by: disposeBag)
         
@@ -128,6 +127,17 @@ class ChartViewController: BaseViewController<ChartViewModel> {
     private func getUser() {
         Task {
             await viewModel.getUser()
+        }
+    }
+    
+    private func getStats() {
+        let period = headerView.periodRelay.value
+        Task {
+            await self.viewModel.getStats(period: period)
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.refreshControl.endRefreshing()
+            }
         }
     }
 }
