@@ -454,6 +454,22 @@ final class EditNameField: UIView {
                 textRelay.accept(text)
             })
             .disposed(by: disposeBag)
+        
+        textField.rx.controlEvent(.editingDidBegin)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                self.layer.borderColor = UIColor.systemBlue.cgColor
+            })
+            .disposed(by: disposeBag)
+
+        textField.rx.controlEvent(.editingDidEnd)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                self.layer.borderColor = UIColor.systemGray4.cgColor
+            })
+            .disposed(by: disposeBag)
     }
     
     func setText(text: String) {
@@ -524,6 +540,22 @@ final class EditAgeField: UIView {
                 textRelay.accept(text)
             })
             .disposed(by: disposeBag)
+        
+        textField.rx.controlEvent(.editingDidBegin)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                self.layer.borderColor = UIColor.systemBlue.cgColor
+            })
+            .disposed(by: disposeBag)
+
+        textField.rx.controlEvent(.editingDidEnd)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                self.layer.borderColor = UIColor.systemGray4.cgColor
+            })
+            .disposed(by: disposeBag)
     }
     
     func setText(text: String) {
@@ -592,6 +624,22 @@ final class EditHeightField: UIView {
                 }
                 
                 textRelay.accept(text)
+            })
+            .disposed(by: disposeBag)
+        
+        textField.rx.controlEvent(.editingDidBegin)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                self.layer.borderColor = UIColor.systemBlue.cgColor
+            })
+            .disposed(by: disposeBag)
+
+        textField.rx.controlEvent(.editingDidEnd)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                self.layer.borderColor = UIColor.systemGray4.cgColor
             })
             .disposed(by: disposeBag)
     }
