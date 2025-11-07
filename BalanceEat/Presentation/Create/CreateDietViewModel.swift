@@ -20,6 +20,7 @@ final class CreateDietViewModel: BaseViewModel {
     let mealTimeRelay = BehaviorRelay<MealType>(value: .breakfast)
     let dateRelay: BehaviorRelay<Date> = BehaviorRelay(value: Date())
     
+    let dataChangedRelay: BehaviorRelay<Bool> = BehaviorRelay(value: false)
     let deleteButtonIsEnabledRelay: BehaviorRelay<Bool> = BehaviorRelay(value: false)
     
     init(dietUseCase: DietUseCaseProtocol, userUseCase: UserUseCaseProtocol, dietDatas: [DietData], date: Date) {
@@ -49,6 +50,17 @@ final class CreateDietViewModel: BaseViewModel {
     }
     
     private func setBinding() {
+        dietFoodsRelay
+            .subscribe(onNext: { [weak self] dietFoods in
+                guard let self else { return }
+                
+                let mealTimeKey = mealTimeRelay.value.rawValue
+                let currentFoods = dietFoods[mealTimeKey]
+                                
+                currentFoodsRelay.accept(currentFoods)
+            })
+            .disposed(by: disposeBag)
+        
         mealTimeRelay
             .subscribe(onNext: { [weak self] mealTime in
                 guard let self else { return }
@@ -71,7 +83,18 @@ final class CreateDietViewModel: BaseViewModel {
             })
             .disposed(by: disposeBag)
         
-        
+        Observable.combineLatest(currentFoodsRelay, mealTimeRelay)
+            .subscribe(onNext: { [weak self] currentFoods, mealTime in
+                guard let self else { return }
+                
+                let mealTimeKey = mealTime.rawValue
+                if originalDietFoodDatas[mealTimeKey]?.items == currentFoods?.items {
+                    dataChangedRelay.accept(false)
+                } else {
+                    dataChangedRelay.accept(true)
+                }
+            })
+            .disposed(by: disposeBag)
     }
     
     func createDiet(mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async {
@@ -124,7 +147,8 @@ final class CreateDietViewModel: BaseViewModel {
     
     func deleteFood(food: DietFoodData) {
         var current = dietFoodsRelay.value
-        let key = mealTimeRelay.value.title
+        let key = mealTimeRelay.value.rawValue
+        
         if var items = current[key]?.items {
             if let index = items.firstIndex(where: { $0.id == food.id }) {
                 items.remove(at: index)

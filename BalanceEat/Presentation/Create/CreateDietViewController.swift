@@ -224,6 +224,18 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 })
             .disposed(by: disposeBag)
         
+        Observable.combineLatest(viewModel.currentFoodsRelay, viewModel.dataChangedRelay)
+            .subscribe(onNext: { [weak self] foods, dataChanged in
+                guard let self else { return }
+                
+                if dataChanged && foods?.items.count ?? 0 > 0 {
+                    saveButton.isEnabled = true
+                } else {
+                    saveButton.isEnabled = false
+                }
+            })
+            .disposed(by: disposeBag)
+        
         viewModel.currentFoodsRelay
             .map { $0?.items.count ?? 0 > 0 }
             .bind(to: saveButton.rx.isEnabled)

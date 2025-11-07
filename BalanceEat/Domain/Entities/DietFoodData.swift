@@ -6,7 +6,7 @@
 //
 import Foundation
 
-struct DietFoodData {
+struct DietFoodData: Equatable {
     let id: Int
     let name: String
     let intake: Double
@@ -16,4 +16,8 @@ struct DietFoodData {
     let carbohydrates: Double
     let protein: Double
     let fat: Double
+    
+    static func == (lhs: DietFoodData, rhs: DietFoodData) -> Bool {
+        return lhs.id == rhs.id && lhs.intake == rhs.intake
+    }
 }
