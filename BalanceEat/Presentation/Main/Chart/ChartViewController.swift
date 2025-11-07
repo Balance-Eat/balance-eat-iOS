@@ -938,8 +938,24 @@ final class AchievementRateListView: BalanceEatContentView {
                 
                 var achievementRateStats: [AchievementRateStat] = []
                 
-                for stat in stats {
+                for (index, stat) in stats.enumerated() {
+                    var date: String = ""
                     var percent: Double = 0.0
+                    
+                    let isLast = index == stats.count - 1
+                    
+                    if isLast {
+                        switch stat.type {
+                        case .daily:
+                            date = "오늘"
+                        case .weekly:
+                            date = "이번 주"
+                        case .monthly:
+                            date = "이번 달"
+                        }
+                    } else {
+                        date = extractMonthAndDay(period: stat.type, from: stat.date)
+                    }
                                         
                     switch nutritionStatType {
                     case .calorie:
@@ -954,7 +970,7 @@ final class AchievementRateListView: BalanceEatContentView {
 //                        percent = (stat.weight / (userData?.targetWeight ?? 1)) * 100
                     }
                     
-                    let achievementRateStat = AchievementRateStat(date: extractMonthAndDay(from: stat.date), percent: percent)
+                    let achievementRateStat = AchievementRateStat(date: date, percent: percent)
                     achievementRateStats.append(achievementRateStat)
                 }
                 
@@ -982,10 +998,15 @@ final class AchievementRateListView: BalanceEatContentView {
             .disposed(by: disposeBag)
     }
     
-    private func extractMonthAndDay(from dateString: String) -> String {
+    private func extractMonthAndDay(period: Period, from dateString: String) -> String {
         let components = dateString.split(separator: "-")
         guard components.count == 3 else { return "" }
-        return "\(components[1])-\(components[2])"
+        
+        if period == .monthly {
+            return "\(components[0].suffix(2))-\(components[1])"
+        } else {
+            return "\(components[1])-\(components[2])"
+        }
     }
 }
 
