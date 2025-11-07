@@ -95,6 +95,21 @@ final class CreateDietViewModel: BaseViewModel {
                 }
             })
             .disposed(by: disposeBag)
+        
+        createDietSuccessRelay
+            .subscribe(onNext: { [weak self] _ in
+                guard let self else { return }
+                
+                let mealTime = mealTimeRelay.value.rawValue
+                originalDietFoodDatas[mealTime] = currentFoodsRelay.value
+                
+                var current = dietFoodsRelay.value
+                current[mealTime] = currentFoodsRelay.value
+                dietFoodsRelay.accept(current)
+                
+                deleteButtonIsEnabledRelay.accept(true)
+            })
+            .disposed(by: disposeBag)
     }
     
     func createDiet(mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String) async {
