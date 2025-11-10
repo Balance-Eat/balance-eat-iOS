@@ -539,12 +539,13 @@ final class EditAgeField: UIView {
             .subscribe(onNext: { [weak self] text in
                 guard let self else { return }
                 
+                var limitedText: String = text
                 if text.count > 3 {
-                    let limitedText = String(text.prefix(3))
+                    limitedText = String(text.prefix(3))
                     self.textField.text = limitedText
                 }
                 
-                textRelay.accept(text)
+                textRelay.accept(limitedText)
             })
             .disposed(by: disposeBag)
         
@@ -626,12 +627,13 @@ final class EditHeightField: UIView {
             .subscribe(onNext: { [weak self] text in
                 guard let self else { return }
                 
+                var limitedText: String = text
                 if text.count > 3 {
-                    let limitedText = String(text.prefix(3))
+                    limitedText = String(text.prefix(3))
                     self.textField.text = limitedText
                 }
                 
-                textRelay.accept(text)
+                textRelay.accept(limitedText)
             })
             .disposed(by: disposeBag)
         
@@ -684,6 +686,21 @@ final class BMIView: UIView {
         label.textColor = .lightGray
         return label
     }()
+    private let bmiSourceLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .lightGray
+        label.text = "BMI 기준: 세계보건기구(WHO) 권장 지침 참고"
+        return label
+    }()
+    private let sourceButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("출처 보기", for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 12, weight: .medium)
+        button.addTarget(nil, action: #selector(openSource), for: .touchUpInside)
+        return button
+    }()
     
     let userDataRelay: BehaviorRelay<UserData?> = .init(value: nil)
     let heightRelay: BehaviorRelay<Double> = .init(value: 0)
@@ -721,16 +738,27 @@ final class BMIView: UIView {
             return stackView
         }()
         
-        [leftStackView, rightStackView].forEach(addSubview(_:))
+        [leftStackView, rightStackView, bmiSourceLabel, sourceButton].forEach(addSubview(_:))
         
         leftStackView.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(16)
-            make.centerY.equalToSuperview()
+            make.top.equalToSuperview().inset(16)
         }
         
         rightStackView.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(16)
-            make.top.bottom.equalToSuperview().inset(16)
+            make.top.equalToSuperview().offset(12)
+        }
+        
+        bmiSourceLabel.snp.makeConstraints { make in
+            make.top.equalTo(rightStackView.snp.bottom).offset(20)
+            make.leading.equalToSuperview().inset(16)
+        }
+        
+        sourceButton.snp.makeConstraints { make in
+            make.top.equalTo(bmiSourceLabel.snp.bottom)
+            make.leading.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().inset(8)
         }
     }
     
@@ -759,4 +787,8 @@ final class BMIView: UIView {
         
     }
     
+    @objc private func openSource() {
+        guard let url = URL(string: "https://www.who.int/news-room/fact-sheets/detail/obesity-and-overweight") else { return }
+        UIApplication.shared.open(url)
+    }
 }
