@@ -265,7 +265,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     let mealTypeString = mealType.rawValue
                     if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
                         let dietFoods = diet.items.map { [weak self] food in
-                            if let servingSize = self?.addedFoodListView.cellIntakeRelay.value[String(food.id)] {
+                            if let servingSize = self?.addedFoodListView.cellIntakeRelay.value[food.id] {
                                 return FoodItemForCreateDietDTO(
                                     foodId: food.id,
                                     intake: servingSize

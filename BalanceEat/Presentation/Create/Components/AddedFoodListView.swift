@@ -55,7 +55,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
     
     /// (Calorie, Carbon, Protein, Fat)
     private let cellNutritionRelay = BehaviorRelay<[String: (Double, Double, Double, Double)]>(value: [:])
-    let cellIntakeRelay = BehaviorRelay<[String: Double]>(value: [:])
+    let cellIntakeRelay = BehaviorRelay<[Int: Double]>(value: [:])
     
     let deletedFoodItem = PublishRelay<DietFoodData>()
     private let disposeBag = DisposeBag()
@@ -193,7 +193,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
             .subscribe(onNext: { [weak self] intake in
                 guard let self else { return }
                 var dict = self.cellIntakeRelay.value
-                dict[String(foodItem.id)] = intake
+                dict[foodItem.id] = intake
                 self.cellIntakeRelay.accept(dict)
                 
                 

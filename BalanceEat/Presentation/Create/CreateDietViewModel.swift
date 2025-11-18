@@ -16,7 +16,7 @@ final class CreateDietViewModel: BaseViewModel {
     var originalDietFoodDatas: [String: DietData] = [:]
     
     let dietFoodsRelay = BehaviorRelay<[String: DietData]>(value: [:])
-    let intakeRelay = BehaviorRelay<[String: Double]>(value: [:])
+    let intakeRelay = BehaviorRelay<[Int: Double]>(value: [:])
     let currentFoodsRelay = BehaviorRelay<DietData?>(value: nil)
     let saveDietSuccessRelay = PublishRelay<Void>()
     let mealTimeRelay = BehaviorRelay<MealType>(value: .breakfast)
@@ -92,7 +92,7 @@ final class CreateDietViewModel: BaseViewModel {
                 var isIntakeCorrect: Bool = true
                 
                 for item in currentFoods?.items ?? [] {
-                    if item.intake != intake[String(item.id)] {
+                    if item.intake != intake[item.id] {
                         isIntakeCorrect = false
                         break
                     }
@@ -112,6 +112,19 @@ final class CreateDietViewModel: BaseViewModel {
                 guard let self else { return }
                 
                 let mealTime = mealTimeRelay.value.rawValue
+                
+                let updatedItems = currentFoodsRelay.value?.items.map { [weak self] item in
+                    guard let self else { return item }
+                    var newItem = item
+                    newItem.intake = intakeRelay.value[item.id] ?? 0
+                    return newItem
+                }
+                
+                var currentFoods = currentFoodsRelay.value
+                currentFoods?.items = updatedItems ?? []
+                
+                currentFoodsRelay.accept(currentFoods)
+                
                 originalDietFoodDatas[mealTime] = currentFoodsRelay.value
                 
                 var current = dietFoodsRelay.value
