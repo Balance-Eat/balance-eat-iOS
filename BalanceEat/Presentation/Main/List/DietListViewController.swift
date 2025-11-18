@@ -79,6 +79,16 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
             })
             .disposed(by: disposeBag)
         
+        headerView.showNewMonth
+            .subscribe(onNext: { [weak self] (year, month) in
+                guard let self else { return }
+                
+                Task {
+                    await self.viewModel.getMonthlyDiets(year: year, month: month)
+                }
+            })
+            .disposed(by: disposeBag)
+        
         dietEmptyInfoView.buttonTappedRelay
             .subscribe(onNext: { [weak self] in
                 self?.goToDiet()
@@ -146,6 +156,10 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
                 sumOfNutritionValueView.editSubtitleText("목표 : \(String(format: "%.0f", userData?.targetCalorie ?? 0))kcal")
             })
             .disposed(by: disposeBag)
+        
+        viewModel.ateDateRelay
+            .bind(to: headerView.markedDatesRelay)
+            .disposed(by: disposeBag)
     }
     
     private func getDatas() {
@@ -175,7 +189,7 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
 }
 
 
-final class DietListHeaderView: UIView {
+final class DietListHeaderView: UIView, UICalendarSelectionSingleDateDelegate, UICalendarViewDelegate {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 18, weight: .bold)
@@ -221,15 +235,16 @@ final class DietListHeaderView: UIView {
         return view
     }()
     
-    private let datePicker: UIDatePicker = {
-        let datePicker = UIDatePicker()
-        datePicker.datePickerMode = .date
-        datePicker.preferredDatePickerStyle = .inline
-        datePicker.locale = Locale(identifier: "ko_KR")
-        datePicker.translatesAutoresizingMaskIntoConstraints = false
-        return datePicker
+    private let calendarView: UICalendarView = {
+        let calendar = UICalendarView()
+        calendar.translatesAutoresizingMaskIntoConstraints = false
+        calendar.locale = Locale(identifier: "ko_KR")
+        return calendar
     }()
     
+    
+    let markedDatesRelay: BehaviorRelay<Set<Date>> = .init(value: [])
+    let showNewMonth: PublishRelay<(Int, Int)> = .init()
     let selectedDate = BehaviorRelay<Date>(value: Date())
     let goToTodayButtonTap = PublishSubject<Void>()
     private let disposeBag = DisposeBag()
@@ -273,13 +288,16 @@ final class DietListHeaderView: UIView {
         rightSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
         rightSpacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
+        let selection = UICalendarSelectionSingleDate(delegate: self)
+        calendarView.selectionBehavior = selection
+        calendarView.delegate = self
         
         let dateStackView = UIStackView(arrangedSubviews: [previousDateButton, dateLabel, nextDateButton])
         dateStackView.axis = .horizontal
         dateStackView.distribution = .equalSpacing
         dateStackView.alignment = .center
         
-        [titleStackView, dateStackView, separatorView, datePicker].forEach { mainStackview.addArrangedSubview($0) }
+        [titleStackView, dateStackView, separatorView, calendarView].forEach { mainStackview.addArrangedSubview($0) }
        
         addSubview(mainStackview)
         
@@ -302,16 +320,12 @@ final class DietListHeaderView: UIView {
     private func setBinding() {
         openCalendarButton.isSelectedRelay
             .map { !$0 }
-            .bind(to: datePicker.rx.isHidden)
+            .bind(to: calendarView.rx.isHidden)
             .disposed(by: disposeBag)
         
         openCalendarButton.isSelectedRelay
             .map { !$0 }
             .bind(to: separatorView.rx.isHidden)
-            .disposed(by: disposeBag)
-        
-        datePicker.rx.date
-            .bind(to: selectedDate)
             .disposed(by: disposeBag)
         
         goToTodayButton.rx.tap
@@ -343,7 +357,25 @@ final class DietListHeaderView: UIView {
         selectedDate
             .subscribe(onNext: { [weak self] date in
                 guard let self else { return }
-                datePicker.setDate(date, animated: true)
+                
+                let comps = Calendar.current.dateComponents([.year, .month, .day], from: date)
+                
+                if let selection = self.calendarView.selectionBehavior as? UICalendarSelectionSingleDate {
+                    selection.setSelected(comps, animated: true)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        markedDatesRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                
+                let dateComponentsArray = self.markedDatesRelay.value.map { date in
+                    Calendar.current.dateComponents([.year, .month, .day], from: date)
+                }
+                
+                self.calendarView.reloadDecorations(forDateComponents: dateComponentsArray, animated: false)
             })
             .disposed(by: disposeBag)
     }
@@ -360,6 +392,37 @@ final class DietListHeaderView: UIView {
         outputFormatter.locale = Locale(identifier: "ko_KR")
         
         return outputFormatter.string(from: date)
+    }
+    
+    func dateSelection(_ selection: UICalendarSelectionSingleDate,
+                       didSelectDate dateComponents: DateComponents?) {
+        guard let comps = dateComponents,
+              let date = Calendar.current.date(from: comps) else { return }
+        
+        selectedDate.accept(date)
+    }
+    
+    func calendarView(_ calendarView: UICalendarView, decorationFor dateComponents: DateComponents) -> UICalendarView.Decoration? {
+        let calendar = Calendar.current
+        
+        guard let date = calendar.date(from: dateComponents) else { return nil }
+        
+        let isTarget = markedDatesRelay.value.contains { targetDate in
+            calendar.isDate(targetDate, inSameDayAs: date)
+        }
+        
+        if isTarget {
+            return .default(color: .red)
+        }
+        
+        return nil
+    }
+    
+    func calendarView(_ calendarView: UICalendarView, didChangeVisibleDateComponentsFrom previousDateComponents: DateComponents) {
+        guard let year = calendarView.visibleDateComponents.year,
+              let month = calendarView.visibleDateComponents.month else { return }
+        
+        showNewMonth.accept((year, month))
     }
 }
 

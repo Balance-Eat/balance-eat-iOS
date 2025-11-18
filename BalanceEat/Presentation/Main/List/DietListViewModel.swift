@@ -16,6 +16,7 @@ final class DietListViewModel: BaseViewModel {
     let monthDataCache = BehaviorRelay<[String: [String: [DietData]] ]>(value: [:])
     let selectedDate = BehaviorRelay<Date>(value: Date())
     let selectedDayDataCache = BehaviorRelay<[DietData]>(value: [])
+    let ateDateRelay = BehaviorRelay<Set<Date>>(value: [])
 
     init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {
         self.userUseCase = userUseCase
@@ -53,11 +54,15 @@ final class DietListViewModel: BaseViewModel {
         loadingRelay.accept(false)
     }
     
-    func getMonthlyDiets() async {
+    func getMonthlyDiets(year: Int = 0, month: Int = 0) async {
         let calendar = Calendar.current
-        let year = calendar.component(.year, from: selectedDate.value)
-        let month = calendar.component(.month, from: selectedDate.value)
+        let year = year == 0 ? calendar.component(.year, from: selectedDate.value) : year
+        let month = month == 0 ? calendar.component(.month, from: selectedDate.value) : month
         let userId = getUserId()
+        
+        if monthDataCache.value.keys.contains("\(year)-\(month)") {
+            return
+        }
         
         loadingRelay.accept(true)
         let response = await dietUseCase.getMonthlyDiet(year: year, month: month, userId: userId)
@@ -69,6 +74,10 @@ final class DietListViewModel: BaseViewModel {
             
             for diet in dietDTOs {
                 dailyDict[diet.consumeDate, default: []].append(diet.toDietData())
+                
+                var current = ateDateRelay.value
+                current.insert(convertToDate(diet.consumeDate) ?? Date())
+                ateDateRelay.accept(current)
             }
             
             currentCache[yearMonthKey] = dailyDict
@@ -109,5 +118,15 @@ final class DietListViewModel: BaseViewModel {
                 }
             })
             .disposed(by: disposeBag)
+        
+        
+    }
+    
+    private func convertToDate(_ string: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.date(from: string)
     }
 }
