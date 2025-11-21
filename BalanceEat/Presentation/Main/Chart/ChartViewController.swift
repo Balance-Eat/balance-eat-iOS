@@ -861,7 +861,8 @@ final class StatsGraphView: BalanceEatContentView {
                 lineChartView.xAxis.labelPosition = .bottom
                 
                 lineChartView.rightAxis.enabled = false
-                lineChartView.animate(xAxisDuration: 1.0, yAxisDuration: 1.0)
+                lineChartView.notifyDataSetChanged() 
+//                lineChartView.animate(xAxisDuration: 1.0, yAxisDuration: 1.0)
                 
                 let count = Double(labels.count)
                 lineChartView.xAxis.axisMinimum = -0.5
