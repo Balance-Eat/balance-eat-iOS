@@ -184,6 +184,71 @@ enum DietEndPoints: Endpoint {
     }
 }
 
+enum NotificationEndpoints: Endpoint {
+    case create(notificationRequestDTO: NotificationRequestDTO, userId: String)
+    case updateActivation(isActive: Bool, deviceId: Int, userId: String)
+    case getCurrentDevice(userId: String, agentId: String)
+    
+    var path: String {
+        switch self {
+        case .create:
+            return "/v1/notification-devices"
+        case .updateActivation(_, let deviceId, _):
+            return "/v1/notification-devices/\(deviceId)/activation"
+        case .getCurrentDevice:
+            return "/v1/notification-devices/current"
+        }
+    }
+    
+    var method: Alamofire.HTTPMethod {
+        switch self {
+        case .create:
+            return .post
+        case .updateActivation:
+            return .patch
+        case .getCurrentDevice:
+            return .get
+        }
+    }
+    
+    var parameters: [String : Any?]? {
+        switch self {
+        case .create(let notificationRequestDTO, _):
+            return [
+                "agentId": notificationRequestDTO.agentId,
+                "osType": notificationRequestDTO.osType,
+                "deviceName": notificationRequestDTO.deviceName,
+                "isActive": notificationRequestDTO.isActive
+            ]
+        case .updateActivation(let isActive, _, _):
+            return [
+                "isActive": isActive
+            ]
+        default:
+            return nil
+        }
+    }
+    
+    var queryParameters: [String : Any]? {
+        switch self {
+        default:
+            return nil
+        }
+    }
+    
+    var headers: Alamofire.HTTPHeaders? {
+        switch self {
+        case .create(_, let userId), .updateActivation(_, _, let userId):
+            return ["X-USER-ID": userId]
+        case .getCurrentDevice(let userId, let agentId):
+            return [
+                "X-USER-ID": userId,
+                "X-Device-Agent-Id": agentId
+            ]
+        }
+    }
+}
+
 enum FoodEndPoints: Endpoint {
     case create(createFoodDTO: CreateFoodDTO)
     case search(foodName: String, page: Int, size: Int)

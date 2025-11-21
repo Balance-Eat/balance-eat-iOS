@@ -12,6 +12,9 @@
 		4965DEAA2E5220BD006D7CDA /* UUIDV7 in Frameworks */ = {isa = PBXBuildFile; productRef = 4965DEA92E5220BD006D7CDA /* UUIDV7 */; };
 		4965DEB52E5619D5006D7CDA /* BalanceEat.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4965DEAD2E560D89006D7CDA /* BalanceEat.xcdatamodeld */; };
 		4972B0242EA917B500E8F770 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 4972B0232EA917B500E8F770 /* DGCharts */; };
+		497CB8AA2ECFFC8300F0E8FC /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 497CB8A92ECFFC8300F0E8FC /* FirebaseCore */; };
+		497CB8AC2ECFFC8300F0E8FC /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 497CB8AB2ECFFC8300F0E8FC /* FirebaseMessaging */; };
+		497CB8AE2ECFFCB600F0E8FC /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 497CB8AD2ECFFCB600F0E8FC /* FirebaseAnalytics */; };
 		49808CFF2E51F9D6003ACBCF /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = 49808CFE2E51F9D6003ACBCF /* Alamofire */; };
 		49BF00AB2E1E301500876EC3 /* FlexLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AA2E1E301500876EC3 /* FlexLayout */; };
 		49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00AD2E1E303200876EC3 /* PinLayout */; };
@@ -99,12 +102,15 @@
 			files = (
 				492980422E8CCA8B00CC1FA9 /* Toast in Frameworks */,
 				4965DEAA2E5220BD006D7CDA /* UUIDV7 in Frameworks */,
+				497CB8AC2ECFFC8300F0E8FC /* FirebaseMessaging in Frameworks */,
 				490295E12E51F79200BE288B /* Alamofire in Frameworks */,
 				49BF00B12E1E309400876EC3 /* RxCocoa in Frameworks */,
 				4972B0242EA917B500E8F770 /* DGCharts in Frameworks */,
 				49BF00AE2E1E303200876EC3 /* PinLayout in Frameworks */,
 				49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */,
+				497CB8AE2ECFFCB600F0E8FC /* FirebaseAnalytics in Frameworks */,
 				49808CFF2E51F9D6003ACBCF /* Alamofire in Frameworks */,
+				497CB8AA2ECFFC8300F0E8FC /* FirebaseCore in Frameworks */,
 				49BF011C2E1F4CE500876EC3 /* SnapKit in Frameworks */,
 				49BF00B52E1E309400876EC3 /* RxSwift in Frameworks */,
 				49BF00B32E1E309400876EC3 /* RxRelay in Frameworks */,
@@ -183,6 +189,9 @@
 				4965DEA92E5220BD006D7CDA /* UUIDV7 */,
 				492980412E8CCA8B00CC1FA9 /* Toast */,
 				4972B0232EA917B500E8F770 /* DGCharts */,
+				497CB8A92ECFFC8300F0E8FC /* FirebaseCore */,
+				497CB8AB2ECFFC8300F0E8FC /* FirebaseMessaging */,
+				497CB8AD2ECFFCB600F0E8FC /* FirebaseAnalytics */,
 			);
 			productName = BanlanceEat;
 			productReference = 49BF00722E1E2FC900876EC3 /* BalanceEat.app */;
@@ -276,6 +285,7 @@
 				4965DEA82E5220BD006D7CDA /* XCRemoteSwiftPackageReference "UUIDV7" */,
 				492980402E8CCA8B00CC1FA9 /* XCRemoteSwiftPackageReference "Toast-Swift" */,
 				4972B0222EA917B500E8F770 /* XCRemoteSwiftPackageReference "Charts" */,
+				497CB8A82ECFFC8300F0E8FC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 49BF00732E1E2FC900876EC3 /* Products */;
@@ -357,6 +367,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BalanceEat/BalanceEat.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 697ACQDW6C;
@@ -367,6 +378,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -387,6 +399,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = BalanceEat/BalanceEat.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 697ACQDW6C;
@@ -397,6 +410,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -669,6 +683,14 @@
 				minimumVersion = 5.1.0;
 			};
 		};
+		497CB8A82ECFFC8300F0E8FC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.6.0;
+			};
+		};
 		49808CFD2E51F9D6003ACBCF /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -738,6 +760,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4972B0222EA917B500E8F770 /* XCRemoteSwiftPackageReference "Charts" */;
 			productName = DGCharts;
+		};
+		497CB8A92ECFFC8300F0E8FC /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 497CB8A82ECFFC8300F0E8FC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		497CB8AB2ECFFC8300F0E8FC /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 497CB8A82ECFFC8300F0E8FC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		497CB8AD2ECFFCB600F0E8FC /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 497CB8A82ECFFC8300F0E8FC /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
 		};
 		49808CFE2E51F9D6003ACBCF /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
