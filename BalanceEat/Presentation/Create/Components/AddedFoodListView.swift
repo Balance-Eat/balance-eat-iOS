@@ -75,7 +75,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(AddedFoodCell.self, forCellReuseIdentifier: "AddedFoodCell")
-        tableView.rowHeight = 210
+        tableView.rowHeight = 220
         tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
         
@@ -241,6 +241,13 @@ final class AddedFoodCell: UITableViewCell {
         return label
     }()
     
+    private let foodServingSizeLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .systemGray
+        return label
+    }()
+    
     let closeButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(systemName: "xmark"), for: .normal)
@@ -311,6 +318,7 @@ final class AddedFoodCell: UITableViewCell {
         containerView.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.1).cgColor
         
         containerView.addSubview(foodNameLabel)
+        containerView.addSubview(foodServingSizeLabel)
         containerView.addSubview(twoOptionPickerView)
         containerView.addSubview(stepperView)
         containerView.addSubview(closeButton)
@@ -335,6 +343,11 @@ final class AddedFoodCell: UITableViewCell {
             make.width.height.equalTo(24)
         }
         
+        foodServingSizeLabel.snp.makeConstraints { make in
+            make.top.equalTo(foodNameLabel.snp.bottom).offset(8)
+            make.leading.equalToSuperview().inset(16)
+        }
+        
         let inputStackView = UIStackView(arrangedSubviews: [twoOptionPickerView, stepperView])
         inputStackView.axis = .horizontal
         inputStackView.distribution = .equalSpacing
@@ -343,7 +356,7 @@ final class AddedFoodCell: UITableViewCell {
         addSubview(inputStackView)
         
         inputStackView.snp.makeConstraints { make in
-            make.top.equalTo(foodNameLabel.snp.bottom).offset(8)
+            make.top.equalTo(foodServingSizeLabel.snp.bottom).offset(8)
             make.leading.trailing.equalToSuperview().inset(16)
         }
         
@@ -358,6 +371,7 @@ final class AddedFoodCell: UITableViewCell {
         prepareForReuse()
         
         foodNameLabel.text = foodData.name
+        foodServingSizeLabel.text = "1인분: \(foodData.servingSize)\(foodData.unit)"
         self.intake = foodData.intake
         self.foodData = foodData
         
