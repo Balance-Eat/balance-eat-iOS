@@ -336,6 +336,15 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         viewModel.deleteButtonIsEnabledRelay
             .bind(to: deleteButton.rx.isEnabled)
             .disposed(by: disposeBag)
+        
+        viewModel.saveDietSuccessRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] _ in
+                guard let self else { return }
+                
+                navigationController?.popViewController(animated: true)
+            })
+            .disposed(by: disposeBag)
     }
     
     @objc private func backButtonTapped() {
