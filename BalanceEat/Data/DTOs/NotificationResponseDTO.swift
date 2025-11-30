@@ -14,4 +14,15 @@ struct NotificationResponseDTO: Codable {
     let osType: String
     let deviceName: String
     let isActive: Bool
+    
+    func DTOToModel() -> NotificationData {
+        NotificationData(
+            id: self.id,
+            userId: self.userId,
+            agentId: self.agentId,
+            osType: self.osType,
+            deviceName: self.deviceName,
+            isActive: self.isActive
+        )
+    }
 }

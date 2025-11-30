@@ -34,10 +34,22 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         subtitle: "목표와 일상 활동량 조정"
     )
     
+    
+    private let pushNotiSwitchMenuItemView = MenuItemView(
+        icon: UIImage(systemName: "bell.fill") ?? UIImage(),
+        iconTintColor: .systemYellow,
+        iconBackgroundColor: .systemYellow.withAlphaComponent(0.15),
+        title: "푸쉬 알림",
+        subtitle: "앱 내에서 발생하는 푸쉬 알림 설정",
+        isSwitch: true
+    )
+    
     init() {
         let userRepository = UserRepository()
         let userUseCase = UserUseCase(repository: userRepository)
-        let vm = MenuViewModel(userUseCase: userUseCase)
+        let notificationRepository = NotificationRepository()
+        let notificationUseCase = NotificationUseCase(repository: notificationRepository)
+        let vm = MenuViewModel(userUseCase: userUseCase, notificationUseCase: notificationUseCase)
         super.init(viewModel: vm)
     }
     
@@ -73,7 +85,11 @@ class MenuViewController: BaseViewController<MenuViewModel> {
             targetTypeAndActivityLevelMenuItemView
         ])
         
-        [personalInfoMenuStackView].forEach(mainStackView.addArrangedSubview)
+        let notificationMenuStackView = createMenuStackView(title: "알림", views: [
+            pushNotiSwitchMenuItemView
+        ])
+        
+        [personalInfoMenuStackView, notificationMenuStackView].forEach(mainStackView.addArrangedSubview)
         
         
     }
@@ -82,9 +98,23 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         viewModel.userRelay
             .compactMap { $0 }
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] user in
+            .subscribe(onNext: { [weak self] (user: UserData) in
                 guard let self else { return }
                 self.updateUIForUserData(user: user)
+                
+                let agentId = UserDefaultsManager.shared.getString(forKey: .agentId)
+                Task {
+                    await self.viewModel.getNotificationCurrentDevice(userId: String(user.id), agentId: agentId)
+                }
+            })
+            .disposed(by: disposeBag)
+        
+        viewModel.notificationRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] notification in
+                guard let self else { return }
+                
+                pushNotiSwitchMenuItemView.setSwitchValue(notification?.isActive ?? false)
             })
             .disposed(by: disposeBag)
         
@@ -108,6 +138,26 @@ class MenuViewController: BaseViewController<MenuViewModel> {
             
             navigationController?.pushViewController(EditTargetTypeAndActivityLevelViewController(userData: userData), animated: true)
         }
+        
+        pushNotiSwitchMenuItemView.switchRelay
+            .subscribe(onNext: { [weak self] isOn in
+                guard let self else { return }
+                
+                guard let deviceId = viewModel.notificationRelay.value?.id else {
+                    print("deviceId is nil")
+                    return
+                }
+                guard let userId = viewModel.notificationRelay.value?.userId else {
+                    print("userId is nil")
+                    return
+                }
+                
+                Task {
+                    await self.viewModel.updateNotificationActivation(isActive: isOn, deviceId: deviceId, userId: String(userId))
+                }
+            })
+            .disposed(by: disposeBag)
+            
     }
     
     private func getDatas() {
@@ -279,6 +329,20 @@ final class MenuItemView: UIView {
         return stack
     }()
     
+    private let arrowImageView: UIImageView = {
+        let arrowImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
+        arrowImageView.contentMode = .scaleAspectFit
+        arrowImageView.tintColor = .secondaryLabel
+        return arrowImageView
+    }()
+    
+    private let toggleSwitch: UISwitch = {
+        let switchView = UISwitch()
+        switchView.translatesAutoresizingMaskIntoConstraints = false
+        switchView.onTintColor = .systemBlue
+        return switchView
+    }()
+    
     private lazy var mainStack: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [iconContentView, textStack])
         stack.axis = .horizontal
@@ -287,15 +351,19 @@ final class MenuItemView: UIView {
         return stack
     }()
     
+    private let isSwitch: Bool
+    
+    let switchRelay: BehaviorRelay<Bool> = .init(value: false)
     let disposeBag = DisposeBag()
     var onTap: (() -> Void)?
     
-    init(icon: UIImage, iconTintColor: UIColor, iconBackgroundColor: UIColor, title: String, subtitle: String) {
+    init(icon: UIImage, iconTintColor: UIColor, iconBackgroundColor: UIColor, title: String, subtitle: String, isSwitch: Bool = false) {
         self.icon = icon
         self.iconTintColor = iconTintColor
         self.iconBackgroundColor = iconBackgroundColor
         self.title = title
         self.subtitle = subtitle
+        self.isSwitch = isSwitch
         super.init(frame: .zero)
         
         setUpView()
@@ -344,19 +412,24 @@ final class MenuItemView: UIView {
         
         iconImageView.tintColor = iconTintColor
         
-        let arrowImageView = UIImageView(image: UIImage(systemName: "chevron.right"))
-        arrowImageView.contentMode = .scaleAspectFit
-        arrowImageView.tintColor = .secondaryLabel
-        
-        addSubview(arrowImageView)
-        
         mainStack.snp.makeConstraints { make in
             make.leading.top.bottom.equalToSuperview().inset(12)
         }
         
-        arrowImageView.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(12)
-            make.centerY.equalToSuperview()
+        if isSwitch {
+            addSubview(toggleSwitch)
+            
+            toggleSwitch.snp.makeConstraints { make in
+                make.trailing.equalToSuperview().inset(12)
+                make.centerY.equalToSuperview()
+            }
+        } else {
+            addSubview(arrowImageView)
+            
+            arrowImageView.snp.makeConstraints { make in
+                make.trailing.equalToSuperview().inset(12)
+                make.centerY.equalToSuperview()
+            }
         }
     }
     
@@ -369,5 +442,14 @@ final class MenuItemView: UIView {
                 self?.onTap?()
             })
             .disposed(by: disposeBag)
+        
+        toggleSwitch.rx.isOn
+            .bind(to: switchRelay)
+            .disposed(by: disposeBag)
+    }
+    
+    func setSwitchValue(_ isOn: Bool) {
+        toggleSwitch.isOn = isOn
     }
 }
+

@@ -8,9 +8,9 @@
 import Foundation
 
 protocol NotificationUseCaseProtocol {
-    func createNotification(notificationRequestDTO: NotificationRequestDTO, userId: String) async -> Result<NotificationResponseDTO, NetworkError>
-    func updateActivation(isActive: Bool, deviceId: Int, userId: String) async -> Result<NotificationResponseDTO, NetworkError>
-    func getCurrentDevice(userId: String, agentId: String) async -> Result<NotificationResponseDTO, NetworkError>
+    func createNotification(notificationRequestDTO: NotificationRequestDTO, userId: String) async -> Result<NotificationData, NetworkError>
+    func updateActivation(isActive: Bool, deviceId: Int, userId: String) async -> Result<NotificationData, NetworkError>
+    func getCurrentDevice(userId: String, agentId: String) async -> Result<NotificationData, NetworkError>
 }
 
 struct NotificationUseCase: NotificationUseCaseProtocol {
@@ -20,35 +20,35 @@ struct NotificationUseCase: NotificationUseCaseProtocol {
         self.repository = repository
     }
     
-    func createNotification(notificationRequestDTO: NotificationRequestDTO, userId: String) async -> Result<NotificationResponseDTO, NetworkError> {
+    func createNotification(notificationRequestDTO: NotificationRequestDTO, userId: String) async -> Result<NotificationData, NetworkError> {
         let response = await repository.createNotification(notificationRequestDTO: notificationRequestDTO, userId: userId)
         
         switch response {
         case .success(let notificationResponseDTO):
-            return .success(notificationResponseDTO)
+            return .success(notificationResponseDTO.DTOToModel())
         case .failure(let error):
             return .failure(error)
         }
         
     }
     
-    func updateActivation(isActive: Bool, deviceId: Int, userId: String) async -> Result<NotificationResponseDTO, NetworkError> {
+    func updateActivation(isActive: Bool, deviceId: Int, userId: String) async -> Result<NotificationData, NetworkError> {
         let response = await repository.updateActivation(isActive: isActive, deviceId: deviceId, userId: userId)
         
         switch response {
         case .success(let notificationResponseDTO):
-            return .success(notificationResponseDTO)
+            return .success(notificationResponseDTO.DTOToModel())
         case .failure(let error):
             return .failure(error)
         }
     }
     
-    func getCurrentDevice(userId: String, agentId: String) async -> Result<NotificationResponseDTO, NetworkError> {
+    func getCurrentDevice(userId: String, agentId: String) async -> Result<NotificationData, NetworkError> {
         let response = await repository.getCurrentDevice(userId: userId, agentId: agentId)
         
         switch response {
         case .success(let notificationResponseDTO):
-            return .success(notificationResponseDTO)
+            return .success(notificationResponseDTO.DTOToModel())
         case .failure(let error):
             return .failure(error)
         }
