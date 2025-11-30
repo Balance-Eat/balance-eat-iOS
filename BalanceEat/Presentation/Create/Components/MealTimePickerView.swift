@@ -12,9 +12,12 @@ import RxCocoa
 
 final class MealTimePickerView: UIView {
     private var selectedItemView: MealTimePickerItem?
-    private let stackView = UIStackView()
+    private let timePickerStackView = UIStackView()
+    
+    private let inputTimeView = InputTimeView()
     
     let selectedMealTimeRelay: BehaviorRelay<MealType>
+    let timeRelay: BehaviorRelay<Date> = .init(value: Date())
     
     private var itemViews: [MealType: MealTimePickerItem] = [:]
     private let disposeBag = DisposeBag()
@@ -34,18 +37,20 @@ final class MealTimePickerView: UIView {
     
     private func setUpView() {
         self.isUserInteractionEnabled = true
-        stackView.axis = .horizontal
-        stackView.spacing = 10
-        stackView.distribution = .fillEqually
-        self.addSubview(stackView)
+        timePickerStackView.axis = .horizontal
+        timePickerStackView.spacing = 10
+        timePickerStackView.distribution = .fillEqually
         
-        stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+        [timePickerStackView, inputTimeView].forEach(addSubview(_:))
+                
+        timePickerStackView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
         }
         
-        self.snp.makeConstraints { make in
-                make.height.equalTo(40)
-            }
+        inputTimeView.snp.makeConstraints { make in
+            make.top.equalTo(timePickerStackView.snp.bottom).offset(16)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
     }
     
     private func setBinding() {
@@ -55,13 +60,17 @@ final class MealTimePickerView: UIView {
                 self?.updateSelectedItem()
             })
             .disposed(by: disposeBag)
+        
+        inputTimeView.timeRelay
+            .bind(to: timeRelay)
+            .disposed(by: disposeBag)
     }
     
     private func setUpItems() {
         for mealType in [MealType.breakfast, .lunch, .dinner, .snack] {
             let item = MealTimePickerItem(mealType: mealType, isSelected: mealType == selectedMealTimeRelay.value)
             itemViews[mealType] = item
-            stackView.addArrangedSubview(item)
+            timePickerStackView.addArrangedSubview(item)
         
             
             item.tapObservable
@@ -85,6 +94,10 @@ final class MealTimePickerView: UIView {
                 selectedItemView = itemView
             }
         }
+    }
+    
+    func setTime(_ date: Date) {
+        inputTimeView.setTime(date)
     }
 }
 
@@ -186,3 +199,94 @@ final class MealTimePickerItem: UIView {
     }
 }
 
+final class InputTimeView: UIView {
+    private let label: UILabel = {
+        let label = UILabel()
+        label.text = "시간 입력"
+        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.textColor = .darkGray
+        return label
+    }()
+    
+    private let textField: UITextField = {
+        let textField = UITextField()
+        textField.font = .systemFont(ofSize: 16, weight: .semibold)
+        textField.borderStyle = .roundedRect
+        
+        textField.textColor = .black
+        return textField
+    }()
+    
+    private let timePicker = UIDatePicker()
+    private let toolbar: UIToolbar = {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        return toolbar
+    }()
+    
+    private let doneButton = UIBarButtonItem(title: "완료", style: .done, target: nil, action: nil)
+    
+    let timeRelay = BehaviorRelay<Date>(value: Date())
+    private let disposeBag = DisposeBag()
+    
+    init() {
+        super.init(frame: .zero)
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        timePicker.datePickerMode = .time
+        timePicker.preferredDatePickerStyle = .wheels
+        timePicker.locale = Locale(identifier: "ko_KR")
+        
+        toolbar.items = [doneButton]
+        
+        textField.inputView = timePicker
+        textField.inputAccessoryView = toolbar
+        
+        [label, textField].forEach(addSubview(_:))
+      
+        label.snp.makeConstraints { make in
+            make.leading.top.equalToSuperview()
+        }
+        
+        textField.snp.makeConstraints { make in
+            make.width.equalTo(68)
+            make.top.equalTo(label.snp.bottom).offset(12)
+            make.leading.bottom.equalToSuperview()
+        }
+    }
+    
+    private func setBinding() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        
+        timePicker.rx.date
+            .bind(to: timeRelay)
+            .disposed(by: disposeBag)
+        
+        timePicker.rx.date
+            .map { formatter.string(from: $0) }
+            .bind(to: textField.rx.text)
+            .disposed(by: disposeBag)
+        
+        doneButton.rx.tap
+            .bind { [weak self] in
+                guard let self else { return }
+                
+                textField.resignFirstResponder()
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    func setTime(_ date: Date) {
+        timePicker.setDate(date, animated: false)
+        timePicker.sendActions(for: .valueChanged)
+    }
+}

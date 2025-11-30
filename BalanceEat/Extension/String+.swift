@@ -9,7 +9,7 @@ import Foundation
 
 
 extension String {
-    func toDate(format: String = "yyyy-MM-dd HH:mm",
+    func toDate(format: String = "yyyy-MM-dd HH:mm:ss",
                 locale: Locale = Locale(identifier: "ko_KR"),
                 timeZone: TimeZone? = TimeZone(identifier: "Asia/Seoul")) -> Date? {
         let formatter = DateFormatter()

@@ -38,9 +38,6 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     
     private lazy var mealTimePickerView: MealTimePickerView = {
         let view = MealTimePickerView(selectedMealTimeRelay: viewModel.mealTimeRelay)
-        view.snp.makeConstraints { make in
-            make.height.equalTo(40)
-        }
         return view
     }()
     
@@ -78,6 +75,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     ]
     
     init(dietDatas: [DietData], date: Date) {
+        print("time date: \(date)")
         let userRepository = UserRepository()
         let userUseCase = UserUseCase(repository: userRepository)
         
@@ -123,11 +121,6 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         mainStackView.snp.remakeConstraints { make in
             make.edges.equalToSuperview().inset(16)
         }
-        
-        mealTimeTitledView.snp.makeConstraints { make in
-            make.height.equalTo(120)
-        }
-        
         saveButton.snp.makeConstraints { make in
             make.height.equalTo(40)
         }
@@ -163,6 +156,15 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 }
             }
             .bind(to: dateLabel.rx.text)
+            .disposed(by: disposeBag)
+        
+        viewModel.ateTimeRelay
+            .subscribe(onNext: { [weak self] ateTime in
+                guard let self else { return }
+                
+                
+                mealTimePickerView.setTime(ateTime)
+            })
             .disposed(by: disposeBag)
         
         searchInputField.textField.rx.controlEvent(.editingDidBegin)
@@ -254,13 +256,17 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             .bind(to: viewModel.intakeRelay)
             .disposed(by: disposeBag)
         
+        mealTimePickerView.timeRelay
+            .bind(to: viewModel.mealTimePickerViewTimeRelay)
+            .disposed(by: disposeBag)
+        
         saveButton.rx.tap
             .subscribe(
                 onNext: { [weak self] in
                     guard let self else { return }
                     
                     let mealType = viewModel.mealTimeRelay.value
-                    let consumedAt = viewModel.dateRelay.value.toString(format: "yyyy-MM-dd'T'HH:mm:ss")
+                    let consumedAt = mealTimePickerView.timeRelay.value.toString(format: "yyyy-MM-dd'T'HH:mm:ss")
 //                    let todayConsumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
                     let mealTypeString = mealType.rawValue
                     if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
@@ -279,7 +285,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                         }
                         
                         let userId = viewModel.getUserId()
-                        
+                                                
                         if viewModel.currentFoodsRelay.value?.id == -1 {
                             Task {
                                 await self.viewModel.createDiet(
@@ -290,7 +296,6 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                                 )
                             }
                         } else {
-                            let consumedAt = diet.consumedAt
                             Task {
                                 await self.viewModel.updateDiet(
                                     dietId: diet.id,
