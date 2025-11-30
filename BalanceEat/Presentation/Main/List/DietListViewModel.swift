@@ -60,9 +60,9 @@ final class DietListViewModel: BaseViewModel {
         let month = month == 0 ? calendar.component(.month, from: selectedDate.value) : month
         let userId = getUserId()
         
-        if monthDataCache.value.keys.contains("\(year)-\(month)") {
-            return
-        }
+//        if monthDataCache.value.keys.contains("\(year)-\(month)") {
+//            return
+//        }
         
         loadingRelay.accept(true)
         let response = await dietUseCase.getMonthlyDiet(year: year, month: month, userId: userId)
