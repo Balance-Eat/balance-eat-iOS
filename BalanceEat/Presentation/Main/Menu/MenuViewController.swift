@@ -43,6 +43,13 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         subtitle: "앱 내에서 발생하는 푸쉬 알림 설정",
         isSwitch: true
     )
+    private let remindNotiMenuItemView = MenuItemView(
+        icon: UIImage(systemName: "rectangle.and.pencil.and.ellipsis") ?? UIImage(),
+        iconTintColor: .systemMint,
+        iconBackgroundColor: .systemMint.withAlphaComponent(0.15),
+        title: "식단 미섭취 알림 추가",
+        subtitle: "사용자가 추가로 등록하는 알림 설정"
+    )
     
     init() {
         let userRepository = UserRepository()
@@ -86,7 +93,8 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         ])
         
         let notificationMenuStackView = createMenuStackView(title: "알림", views: [
-            pushNotiSwitchMenuItemView
+            pushNotiSwitchMenuItemView,
+            remindNotiMenuItemView
         ])
         
         [personalInfoMenuStackView, notificationMenuStackView].forEach(mainStackView.addArrangedSubview)
@@ -157,6 +165,12 @@ class MenuViewController: BaseViewController<MenuViewModel> {
                 }
             })
             .disposed(by: disposeBag)
+        
+        remindNotiMenuItemView.onTap = { [weak self] in
+            guard let self else { return }
+            
+            navigationController?.pushViewController(SetRemindNotiViewController(), animated: true)
+        }
             
     }
     
@@ -376,17 +390,23 @@ final class MenuItemView: UIView {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
-        self.alpha = 0.6
+        if !isSwitch {
+            self.alpha = 0.6
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-        self.alpha = 1.0
+        if !isSwitch {
+            self.alpha = 1.0
+        }
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesCancelled(touches, with: event)
-        self.alpha = 1.0
+        if !isSwitch {
+            self.alpha = 1.0
+        }
     }
     
     private func setUpView() {
