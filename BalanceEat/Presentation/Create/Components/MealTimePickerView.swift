@@ -212,6 +212,7 @@ final class InputTimeView: UIView {
         let textField = UITextField()
         textField.font = .systemFont(ofSize: 16, weight: .semibold)
         textField.borderStyle = .roundedRect
+        textField.textAlignment = .center
         
         textField.textColor = .black
         return textField
@@ -257,7 +258,7 @@ final class InputTimeView: UIView {
         }
         
         textField.snp.makeConstraints { make in
-            make.width.equalTo(68)
+            make.width.equalTo(100)
             make.top.equalTo(label.snp.bottom).offset(12)
             make.leading.bottom.equalToSuperview()
         }
@@ -265,7 +266,8 @@ final class InputTimeView: UIView {
     
     private func setBinding() {
         let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm"
+        formatter.dateFormat = "a hh:mm"
+        formatter.locale = Locale(identifier: "ko_KR")
         
         timePicker.rx.date
             .bind(to: timeRelay)
