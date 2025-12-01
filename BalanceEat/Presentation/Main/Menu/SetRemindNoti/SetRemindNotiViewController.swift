@@ -88,7 +88,11 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     }
     
     @objc private func didTapPlus() {
+        let editNotiViewController = EditNotiViewController(editNotiCase: .add)
+        editNotiViewController.modalPresentationStyle = .overCurrentContext
+        editNotiViewController.modalTransitionStyle = .crossDissolve
         
+        present(editNotiViewController, animated: true, completion: nil)
     }
     
     private func setUpKeyboardDismissGesture() {
@@ -142,12 +146,12 @@ final class RemindNotificationView: UIView {
     }()
     private let imageContainerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemBlue.withAlphaComponent(0.3)
+        view.backgroundColor = .systemBlue.withAlphaComponent(0.2)
         return view
     }()
     private let timeLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 18, weight: .bold)
+        label.font = .systemFont(ofSize: 20, weight: .bold)
         label.textColor = .black
         return label
     }()
@@ -235,9 +239,13 @@ final class RemindNotificationView: UIView {
         dayStackView.axis = .horizontal
         dayStackView.spacing = 4
         
+        dayImageView.snp.makeConstraints { make in
+            make.width.height.equalTo(14)
+        }
+        
         let infoStackView = UIStackView(arrangedSubviews: [timeLabel, memoLabel, dayStackView])
         infoStackView.axis = .vertical
-        infoStackView.spacing = 4
+        infoStackView.spacing = 8
         
         let spacer = UIView()
         spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)

@@ -5,4 +5,291 @@
 //  Created by 김견 on 12/1/25.
 //
 
-import Foundation
+import UIKit
+import SnapKit
+import RxSwift
+import RxCocoa
+
+enum EditNotiCase {
+    case add
+    case edit
+}
+
+final class EditNotiViewController: UIViewController {
+    private let editNotiCase: EditNotiCase
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 18, weight: .bold)
+        label.textColor = .black
+        return label
+    }()
+    private let exitButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "xmark"), for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.tintColor = .black
+        return button
+    }()
+    
+    private let mainStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 20
+        return stackView
+    }()
+    private let setNotiTimeView = SetNotiTimeView()
+    private lazy var notiTimeTitledInputInfoView = TitledInputInfoView(title: "알림 시간 *", inputView: setNotiTimeView, useBalanceEatWrapper: false)
+    
+    private let setNotiMemoView = SetNotiMemoView()
+    private lazy var notiMemoTitledInputInfoView = TitledInputInfoView(title: "메모 *", inputView: setNotiMemoView, useBalanceEatWrapper: false)
+    
+    private lazy var saveButton = TitledButton(
+        title: editNotiCase == .add ? "알림 추가" : "수정 완료",
+        image: UIImage(systemName: "square.and.arrow.down"),
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .white,
+            borderColor: nil,
+            gradientColors: [.systemBlue, .systemBlue.withAlphaComponent(0.5)]
+        )
+    )
+    private let cancelButton = TitledButton(
+        title: "취소",
+        style: .init(
+            backgroundColor: .lightGray.withAlphaComponent(0.1),
+            titleColor: .black,
+            borderColor: nil,
+            gradientColors: nil
+        )
+    )
+    
+    private let disposeBag = DisposeBag()
+    
+    init(editNotiCase: EditNotiCase) {
+        self.editNotiCase = editNotiCase
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setUpView()
+        setBinding()
+    }
+    
+    private func setUpView() {
+        view.backgroundColor = .black.withAlphaComponent(0.5)
+        view.layer.cornerRadius = 8
+        
+        switch editNotiCase {
+        case .add:
+            titleLabel.text = "새 알림 추가"
+        case .edit:
+            titleLabel.text = "알림 수정"
+        }
+        
+        let contentView = BalanceEatContentView()
+        
+        view.addSubview(contentView)
+        
+        contentView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(32)
+        }
+        
+        contentView.addSubview(mainStackView)
+        
+        mainStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(20)
+        }
+        
+        let titleStackView = UIStackView(arrangedSubviews: [titleLabel, exitButton])
+        titleStackView.axis = .horizontal
+        titleStackView.distribution = .equalSpacing
+        titleStackView.alignment = .center
+        titleStackView.spacing = 0
+        
+        titleStackView.snp.makeConstraints { make in
+            make.height.equalTo(32)
+        }
+        
+        saveButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
+        
+        cancelButton.snp.makeConstraints { make in
+            make.height.equalTo(44)
+        }
+        
+        [titleStackView, notiTimeTitledInputInfoView, notiMemoTitledInputInfoView, saveButton, cancelButton].forEach(mainStackView.addArrangedSubview(_:))
+    }
+    
+    private func setBinding() {
+        exitButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                dismiss(animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+        cancelButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                dismiss(animated: true)
+            })
+            .disposed(by: disposeBag)
+    }
+}
+
+final class SetNotiTimeView: UIView {
+    private let textField: UITextField = {
+        let textField = UITextField()
+        textField.font = .systemFont(ofSize: 16, weight: .semibold)
+        textField.textColor = .black
+        return textField
+    }()
+    private let timePicker = UIDatePicker()
+    private let toolbar: UIToolbar = {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        return toolbar
+    }()
+    private let doneButton = UIBarButtonItem(title: "완료", style: .done, target: nil, action: nil)
+    
+    let timeRelay = BehaviorRelay<Date>(value: Date())
+    private let disposeBag = DisposeBag()
+    
+    init() {
+        super.init(frame: .zero)
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        self.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.3).cgColor
+        self.layer.borderWidth = 1
+        self.layer.cornerRadius = 8
+        
+        timePicker.datePickerMode = .time
+        timePicker.preferredDatePickerStyle = .wheels
+        timePicker.locale = Locale(identifier: "ko_KR")
+        
+        toolbar.items = [doneButton]
+        
+        textField.inputView = timePicker
+        textField.inputAccessoryView = toolbar
+        
+        addSubview(textField)
+        
+        textField.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(16)
+        }
+    }
+    
+    private func setBinding() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "a hh:mm"
+        formatter.locale = Locale(identifier: "ko_KR")
+        
+        timePicker.rx.date
+            .bind(to: timeRelay)
+            .disposed(by: disposeBag)
+        
+        timePicker.rx.date
+            .map { formatter.string(from: $0) }
+            .bind(to: textField.rx.text)
+            .disposed(by: disposeBag)
+        
+        doneButton.rx.tap
+            .bind { [weak self] in
+                guard let self else { return }
+                
+                textField.resignFirstResponder()
+            }
+            .disposed(by: disposeBag)
+    }
+}
+
+final class SetNotiMemoView: UIView {
+    private let textFieldContainerView: UIView = {
+       let view = UIView()
+        view.layer.cornerRadius = 8
+        view.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.3).cgColor
+        view.layer.borderWidth = 1
+        return view
+    }()
+    private let textField: UITextField = {
+        let textField = UITextField()
+        textField.font = .systemFont(ofSize: 16, weight: .semibold)
+        textField.textColor = .black
+        textField.autocapitalizationType = .none
+        return textField
+    }()
+    private let textCountLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 12, weight: .regular)
+        label.textColor = .gray
+        return label
+    }()
+    
+    let textRelay: BehaviorRelay<String> = .init(value: "")
+    private let disposeBag = DisposeBag()
+    
+    init() {
+        super.init(frame: .zero)
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        textFieldContainerView.addSubview(textField)
+        [textFieldContainerView, textCountLabel].forEach(addSubview(_:))
+        
+        textFieldContainerView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+        }
+        
+        textCountLabel.snp.makeConstraints { make in
+            make.top.equalTo(textFieldContainerView.snp.bottom).offset(8)
+            make.trailing.bottom.equalToSuperview()
+        }
+        
+        textField.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(16)
+        }
+    }
+    
+    private func setBinding() {
+        textField.rx.text.orEmpty
+            .bind(to: textRelay)
+            .disposed(by: disposeBag)
+        
+        textField.rx.text.orEmpty
+            .map { [weak self] text -> String in
+                guard let self else { return "" }
+                
+                let limitedText = String(text.prefix(50))
+                self.textCountLabel.text = "\(limitedText.count)/50"
+                return limitedText
+            }
+            .bind(to: textField.rx.text)
+            .disposed(by: disposeBag)
+
+    }
+}
