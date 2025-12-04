@@ -16,6 +16,81 @@ protocol Endpoint {
     var headers: HTTPHeaders? { get }
 }
 
+enum ReminderEndPoints: Endpoint {
+    case getReminderList(userId: String)
+    case createReminder(reminderRequestDTO: ReminderRequestDTO, userId: String)
+    case getReminderDetail(reminderId: Int, userId: String)
+    case updateReminder(reminderRequestDTO: ReminderRequestDTO, reminderId: Int, userId: String)
+    case deleteReminder(reminderId: Int, userId: String)
+    case updateReminderActivation(isActive: Bool, reminderId: Int, userId: String)
+    
+    var path: String {
+        switch self {
+        case .getReminderList:
+            return "/v1/reminders"
+        case .createReminder:
+            return "/v1/reminders"
+        case .getReminderDetail(let reminderId, _):
+            return "/v1/reminders/\(reminderId)"
+        case .updateReminder(_, let reminderId, _):
+            return "/v1/reminders/\(reminderId)"
+        case .deleteReminder(let reminderId, _):
+            return "/v1/reminders\(reminderId)"
+        case .updateReminderActivation(_, let reminderId, _):
+            return "/v1/reminders/\(reminderId)/activation"
+        }
+    }
+    
+    var method: Alamofire.HTTPMethod {
+        switch self {
+        case .getReminderList, .getReminderDetail:
+            return .get
+        case .createReminder:
+            return .post
+        case .updateReminder:
+            return .put
+        case .deleteReminder:
+            return .delete
+        case .updateReminderActivation:
+            return .patch
+        }
+    }
+    
+    var parameters: [String : Any?]? {
+        switch self {
+        case .createReminder(let reminderRequestDTO, _), .updateReminder(let reminderRequestDTO, _, _):
+            return [
+                "content": reminderRequestDTO.content,
+                "sendTime": reminderRequestDTO.sendTime,
+                "isActive": reminderRequestDTO.isActive,
+                "dayOfWeeks": reminderRequestDTO.dayOfWeeks
+            ]
+        case .updateReminderActivation(let isActive, _, _):
+            return [
+                "isActive": isActive
+            ]
+        default:
+            return nil
+        }
+    }
+    
+    var queryParameters: [String : Any]? {
+        switch self {
+        default:
+            return nil
+        }
+    }
+    
+    var headers: Alamofire.HTTPHeaders? {
+        switch self {
+        case .getReminderList(let userId), .createReminder(_, let userId), .getReminderDetail(_, let userId), .updateReminder(_, _, let userId), .deleteReminder(_, let userId), .updateReminderActivation(_, _, let userId):
+            return ["X-USER-ID": userId]
+        }
+    }
+    
+    
+}
+
 enum UserEndPoints: Endpoint {
 
     case createUser(userDTO: UserDTO)
