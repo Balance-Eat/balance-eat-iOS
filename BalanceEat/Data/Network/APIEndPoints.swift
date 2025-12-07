@@ -35,7 +35,7 @@ enum ReminderEndPoints: Endpoint {
         case .updateReminder(_, let reminderId, _):
             return "/v1/reminders/\(reminderId)"
         case .deleteReminder(let reminderId, _):
-            return "/v1/reminders\(reminderId)"
+            return "/v1/reminders/\(reminderId)"
         case .updateReminderActivation(_, let reminderId, _):
             return "/v1/reminders/\(reminderId)/activation"
         }
