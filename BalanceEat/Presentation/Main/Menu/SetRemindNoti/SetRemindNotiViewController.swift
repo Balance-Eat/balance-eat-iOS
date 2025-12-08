@@ -98,6 +98,12 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         tableView.refreshControl = refreshControl
 
         view.addSubview(tableView)
+        view.bringSubviewToFront(loadingView)
+        
+        loadingView.snp.remakeConstraints { make in
+            make.center.equalTo(tableView)
+        }
+        
         tableView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.leading.trailing.equalToSuperview()
