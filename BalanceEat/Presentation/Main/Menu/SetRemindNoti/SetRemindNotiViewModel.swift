@@ -19,6 +19,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
     var isLastPage: Bool { currentPage == totalPage }
     let size: Int = 10
     
+    let isLoadingNextPageRelay: BehaviorRelay<Bool> = .init(value: false)
     let successToSaveReminderRelay: PublishRelay<Void> = .init()
     let reminderListRelay: BehaviorRelay<[ReminderData]> = .init(value: [])
     let reminderDetailRelay: BehaviorRelay<ReminderDetailData?> = .init(value: nil)
@@ -52,21 +53,25 @@ final class SetRemindNotiViewModel: BaseViewModel {
     func fetchReminderList() async {
         guard !isLastPage else { return }
         
-        loadingRelay.accept(true)
+        isLoadingNextPageRelay.accept(true)
         
-        let getReminderListResponse = await reminderUseCase.getReminderList(page: currentPage, size: size, userId: getUserId())
+        let getReminderListResponse = await reminderUseCase.getReminderList(
+            page: currentPage,
+            size: size,
+            userId: getUserId()
+        )
         
         switch getReminderListResponse {
         case .success(let reminderListData):
-            print("리마인더 리스트 추가 불러오기 성공")
-            loadingRelay.accept(false)
             reminderListRelay.accept(reminderListRelay.value + reminderListData.items)
             currentPage += 1
         case .failure(let error):
-            loadingRelay.accept(false)
             toastMessageRelay.accept(error.localizedDescription)
         }
+        
+        isLoadingNextPageRelay.accept(false)
     }
+
     
     func createReminder(reminderDataForCreate: ReminderDataForCreate) async {
         loadingRelay.accept(true)

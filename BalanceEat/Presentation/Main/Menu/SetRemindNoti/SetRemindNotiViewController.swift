@@ -92,6 +92,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         tableView.estimatedRowHeight = 120
         tableView.separatorStyle = .none
         tableView.refreshControl = refreshControl
+        tableView.backgroundColor = .clear
 
         view.addSubview(tableView)
         view.bringSubviewToFront(loadingView)
@@ -198,6 +199,19 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                     })
                     .disposed(by: cell.disposeBag)
             }
+            .disposed(by: disposeBag)
+        
+        tableView.rx.contentOffset
+            .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] offset in
+                guard let self = self else { return }
+                let threshold = self.tableView.contentSize.height - self.tableView.frame.size.height
+                if offset.y > threshold && !self.viewModel.isLastPage {
+                    Task {
+                        await self.viewModel.fetchReminderList()
+                    }
+                }
+            })
             .disposed(by: disposeBag)
         
         refreshControl.rx.controlEvent(.valueChanged)
@@ -316,6 +330,7 @@ final class RemindNotificationCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
+        backgroundColor = .clear
         selectionStyle = .none
         contentView.addSubview(remindView)
         
@@ -429,6 +444,7 @@ final class RemindNotificationView: UIView {
         contentLabel.text = "아침 식사"
         dayLabel.text = "금요일"
         
+        self.backgroundColor = .white
         self.layer.borderColor = UIColor.lightGray.cgColor
         self.layer.borderWidth = 1
         self.layer.cornerRadius = 8
@@ -509,7 +525,7 @@ final class RemindNotificationView: UIView {
         contentLabel.text = reminderData.content
         dayLabel.text = getDayString(dayOfWeeks: reminderData.dayOfWeeks)
         toggleSwitch.isOn = reminderData.isActive
-        toggleSwitch.sendActions(for: .editingChanged)
+        overlayView.isHidden = reminderData.isActive
     }
     
     private func getDayString(dayOfWeeks: [String]) -> String {
