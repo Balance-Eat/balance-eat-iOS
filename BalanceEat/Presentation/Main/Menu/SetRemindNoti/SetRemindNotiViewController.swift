@@ -189,6 +189,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                     .disposed(by: cell.disposeBag)
                 
                 cell.remindView.isSwitchOnRelay
+                    .skip(1)
                     .observe(on: MainScheduler.instance)
                     .subscribe(onNext: { [weak self] isOn in
                         guard let self else { return }
