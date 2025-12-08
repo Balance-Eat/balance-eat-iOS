@@ -183,7 +183,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                     
                     let content = editNotiViewController.memoRelay.value
                     let sendTime = timeStringHHmm00(from: editNotiViewController.timeRelay.value)
-                    let dayOfWeeks = editNotiViewController.selectedDays.value.map { $0.rawValue }
+                    let dayOfWeeks = editNotiViewController.selectedDaysRelay.value.map { $0.rawValue }
                     
                     let reminderDataForCreate = ReminderDataForCreate(
                         content: content,

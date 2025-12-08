@@ -43,7 +43,7 @@ final class EditNotiViewController: UIViewController {
     private let setNotiMemoView = SetNotiMemoView()
     private lazy var notiMemoTitledInputInfoView = TitledInputInfoView(title: "메모 *", inputView: setNotiMemoView, useBalanceEatWrapper: false)
     
-    private lazy var setNotiRepeatDayOfWeekView = SetNotiRepeatDayOfWeekView(selectedDays: selectedDays)
+    private lazy var setNotiRepeatDayOfWeekView = SetNotiRepeatDayOfWeekView(selectedDays: selectedDaysRelay)
     private lazy var notiRepeatDayOfWeekTitledInputInfoView = TitledInputInfoView(title: "반복 요일 *", inputView: setNotiRepeatDayOfWeekView, useBalanceEatWrapper: false)
     
     private lazy var saveButton = TitledButton(
@@ -68,7 +68,9 @@ final class EditNotiViewController: UIViewController {
     
     let timeRelay = BehaviorRelay<Date>(value: Date())
     let memoRelay = BehaviorRelay<String>(value: "")
-    let selectedDays = BehaviorRelay<Set<DayOfWeek>>(value: [])
+    let selectedDaysRelay = BehaviorRelay<Set<DayOfWeek>>(value: [])
+    let isValidInputRelay: BehaviorRelay<Bool> = .init(value: false)
+    
     let saveButtonTapRelay = PublishRelay<Void>()
     
     let successToSaveRelay: PublishRelay<Void> = .init()
@@ -173,6 +175,18 @@ final class EditNotiViewController: UIViewController {
                 
                 dismiss(animated: true)
             })
+            .disposed(by: disposeBag)
+        
+        Observable.combineLatest(memoRelay, selectedDaysRelay) { memo, selectedDays -> Bool in
+            let isEmptyMemo = memo.isEmpty
+            let isEmptySelectedDays = selectedDays.isEmpty
+            return !isEmptyMemo && !isEmptySelectedDays
+        }
+        .bind(to: isValidInputRelay)
+        .disposed(by: disposeBag)
+        
+        isValidInputRelay
+            .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
     }
 }
