@@ -66,7 +66,10 @@ final class EditNotiViewController: UIViewController {
         )
     )
     
+    let timeRelay = BehaviorRelay<Date>(value: Date())
+    let memoRelay = BehaviorRelay<String>(value: "")
     let selectedDays = BehaviorRelay<Set<DayOfWeek>>(value: [])
+    let saveButtonTapRelay = PublishRelay<Void>()
     private let disposeBag = DisposeBag()
     
     init(editNotiCase: EditNotiCase) {
@@ -133,6 +136,14 @@ final class EditNotiViewController: UIViewController {
     }
     
     private func setBinding() {
+        setNotiTimeView.timeRelay
+            .bind(to: timeRelay)
+            .disposed(by: disposeBag)
+        
+        setNotiMemoView.textRelay
+            .bind(to: memoRelay)
+            .disposed(by: disposeBag)
+        
         exitButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
@@ -147,6 +158,10 @@ final class EditNotiViewController: UIViewController {
                 
                 dismiss(animated: true)
             })
+            .disposed(by: disposeBag)
+        
+        saveButton.rx.tap
+            .bind(to: saveButtonTapRelay)
             .disposed(by: disposeBag)
     }
 }

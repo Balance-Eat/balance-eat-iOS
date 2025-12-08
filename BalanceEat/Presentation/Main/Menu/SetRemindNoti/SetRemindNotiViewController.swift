@@ -136,6 +136,28 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         editNotiViewController.modalPresentationStyle = .overCurrentContext
         editNotiViewController.modalTransitionStyle = .crossDissolve
         
+        editNotiViewController.saveButtonTapRelay
+            .subscribe(
+                onNext: { [weak self] in
+                    guard let self else { return }
+                    
+                    let content = editNotiViewController.memoRelay.value
+                    let sendTime = timeStringHHmm00(from: editNotiViewController.timeRelay.value)
+                    let dayOfWeeks = editNotiViewController.selectedDays.value.map { $0.rawValue }
+                    
+                    let reminderDataForCreate = ReminderDataForCreate(
+                        content: content,
+                        sendTime: sendTime,
+                        isActive: true,
+                        dayOfWeeks: dayOfWeeks
+                    )
+                
+                Task {
+                    await self.viewModel.createReminder(reminderDataForCreate: reminderDataForCreate)
+                }
+            })
+            .disposed(by: disposeBag)
+        
         present(editNotiViewController, animated: true, completion: nil)
     }
     
@@ -177,6 +199,14 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
+    }
+    
+    private func timeStringHHmm00(from date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ko_KR")
+        formatter.timeZone = TimeZone.current
+        formatter.dateFormat = "HH:mm:00"
+        return formatter.string(from: date)
     }
 }
 
