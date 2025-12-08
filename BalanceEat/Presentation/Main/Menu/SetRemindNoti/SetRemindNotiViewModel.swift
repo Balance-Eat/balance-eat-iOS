@@ -155,6 +155,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
                 currentReminderList.remove(at: index)
                 reminderListRelay.accept(currentReminderList)
             }
+            toastMessageRelay.accept("알림이 삭제되었습니다.")
         case .failure(let error):
             loadingRelay.accept(false)
             toastMessageRelay.accept(error.localizedDescription)

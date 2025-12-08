@@ -165,8 +165,25 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                     .disposed(by: cell.disposeBag)
                 
                 cell.remindView.deleteButtonTapRelay
+                    .observe(on: MainScheduler.instance)
                     .subscribe(onNext: { [weak self] in
                         guard let self else { return }
+                        
+                        let alert = UIAlertController(
+                            title: "해당 알림을 삭제하시겠습니까?",
+                            message: "되돌릴 수 없습니다.",
+                            preferredStyle: .alert
+                        )
+                        
+                        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+                        
+                        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { _ in
+                            Task {
+                                await self.viewModel.deleteReminder(reminderId: model.id)
+                            }
+                        })
+                        
+                        self.present(alert, animated: true)
                     })
                     .disposed(by: cell.disposeBag)
             }
