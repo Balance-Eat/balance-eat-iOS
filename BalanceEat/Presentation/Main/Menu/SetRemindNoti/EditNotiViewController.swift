@@ -189,6 +189,21 @@ final class EditNotiViewController: UIViewController {
             .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
     }
+    
+    func setDatas(reminderData: ReminderData) {
+        setNotiTimeView.setTime(date: timeStringToDate(reminderData.sendTime) ?? Date())
+        setNotiMemoView.setMemo(memo: reminderData.content)
+        let dayOfWeeksSet = Set(reminderData.dayOfWeeks.compactMap { DayOfWeek(rawValue: $0) })
+        selectedDaysRelay.accept(dayOfWeeksSet)
+    }
+    
+    private func timeStringToDate(_ time: String) -> Date? {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm:ss"
+        formatter.locale = Locale(identifier: "ko_KR")
+
+        return formatter.date(from: time)
+    }
 }
 
 final class SetNotiTimeView: UIView {
@@ -263,6 +278,11 @@ final class SetNotiTimeView: UIView {
             }
             .disposed(by: disposeBag)
     }
+    
+    func setTime(date: Date) {
+        timePicker.date = date
+        timePicker.sendActions(for: .editingChanged)
+    }
 }
 
 final class SetNotiMemoView: UIView {
@@ -335,6 +355,11 @@ final class SetNotiMemoView: UIView {
             .bind(to: textField.rx.text)
             .disposed(by: disposeBag)
 
+    }
+    
+    func setMemo(memo: String) {
+        textField.text = memo
+        textField.sendActions(for: .editingChanged)
     }
 }
 
@@ -641,3 +666,4 @@ final class SelectDayOfWeeksView: UIView {
 
 
 }
+

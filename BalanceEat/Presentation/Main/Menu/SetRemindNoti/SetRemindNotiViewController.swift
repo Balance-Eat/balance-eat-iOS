@@ -127,6 +127,40 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                 cell.remindView.editButtonTapRelay
                     .subscribe(onNext: { [weak self] in
                         guard let self else { return }
+                        
+                        let editNotiViewController = EditNotiViewController(editNotiCase: .edit)
+                        editNotiViewController.modalPresentationStyle = .overCurrentContext
+                        editNotiViewController.modalTransitionStyle = .crossDissolve
+                        editNotiViewController.setDatas(reminderData: model)
+                        
+                        viewModel.successToSaveReminderRelay
+                            .bind(to: editNotiViewController.successToSaveRelay)
+                            .disposed(by: disposeBag)
+                        
+                        editNotiViewController.saveButtonTapRelay
+                            .observe(on: MainScheduler.instance)
+                            .subscribe(
+                                onNext: { [weak self] in
+                                    guard let self else { return }
+                                    
+                                    let content = editNotiViewController.memoRelay.value
+                                    let sendTime = timeStringHHmm00(from: editNotiViewController.timeRelay.value)
+                                    let dayOfWeeks = editNotiViewController.selectedDaysRelay.value.map { $0.rawValue }
+                                    
+                                    let reminderDataForCreate = ReminderDataForCreate(
+                                        content: content,
+                                        sendTime: sendTime,
+                                        isActive: true,
+                                        dayOfWeeks: dayOfWeeks
+                                    )
+                                
+                                Task {
+                                    await self.viewModel.updateReminder(reminderDataForCreate: reminderDataForCreate, reminderId: model.id)
+                                }
+                            })
+                            .disposed(by: disposeBag)
+                        
+                        present(editNotiViewController, animated: true, completion: nil)
                     })
                     .disposed(by: cell.disposeBag)
                 
@@ -167,7 +201,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         editNotiViewController.modalPresentationStyle = .overCurrentContext
         editNotiViewController.modalTransitionStyle = .crossDissolve
         
-        viewModel.successToCreateReminderRelay
+        viewModel.successToSaveReminderRelay
             .bind(to: editNotiViewController.successToSaveRelay)
             .disposed(by: disposeBag)
         
