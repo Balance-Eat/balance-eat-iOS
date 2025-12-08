@@ -41,15 +41,21 @@ final class MealTimePickerView: UIView {
         timePickerStackView.spacing = 10
         timePickerStackView.distribution = .fillEqually
         
-        [timePickerStackView, inputTimeView].forEach(addSubview(_:))
-                
-        timePickerStackView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
+        let separatorView = UIView()
+        separatorView.backgroundColor = .systemGray4
+        
+        let mainStackView = UIStackView(arrangedSubviews: [timePickerStackView, separatorView, inputTimeView])
+        mainStackView.axis = .vertical
+        mainStackView.spacing = 16
+        
+        addSubview(mainStackView)
+        
+        separatorView.snp.makeConstraints { make in
+            make.height.equalTo(1)
         }
         
-        inputTimeView.snp.makeConstraints { make in
-            make.top.equalTo(timePickerStackView.snp.bottom).offset(16)
-            make.leading.trailing.bottom.equalToSuperview()
+        mainStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
     }
     
@@ -203,17 +209,20 @@ final class InputTimeView: UIView {
     private let label: UILabel = {
         let label = UILabel()
         label.text = "시간 입력"
-        label.font = .systemFont(ofSize: 16, weight: .bold)
+        label.font = .systemFont(ofSize: 20, weight: .bold)
         label.textColor = .darkGray
         return label
     }()
     
     private let textField: UITextField = {
         let textField = UITextField()
-        textField.font = .systemFont(ofSize: 16, weight: .semibold)
-        textField.borderStyle = .roundedRect
+        textField.font = .systemFont(ofSize: 18, weight: .regular)
+        textField.borderStyle = .line
         textField.textAlignment = .center
-        
+        textField.layer.borderColor = UIColor.lightGray.cgColor
+        textField.layer.borderWidth = 1
+        textField.layer.cornerRadius = 8
+        textField.clipsToBounds = true
         textField.textColor = .black
         return textField
     }()
@@ -254,13 +263,15 @@ final class InputTimeView: UIView {
         [label, textField].forEach(addSubview(_:))
       
         label.snp.makeConstraints { make in
-            make.leading.top.equalToSuperview()
+            make.centerX.equalToSuperview()
+            make.top.equalToSuperview()
         }
         
         textField.snp.makeConstraints { make in
-            make.width.equalTo(100)
+            make.width.equalTo(120)
             make.top.equalTo(label.snp.bottom).offset(12)
-            make.leading.bottom.equalToSuperview()
+            make.centerX.equalToSuperview()
+            make.bottom.equalToSuperview()
         }
     }
     
@@ -284,6 +295,22 @@ final class InputTimeView: UIView {
                 
                 textField.resignFirstResponder()
             }
+            .disposed(by: disposeBag)
+        
+        textField.rx.controlEvent(.editingDidBegin)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                textField.layer.borderColor = UIColor.systemBlue.cgColor
+            })
+            .disposed(by: disposeBag)
+
+        textField.rx.controlEvent(.editingDidEnd)
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                
+                textField.layer.borderColor = UIColor.lightGray.cgColor
+            })
             .disposed(by: disposeBag)
     }
     
