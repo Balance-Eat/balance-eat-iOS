@@ -171,7 +171,12 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         editNotiViewController.modalPresentationStyle = .overCurrentContext
         editNotiViewController.modalTransitionStyle = .crossDissolve
         
+        viewModel.successToCreateReminderRelay
+            .bind(to: editNotiViewController.successToSaveRelay)
+            .disposed(by: disposeBag)
+        
         editNotiViewController.saveButtonTapRelay
+            .observe(on: MainScheduler.instance)
             .subscribe(
                 onNext: { [weak self] in
                     guard let self else { return }

@@ -19,6 +19,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
     var isLastPage: Bool { currentPage == totalPage }
     let size: Int = 10
     
+    let successToCreateReminderRelay: PublishRelay<Void> = .init()
     let reminderListRelay: BehaviorRelay<[ReminderData]> = .init(value: [])
     let reminderDetailRelay: BehaviorRelay<ReminderDetailData?> = .init(value: nil)
     
@@ -76,6 +77,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         case .success(let reminderDetailData):
             print("리마인더 생성 성공")
             loadingRelay.accept(false)
+            successToCreateReminderRelay.accept(())
             
             let reminderData = ReminderData(
                 id: reminderDetailData.id,
