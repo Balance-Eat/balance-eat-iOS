@@ -334,6 +334,19 @@ final class SetNotiRepeatDayOfWeekView: UIView {
     )
     private lazy var selectDayOfWeeksView = SelectDayOfWeeksView(selectedDays: selectedDays)
     
+    private let resetButton: UIButton = {
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+        let image = UIImage(systemName: "arrow.clockwise", withConfiguration: config)
+        button.setImage(image, for: .normal)
+        button.setTitle(" 초기화", for: .normal)
+        button.tintColor = .lightGray
+        button.titleLabel?.font = .systemFont(ofSize: 12, weight: .medium)
+        button.imageView?.contentMode = .scaleAspectFit
+
+        return button
+    }()
+    
     let selectedDays: BehaviorRelay<Set<DayOfWeek>>
     let disposeBag = DisposeBag()
     
@@ -358,8 +371,10 @@ final class SetNotiRepeatDayOfWeekView: UIView {
         let mainStackView = UIStackView(arrangedSubviews: [quickTypeStackView, selectDayOfWeeksView])
         mainStackView.axis = .vertical
         mainStackView.spacing = 8
+        mainStackView.alignment = .leading
         
         addSubview(mainStackView)
+        addSubview(resetButton)
         
         everydayButton.snp.makeConstraints { make in
             make.width.equalTo(60)
@@ -374,7 +389,12 @@ final class SetNotiRepeatDayOfWeekView: UIView {
         }
         
         mainStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.top.leading.trailing.equalToSuperview()
+        }
+        
+        resetButton.snp.makeConstraints { make in
+            make.top.equalTo(mainStackView.snp.bottom).offset(8)
+            make.trailing.bottom.equalToSuperview()
         }
     }
     
@@ -391,6 +411,11 @@ final class SetNotiRepeatDayOfWeekView: UIView {
         
         weekendButton.rx.tap
             .map { Set([.saturday, .sunday]) }
+            .bind(to: selectedDays)
+            .disposed(by: disposeBag)
+        
+        resetButton.rx.tap
+            .map { Set([]) }
             .bind(to: selectedDays)
             .disposed(by: disposeBag)
     }
