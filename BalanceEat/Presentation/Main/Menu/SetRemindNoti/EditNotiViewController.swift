@@ -43,6 +43,9 @@ final class EditNotiViewController: UIViewController {
     private let setNotiMemoView = SetNotiMemoView()
     private lazy var notiMemoTitledInputInfoView = TitledInputInfoView(title: "메모 *", inputView: setNotiMemoView, useBalanceEatWrapper: false)
     
+    private lazy var setNotiRepeatDayOfWeekView = SetNotiRepeatDayOfWeekView(selectedDays: selectedDays)
+    private lazy var notiRepeatDayOfWeekTitledInputInfoView = TitledInputInfoView(title: "반복 요일 *", inputView: setNotiRepeatDayOfWeekView, useBalanceEatWrapper: false)
+    
     private lazy var saveButton = TitledButton(
         title: editNotiCase == .add ? "알림 추가" : "수정 완료",
         image: UIImage(systemName: "square.and.arrow.down"),
@@ -63,6 +66,7 @@ final class EditNotiViewController: UIViewController {
         )
     )
     
+    let selectedDays = BehaviorRelay<Set<DayOfWeek>>(value: [])
     private let disposeBag = DisposeBag()
     
     init(editNotiCase: EditNotiCase) {
@@ -125,7 +129,7 @@ final class EditNotiViewController: UIViewController {
             make.height.equalTo(44)
         }
         
-        [titleStackView, notiTimeTitledInputInfoView, notiMemoTitledInputInfoView, saveButton, cancelButton].forEach(mainStackView.addArrangedSubview(_:))
+        [titleStackView, notiTimeTitledInputInfoView, notiMemoTitledInputInfoView, notiRepeatDayOfWeekTitledInputInfoView, saveButton, cancelButton].forEach(mainStackView.addArrangedSubview(_:))
     }
     
     private func setBinding() {
@@ -292,4 +296,283 @@ final class SetNotiMemoView: UIView {
             .disposed(by: disposeBag)
 
     }
+}
+
+enum DayOfWeekQuickType {
+    case everyDay
+    case weekdays
+    case weekend
+}
+
+final class SetNotiRepeatDayOfWeekView: UIView {
+    private let everydayButton = TitledButton(
+        title: "매일",
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .black,
+            borderColor: nil,
+            gradientColors: [.red.withAlphaComponent(0.7), .red.withAlphaComponent(0.3)]
+        )
+    )
+    private let weekdaysButton = TitledButton(
+        title: "평일",
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .black,
+            borderColor: nil,
+            gradientColors: [.red.withAlphaComponent(0.7), .red.withAlphaComponent(0.3)]
+        )
+    )
+    private let weekendButton = TitledButton(
+        title: "주말",
+        style: .init(
+            backgroundColor: nil,
+            titleColor: .black,
+            borderColor: nil,
+            gradientColors: [.red.withAlphaComponent(0.7), .red.withAlphaComponent(0.3)]
+        )
+    )
+    private lazy var selectDayOfWeeksView = SelectDayOfWeeksView(selectedDays: selectedDays)
+    
+    let selectedDays: BehaviorRelay<Set<DayOfWeek>>
+    let disposeBag = DisposeBag()
+    
+    init(selectedDays: BehaviorRelay<Set<DayOfWeek>>) {
+        self.selectedDays = selectedDays
+        super.init(frame: .zero)
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        let quickTypeStackView = UIStackView(arrangedSubviews: [everydayButton, weekdaysButton, weekendButton])
+        quickTypeStackView.axis = .horizontal
+        quickTypeStackView.spacing = 8
+        quickTypeStackView.distribution = .fillEqually
+        
+        let mainStackView = UIStackView(arrangedSubviews: [quickTypeStackView, selectDayOfWeeksView])
+        mainStackView.axis = .vertical
+        mainStackView.spacing = 8
+        
+        addSubview(mainStackView)
+        
+        everydayButton.snp.makeConstraints { make in
+            make.width.equalTo(60)
+        }
+        
+        weekdaysButton.snp.makeConstraints { make in
+            make.width.equalTo(60)
+        }
+        
+        weekendButton.snp.makeConstraints { make in
+            make.width.equalTo(60)
+        }
+        
+        mainStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+    }
+    
+    private func setBinding() {
+        everydayButton.rx.tap
+            .map { Set([.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]) }
+            .bind(to: selectedDays)
+            .disposed(by: disposeBag)
+        
+        weekdaysButton.rx.tap
+            .map { Set([.monday, .tuesday, .wednesday, .thursday, .friday]) }
+            .bind(to: selectedDays)
+            .disposed(by: disposeBag)
+        
+        weekendButton.rx.tap
+            .map { Set([.saturday, .sunday]) }
+            .bind(to: selectedDays)
+            .disposed(by: disposeBag)
+    }
+}
+
+final class SelectDayOfWeeksView: UIView {
+    private let dayButtons: [DayOfWeek: SelectableTitledButton] = [
+        .monday: SelectableTitledButton(
+            title: "월",
+            style: .init(
+                backgroundColor: .lightGray.withAlphaComponent(0.3),
+                titleColor: .black,
+                borderColor: nil,
+                gradientColors: nil,
+                selectedBackgroundColor: .systemBlue,
+                selectedTitleColor: .white,
+                selectedBorderColor: nil,
+                selectedGradientColors: nil
+            ),
+            isCancellable: true
+        ),
+        .tuesday: SelectableTitledButton(
+            title: "화",
+            style: .init(
+                backgroundColor: .lightGray.withAlphaComponent(0.3),
+                titleColor: .black,
+                borderColor: nil,
+                gradientColors: nil,
+                selectedBackgroundColor: .systemBlue,
+                selectedTitleColor: .white,
+                selectedBorderColor: nil,
+                selectedGradientColors: nil
+            ),
+            isCancellable: true
+        ),
+        .wednesday: SelectableTitledButton(
+            title: "수",
+            style: .init(
+                backgroundColor: .lightGray.withAlphaComponent(0.3),
+                titleColor: .black,
+                borderColor: nil,
+                gradientColors: nil,
+                selectedBackgroundColor: .systemBlue,
+                selectedTitleColor: .white,
+                selectedBorderColor: nil,
+                selectedGradientColors: nil
+            ),
+            isCancellable: true
+        ),
+        .thursday: SelectableTitledButton(
+            title: "목",
+            style: .init(
+                backgroundColor: .lightGray.withAlphaComponent(0.3),
+                titleColor: .black,
+                borderColor: nil,
+                gradientColors: nil,
+                selectedBackgroundColor: .systemBlue,
+                selectedTitleColor: .white,
+                selectedBorderColor: nil,
+                selectedGradientColors: nil
+            ),
+            isCancellable: true
+        ),
+        .friday: SelectableTitledButton(
+            title: "금",
+            style: .init(
+                backgroundColor: .lightGray.withAlphaComponent(0.3),
+                titleColor: .black,
+                borderColor: nil,
+                gradientColors: nil,
+                selectedBackgroundColor: .systemBlue,
+                selectedTitleColor: .white,
+                selectedBorderColor: nil,
+                selectedGradientColors: nil
+            ),
+            isCancellable: true
+        ),
+        .saturday: SelectableTitledButton(
+            title: "토",
+            style: .init(
+                backgroundColor: .lightGray.withAlphaComponent(0.3),
+                titleColor: .black,
+                borderColor: nil,
+                gradientColors: nil,
+                selectedBackgroundColor: .systemBlue,
+                selectedTitleColor: .white,
+                selectedBorderColor: nil,
+                selectedGradientColors: nil
+            ),
+            isCancellable: true
+        ),
+        .sunday: SelectableTitledButton(
+            title: "일",
+            style: .init(
+                backgroundColor: .lightGray.withAlphaComponent(0.3),
+                titleColor: .black,
+                borderColor: nil,
+                gradientColors: nil,
+                selectedBackgroundColor: .systemBlue,
+                selectedTitleColor: .white,
+                selectedBorderColor: nil,
+                selectedGradientColors: nil
+            ),
+            isCancellable: true
+        )
+    ]
+    
+    let selectedDays: BehaviorRelay<Set<DayOfWeek>>
+    let disposeBag = DisposeBag()
+    
+    init(selectedDays: BehaviorRelay<Set<DayOfWeek>>) {
+        self.selectedDays = selectedDays
+        super.init(frame: .zero)
+        
+        setUpView()
+        setBinding()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setUpView() {
+        let orderedDays: [DayOfWeek] = [
+            .monday, .tuesday, .wednesday,
+            .thursday, .friday, .saturday, .sunday
+        ]
+
+        let orderedButtons = orderedDays.compactMap { dayButtons[$0] }
+
+        let mainStackView = UIStackView(arrangedSubviews: orderedButtons)
+        mainStackView.axis = .horizontal
+        mainStackView.spacing = 8
+        mainStackView.distribution = .fillEqually
+
+        addSubview(mainStackView)
+
+        orderedButtons.forEach { button in
+            button.snp.makeConstraints { make in
+                make.width.height.equalTo(60)
+            }
+        }
+
+        mainStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+    }
+
+    
+    private func setBinding() {
+
+        for (day, button) in dayButtons {
+            button.tapRelay
+                .withLatestFrom(selectedDays)
+                .subscribe(onNext: { [weak self] current in
+                    guard let self else { return }
+
+                    var updated = current
+
+                    if updated.contains(day) {
+                        updated.remove(day)
+                    } else {
+                        updated.insert(day)
+                    }
+
+                    self.selectedDays.accept(updated)
+                })
+                .disposed(by: disposeBag)
+        }
+
+        selectedDays
+            .distinctUntilChanged()
+            .subscribe(onNext: { [weak self] days in
+                guard let self else { return }
+
+                for (day, button) in self.dayButtons {
+                    let shouldSelect = days.contains(day)
+                    button.isSelectedRelay.accept(shouldSelect)
+                }
+            })
+            .disposed(by: disposeBag)
+    }
+
+
 }

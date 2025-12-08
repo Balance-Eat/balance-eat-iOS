@@ -17,7 +17,7 @@ protocol Endpoint {
 }
 
 enum ReminderEndPoints: Endpoint {
-    case getReminderList(userId: String)
+    case getReminderList(page: Int, size: Int, userId: String)
     case createReminder(reminderRequestDTO: ReminderRequestDTO, userId: String)
     case getReminderDetail(reminderId: Int, userId: String)
     case updateReminder(reminderRequestDTO: ReminderRequestDTO, reminderId: Int, userId: String)
@@ -76,6 +76,8 @@ enum ReminderEndPoints: Endpoint {
     
     var queryParameters: [String : Any]? {
         switch self {
+        case .getReminderList(let page, let size, _):
+            return ["page": page, "size": size]
         default:
             return nil
         }
@@ -83,7 +85,7 @@ enum ReminderEndPoints: Endpoint {
     
     var headers: Alamofire.HTTPHeaders? {
         switch self {
-        case .getReminderList(let userId), .createReminder(_, let userId), .getReminderDetail(_, let userId), .updateReminder(_, _, let userId), .deleteReminder(_, let userId), .updateReminderActivation(_, _, let userId):
+        case .getReminderList(_, _, let userId), .createReminder(_, let userId), .getReminderDetail(_, let userId), .updateReminder(_, _, let userId), .deleteReminder(_, let userId), .updateReminderActivation(_, _, let userId):
             return ["X-USER-ID": userId]
         }
     }

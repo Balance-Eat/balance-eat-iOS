@@ -13,13 +13,16 @@ import RxCocoa
 final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewModel> {
     
     private var bottomConstraint: Constraint?
-    
-    private let remindNotificationView = RemindNotificationView()
+    private let tableView = UITableView()
     
     init() {
         let notificationRepository = NotificationRepository()
         let notificationUseCase = NotificationUseCase(repository: notificationRepository)
-        let vm = SetRemindNotiViewModel(notificationUseCase: notificationUseCase)
+        let reminderRepository = ReminderRepository()
+        let reminderUseCase = ReminderUseCase(repository: reminderRepository)
+        let userRepository = UserRepository()
+        let userUseCase = UserUseCase(repository: userRepository)
+        let vm = SetRemindNotiViewModel(notificationUseCase: notificationUseCase, reminderUseCase: reminderUseCase, userUseCase: userUseCase)
         
         super.init(viewModel: vm)
     }
@@ -32,6 +35,8 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         super.viewDidLoad()
         
         setUpView()
+        setupTableView()
+        setBinding()
         setUpKeyboardDismissGesture()
         observeKeyboard()
     }
@@ -62,8 +67,6 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             self.bottomConstraint = make.bottom.equalToSuperview().inset(0).constraint
         }
         
-        [remindNotificationView].forEach(mainStackView.addArrangedSubview(_:))
-        
         navigationItem.title = "추가 알림 설정"
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.backward"),
@@ -80,6 +83,47 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
 
         button.tintColor = .systemBlue
         navigationItem.rightBarButtonItem = button
+    }
+    
+    private func setupTableView() {
+        tableView.register(RemindNotificationCell.self,
+                           forCellReuseIdentifier: "RemindNotificationCell")
+        
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 120
+        tableView.separatorStyle = .none
+        
+        mainStackView.addArrangedSubview(tableView)
+        
+        tableView.snp.makeConstraints { make in
+            make.height.equalToSuperview()
+        }
+    }
+    
+    private func setBinding() {
+        viewModel.reminderListRelay
+            .bind(
+                to: tableView.rx.items(
+                    cellIdentifier: "RemindNotificationCell",
+                    cellType: RemindNotificationCell.self
+                )
+            ) { index, model, cell in
+            
+                cell.remindView.configure(model)
+                
+                cell.remindView.editButtonTapRelay
+                    .subscribe(onNext: { [weak self] in
+                        guard let self else { return }
+                    })
+                    .disposed(by: cell.disposeBag)
+                
+                cell.remindView.deleteButtonTapRelay
+                    .subscribe(onNext: { [weak self] in
+                        guard let self else { return }
+                    })
+                    .disposed(by: cell.disposeBag)
+            }
+            .disposed(by: disposeBag)
     }
     
     @objc private func backButtonTapped() {
@@ -136,6 +180,32 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     }
 }
 
+final class RemindNotificationCell: UITableViewCell {
+    
+    let remindView = RemindNotificationView()
+    var disposeBag = DisposeBag()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        selectionStyle = .none
+        contentView.addSubview(remindView)
+        
+        remindView.snp.makeConstraints { make in
+            make.edges.equalToSuperview().inset(12)
+        }
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 final class RemindNotificationView: UIView {
     private let timeImageView: UIImageView = {
         let imageView = UIImageView()
@@ -155,7 +225,7 @@ final class RemindNotificationView: UIView {
         label.textColor = .black
         return label
     }()
-    private let memoLabel: UILabel = {
+    private let contentLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .regular)
         label.textColor = .black
@@ -210,6 +280,8 @@ final class RemindNotificationView: UIView {
         return view
     }()
     
+    let editButtonTapRelay: PublishRelay<Void> = .init()
+    let deleteButtonTapRelay: PublishRelay<Void> = .init()
     let isSwitchOnRelay: BehaviorRelay<Bool> = .init(value: true)
     private let disposeBag = DisposeBag()
     
@@ -226,7 +298,7 @@ final class RemindNotificationView: UIView {
     
     private func setUpView() {
         timeLabel.text = "07:30"
-        memoLabel.text = "아침 식사"
+        contentLabel.text = "아침 식사"
         dayLabel.text = "금요일"
         
         self.layer.borderColor = UIColor.lightGray.cgColor
@@ -243,7 +315,7 @@ final class RemindNotificationView: UIView {
             make.width.height.equalTo(14)
         }
         
-        let infoStackView = UIStackView(arrangedSubviews: [timeLabel, memoLabel, dayStackView])
+        let infoStackView = UIStackView(arrangedSubviews: [timeLabel, contentLabel, dayStackView])
         infoStackView.axis = .vertical
         infoStackView.spacing = 8
         
@@ -294,5 +366,67 @@ final class RemindNotificationView: UIView {
         isSwitchOnRelay
             .bind(to: overlayView.rx.isHidden)
             .disposed(by: disposeBag)
+        
+        editButton.rx.tap
+            .bind(to: editButtonTapRelay)
+            .disposed(by: disposeBag)
+        
+        deleteButton.rx.tap
+            .bind(to: deleteButtonTapRelay)
+            .disposed(by: disposeBag)
     }
+    
+    func configure(_ reminderData: ReminderData) {
+        timeLabel.text = String(reminderData.sendTime.prefix(5))
+        contentLabel.text = reminderData.content
+        dayLabel.text = getDayString(dayOfWeeks: reminderData.dayOfWeeks)
+        toggleSwitch.isOn = reminderData.isActive
+    }
+    
+    private func getDayString(dayOfWeeks: [String]) -> String {
+        let inputSet = Set(dayOfWeeks)
+
+        let allDays: Set<String> = [
+            DayOfWeek.monday.rawValue,
+            DayOfWeek.tuesday.rawValue,
+            DayOfWeek.wednesday.rawValue,
+            DayOfWeek.thursday.rawValue,
+            DayOfWeek.friday.rawValue,
+            DayOfWeek.saturday.rawValue,
+            DayOfWeek.sunday.rawValue
+        ]
+
+        let weekdays: Set<String> = [
+            DayOfWeek.monday.rawValue,
+            DayOfWeek.tuesday.rawValue,
+            DayOfWeek.wednesday.rawValue,
+            DayOfWeek.thursday.rawValue,
+            DayOfWeek.friday.rawValue
+        ]
+
+        let weekend: Set<String> = [
+            DayOfWeek.saturday.rawValue,
+            DayOfWeek.sunday.rawValue
+        ]
+
+        let order: [DayOfWeek] = [
+            .monday, .tuesday, .wednesday,
+            .thursday, .friday, .saturday, .sunday
+        ]
+
+        if inputSet == allDays {
+            return "매일"
+        } else if inputSet == weekdays {
+            return "평일"
+        } else if inputSet == weekend {
+            return "주말"
+        } else {
+            return order
+                .filter { inputSet.contains($0.rawValue) }
+                .map { $0.koreanValue }
+                .joined(separator: ", ")
+        }
+    }
+
+
 }

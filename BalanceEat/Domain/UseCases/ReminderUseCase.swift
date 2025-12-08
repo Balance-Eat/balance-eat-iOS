@@ -8,10 +8,10 @@
 import Foundation
 
 protocol ReminderUseCaseProtocol {
-    func getReminderList(userId: String) async -> Result<ReminderListData, NetworkError>
-    func createReminder(reminderRequestDTO: ReminderRequestDTO, userId: String) async -> Result<ReminderDetailData, NetworkError>
+    func getReminderList(page: Int, size: Int, userId: String) async -> Result<ReminderListData, NetworkError>
+    func createReminder(reminderDataForCreate: ReminderDataForCreate, userId: String) async -> Result<ReminderDetailData, NetworkError>
     func getReminderDetail(reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError>
-    func updateReminder(reminderRequestDTO: ReminderRequestDTO, reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError>
+    func updateReminder(reminderDataForCreate: ReminderDataForCreate, reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError>
     func deleteReminder(reminderId: Int, userId: String) async -> Result<Void, NetworkError>
     func updateReminderActivation(isActive: Bool, reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError>
 }
@@ -23,8 +23,8 @@ struct ReminderUseCase: ReminderUseCaseProtocol {
         self.repository = repository
     }
     
-    func getReminderList(userId: String) async -> Result<ReminderListData, NetworkError> {
-        let response = await repository.getReminderList(userId: userId)
+    func getReminderList(page: Int, size: Int, userId: String) async -> Result<ReminderListData, NetworkError> {
+        let response = await repository.getReminderList(page: page, size: size, userId: userId)
         
         switch response {
         case .success(let reminderListResponseDTO):
@@ -33,8 +33,8 @@ struct ReminderUseCase: ReminderUseCaseProtocol {
             return .failure(error)
         }
     }
-    func createReminder(reminderRequestDTO: ReminderRequestDTO, userId: String) async -> Result<ReminderDetailData, NetworkError> {
-        let response = await repository.createReminder(reminderRequestDTO: reminderRequestDTO, userId: userId)
+    func createReminder(reminderDataForCreate: ReminderDataForCreate, userId: String) async -> Result<ReminderDetailData, NetworkError> {
+        let response = await repository.createReminder(reminderRequestDTO: reminderDataForCreate.modelToDTO(), userId: userId)
         
         switch response {
         case .success(let reminderDetailDTO):
@@ -53,8 +53,8 @@ struct ReminderUseCase: ReminderUseCaseProtocol {
             return .failure(error)
         }
     }
-    func updateReminder(reminderRequestDTO: ReminderRequestDTO, reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError> {
-        let response = await repository.updateReminder(reminderRequestDTO: reminderRequestDTO, reminderId: reminderId, userId: userId)
+    func updateReminder(reminderDataForCreate: ReminderDataForCreate, reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError> {
+        let response = await repository.updateReminder(reminderRequestDTO: reminderDataForCreate.modelToDTO(), reminderId: reminderId, userId: userId)
         
         switch response {
         case .success(let reminderDetailDTO):

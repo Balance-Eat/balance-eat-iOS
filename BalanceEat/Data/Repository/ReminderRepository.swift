@@ -10,8 +10,8 @@ import Foundation
 struct ReminderRepository: ReminderRepositoryProtocol {
     private let apiClient = APIClient.shared
     
-    func getReminderList(userId: String) async -> Result<ReminderListResponseDTO, NetworkError> {
-        let endPoint = ReminderEndPoints.getReminderList(userId: userId)
+    func getReminderList(page: Int, size: Int, userId: String) async -> Result<ReminderListResponseDTO, NetworkError> {
+        let endPoint = ReminderEndPoints.getReminderList(page: page, size: size, userId: userId)
         let result = await apiClient.request(
             endpoint: endPoint,
             responseType: BaseResponse<ReminderListResponseDTO>.self

@@ -24,6 +24,7 @@ struct SelectableTitledButtonStyle {
 
 final class SelectableTitledButton: UIView {
     private var style: SelectableTitledButtonStyle?
+    private let isCancellable: Bool
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -31,10 +32,12 @@ final class SelectableTitledButton: UIView {
         return label
     }()
     
+    let tapRelay = PublishRelay<Void>()
     let isSelectedRelay = BehaviorRelay<Bool>(value: false)
     private let disposeBag = DisposeBag()
     
-    init(title: String, style: SelectableTitledButtonStyle) {
+    init(title: String, style: SelectableTitledButtonStyle, isCancellable: Bool = false) {
+        self.isCancellable = isCancellable
         super.init(frame: .zero)
         self.style = style
         setUpView(title: title)
@@ -71,18 +74,22 @@ final class SelectableTitledButton: UIView {
     
     private func setupTapGesture() {
         let tapGesture = UITapGestureRecognizer()
-        self.addGestureRecognizer(tapGesture)
-        
+        addGestureRecognizer(tapGesture)
+
         tapGesture.rx.event
             .bind { [weak self] _ in
-                guard let self = self else { return }
-                
-                if !isSelectedRelay.value {
-                    isSelectedRelay.accept(!self.isSelectedRelay.value)
+                guard let self else { return }
+
+                if self.isSelectedRelay.value && !self.isCancellable {
+                    return
                 }
+
+                self.isSelectedRelay.accept(!self.isSelectedRelay.value)
+                self.tapRelay.accept(())
             }
             .disposed(by: disposeBag)
     }
+
     
     private func bindSelectedState() {
         isSelectedRelay
