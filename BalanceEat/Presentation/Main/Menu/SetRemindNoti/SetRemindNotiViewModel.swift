@@ -134,7 +134,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
                 currentReminderList[index] = updatedReminder
                 reminderListRelay.accept(currentReminderList)
             }
-            
+            toastMessageRelay.accept("알림이 수정되었습니다.")
         case .failure(let error):
             loadingRelay.accept(false)
             toastMessageRelay.accept(error.localizedDescription)
