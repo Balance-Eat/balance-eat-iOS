@@ -15,6 +15,15 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     private var bottomConstraint: Constraint?
     private let tableView = UITableView()
     private let refreshControl = UIRefreshControl()
+    private let dataEmptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "아직 설정된 알림이 없습니다."
+        label.textAlignment = .center
+        label.textColor = .gray
+        label.font = .systemFont(ofSize: 16, weight: .regular)
+        label.isHidden = true
+        return label
+    }()
     
     init() {
         let notificationRepository = NotificationRepository()
@@ -66,6 +75,12 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             self.bottomConstraint = make.bottom.equalToSuperview().inset(0).constraint
         }
         
+        view.addSubview(dataEmptyLabel)
+        
+        dataEmptyLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        
         navigationItem.title = "추가 알림 설정"
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.backward"),
@@ -107,12 +122,12 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             make.bottom.equalTo(view.snp.bottom)
         }
     }
-
-
-
-
     
     private func setBinding() {
+        viewModel.reminderListRelay
+            .map { $0.count > 0 }
+            .bind(to: dataEmptyLabel.rx.isHidden)
+            .disposed(by: disposeBag)
         
         viewModel.reminderListRelay
             .observe(on: MainScheduler.instance)
