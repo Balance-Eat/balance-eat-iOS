@@ -186,6 +186,17 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                         self.present(alert, animated: true)
                     })
                     .disposed(by: cell.disposeBag)
+                
+                cell.remindView.isSwitchOnRelay
+                    .observe(on: MainScheduler.instance)
+                    .subscribe(onNext: { [weak self] isOn in
+                        guard let self else { return }
+                        
+                        Task {
+                            await self.viewModel.updateReminderActivation(isActive: isOn, reminderId: model.id)
+                        }
+                    })
+                    .disposed(by: cell.disposeBag)
             }
             .disposed(by: disposeBag)
         
@@ -498,6 +509,7 @@ final class RemindNotificationView: UIView {
         contentLabel.text = reminderData.content
         dayLabel.text = getDayString(dayOfWeeks: reminderData.dayOfWeeks)
         toggleSwitch.isOn = reminderData.isActive
+        toggleSwitch.sendActions(for: .editingChanged)
     }
     
     private func getDayString(dayOfWeeks: [String]) -> String {
