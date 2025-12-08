@@ -37,7 +37,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         
         switch getReminderListResponse {
         case .success(let reminderListData):
-            print("리마인더 리스트 불러오기 성공")
+            print("리마인더 리스트 불러오기 성공: \(reminderListData)")
             loadingRelay.accept(false)
             reminderListRelay.accept(reminderListData.items)
             currentPage += 1

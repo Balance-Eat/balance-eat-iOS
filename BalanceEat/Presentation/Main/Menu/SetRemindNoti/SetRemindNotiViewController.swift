@@ -14,6 +14,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     
     private var bottomConstraint: Constraint?
     private let tableView = UITableView()
+    private let refreshControl = UIRefreshControl()
     
     init() {
         let notificationRepository = NotificationRepository()
@@ -25,6 +26,8 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         let vm = SetRemindNotiViewModel(notificationUseCase: notificationUseCase, reminderUseCase: reminderUseCase, userUseCase: userUseCase)
         
         super.init(viewModel: vm)
+        
+        setBinding()
     }
     
     @MainActor required init?(coder: NSCoder) {
@@ -36,7 +39,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         
         setUpView()
         setupTableView()
-        setBinding()
+        getDatas()
         setUpKeyboardDismissGesture()
         observeKeyboard()
     }
@@ -88,20 +91,28 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     private func setupTableView() {
         tableView.register(RemindNotificationCell.self,
                            forCellReuseIdentifier: "RemindNotificationCell")
-        
+
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 120
         tableView.separatorStyle = .none
-        
-        mainStackView.addArrangedSubview(tableView)
-        
+        tableView.refreshControl = refreshControl
+
+        view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
-            make.height.equalToSuperview()
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
     }
+
+
+
+
     
     private func setBinding() {
+        
         viewModel.reminderListRelay
+            .observe(on: MainScheduler.instance)
             .bind(
                 to: tableView.rx.items(
                     cellIdentifier: "RemindNotificationCell",
@@ -124,6 +135,24 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                     .disposed(by: cell.disposeBag)
             }
             .disposed(by: disposeBag)
+        
+        refreshControl.rx.controlEvent(.valueChanged)
+            .bind { [weak self] in
+                guard let self else { return }
+                
+                getDatas()
+            }
+            .disposed(by: disposeBag)
+    }
+    
+    private func getDatas() {
+        Task {
+            await viewModel.getReminderList()
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.refreshControl.endRefreshing()
+            }
+        }
     }
     
     @objc private func backButtonTapped() {
