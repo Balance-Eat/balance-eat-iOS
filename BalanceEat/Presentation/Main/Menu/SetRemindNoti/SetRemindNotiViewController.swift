@@ -62,10 +62,6 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             make.height.equalTo(0)
         }
         
-        mainStackView.snp.remakeConstraints { make in
-            make.edges.equalToSuperview().inset(20)
-        }
-        
         scrollView.snp.makeConstraints { make in
             self.bottomConstraint = make.bottom.equalToSuperview().inset(0).constraint
         }
@@ -107,7 +103,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         tableView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.leading.trailing.equalToSuperview()
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            make.bottom.equalTo(view.snp.bottom)
         }
     }
 
