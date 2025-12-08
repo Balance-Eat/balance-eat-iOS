@@ -76,19 +76,7 @@ struct ReminderRepository: ReminderRepositoryProtocol {
     }
     func deleteReminder(reminderId: Int, userId: String) async -> Result<Void, NetworkError> {
         let endPoint = ReminderEndPoints.deleteReminder(reminderId: reminderId, userId: userId)
-        let result = await apiClient.request(
-            endpoint: endPoint,
-            responseType: EmptyResponse.self
-        )
-        
-        switch result {
-        case .success(let response):
-            print("delete reminder success")
-            return .success(())
-        case .failure(let error):
-            print("delete reminder failed: \(error)")
-            return .failure(error)
-        }
+        return await apiClient.requestVoid(endpoint: endPoint)
     }
     func updateReminderActivation(isActive: Bool, reminderId: Int, userId: String) async -> Result<ReminderDetailDTO, NetworkError> {
         let endPoint = ReminderEndPoints.updateReminderActivation(isActive: isActive, reminderId: reminderId, userId: userId)

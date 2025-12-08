@@ -78,4 +78,31 @@ final class APIClient {
             }
         }
     }
+    
+    func requestVoid(endpoint: Endpoint) async -> Result<Void, NetworkError> {
+        let url = baseURL + endpoint.path
+
+        return await withCheckedContinuation { continuation in
+            AF.request(
+                url,
+                method: endpoint.method,
+                parameters: endpoint.method == .get ? endpoint.queryParameters : endpoint.parameters,
+                encoding: endpoint.method == .get ? URLEncoding.default : JSONEncoding.default,
+                headers: endpoint.headers
+            )
+            .validate()
+            .response { response in
+                let statusCode = response.response?.statusCode ?? 0
+
+                if (200..<300).contains(statusCode) {
+                    print("🅾️ API Request Success (Void)")
+                    continuation.resume(returning: .success(()))
+                } else {
+                    let message = response.error?.localizedDescription ?? "알 수 없는 오류"
+                    continuation.resume(returning: .failure(.requestFailed(message)))
+                }
+            }
+        }
+    }
+
 }
