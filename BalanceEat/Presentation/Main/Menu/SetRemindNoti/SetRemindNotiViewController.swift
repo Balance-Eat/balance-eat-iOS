@@ -222,7 +222,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             .subscribe(onNext: { [weak self] offset in
                 guard let self = self else { return }
                 let threshold = self.tableView.contentSize.height - self.tableView.frame.size.height
-                if offset.y > threshold && !self.viewModel.isLastPage {
+                if offset.y > threshold && !self.viewModel.isLastPage && self.viewModel.isLoadingNextPageRelay.value == false {
                     Task {
                         await self.viewModel.fetchReminderList()
                     }
