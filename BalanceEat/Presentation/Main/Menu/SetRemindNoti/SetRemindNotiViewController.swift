@@ -500,7 +500,7 @@ final class RemindNotificationView: UIView {
         }
         
         addSubview(mainVerticalStackView)
-        addSubview(overlayView)
+//        addSubview(overlayView)
         
         mainVerticalStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(16)
@@ -510,9 +510,9 @@ final class RemindNotificationView: UIView {
             make.width.height.equalTo(48)
         }
         
-        overlayView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
+//        overlayView.snp.makeConstraints { make in
+//            make.edges.equalToSuperview()
+//        }
         
         imageContainerView.layer.cornerRadius = 24
         imageContainerView.clipsToBounds = true
@@ -524,7 +524,10 @@ final class RemindNotificationView: UIView {
             .disposed(by: disposeBag)
         
         isSwitchOnRelay
-            .bind(to: overlayView.rx.isHidden)
+            .subscribe(onNext: { [weak self] isOn in
+                guard let self else { return }
+                setUIBySwitchState(isOn: isOn)
+            })
             .disposed(by: disposeBag)
         
         editButton.rx.tap
@@ -541,7 +544,8 @@ final class RemindNotificationView: UIView {
         contentLabel.text = reminderData.content
         dayLabel.text = getDayString(dayOfWeeks: reminderData.dayOfWeeks)
         toggleSwitch.isOn = reminderData.isActive
-        overlayView.isHidden = reminderData.isActive
+        setUIBySwitchState(isOn: reminderData.isActive)
+//        overlayView.isHidden = reminderData.isActive
     }
     
     private func getDayString(dayOfWeeks: [String]) -> String {
@@ -589,5 +593,10 @@ final class RemindNotificationView: UIView {
         }
     }
 
-
+    private func setUIBySwitchState(isOn: Bool) {
+        timeImageView.tintColor = isOn ? .systemBlue : .systemBlue.withAlphaComponent(0.3)
+        imageContainerView.backgroundColor = isOn ? .systemBlue.withAlphaComponent(0.2) : .systemBlue.withAlphaComponent(0.05)
+        timeLabel.textColor = isOn ? .black : .lightGray
+        contentLabel.textColor = isOn ? .black : .lightGray
+    }
 }
