@@ -48,7 +48,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         
         setUpView()
         setupTableView()
-        getDatas()
+        getDatas(page: 0, size: 10)
         setUpKeyboardDismissGesture()
         observeKeyboard()
     }
@@ -234,14 +234,14 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             .bind { [weak self] in
                 guard let self else { return }
                 
-                getDatas()
+                getDatas(page: 0, size: 10)
             }
             .disposed(by: disposeBag)
     }
     
-    private func getDatas() {
+    private func getDatas(page: Int, size: Int) {
         Task {
-            await viewModel.getReminderList()
+            await viewModel.getReminderList(page: page, size: size)
             
             DispatchQueue.main.async { [weak self] in
                 self?.refreshControl.endRefreshing()
@@ -261,6 +261,15 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         
         viewModel.successToSaveReminderRelay
             .bind(to: editNotiViewController.successToSaveRelay)
+            .disposed(by: disposeBag)
+        
+        viewModel.successToSaveReminderRelay
+            .subscribe(onNext: { [weak self] _ in
+                guard let self else { return }
+                                
+                let size = viewModel.reminderListRelay.value.count + 1
+                getDatas(page: 0, size: size)
+            })
             .disposed(by: disposeBag)
         
         editNotiViewController.saveButtonTapRelay

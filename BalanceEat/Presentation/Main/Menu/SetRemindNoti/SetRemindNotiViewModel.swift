@@ -17,7 +17,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
     var currentPage: Int = 0
     var totalPage: Int = 0
     var isLastPage: Bool { currentPage == totalPage }
-    let size: Int = 10
+    let pageSize: Int = 10
     
     let isLoadingNextPageRelay: BehaviorRelay<Bool> = .init(value: false)
     let successToSaveReminderRelay: PublishRelay<Void> = .init()
@@ -31,9 +31,10 @@ final class SetRemindNotiViewModel: BaseViewModel {
         super.init()
     }
     
-    func getReminderList() async {
+    func getReminderList(page: Int = -1, size: Int = -1) async {
         loadingRelay.accept(true)
-        currentPage = 0
+        currentPage = page == -1 ? 0 : page
+        let size = size == -1 ? self.pageSize : size
         
         let getReminderListResponse = await reminderUseCase.getReminderList(page: currentPage, size: size, userId: getUserId())
         
@@ -57,7 +58,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         
         let getReminderListResponse = await reminderUseCase.getReminderList(
             page: currentPage,
-            size: size,
+            size: pageSize,
             userId: getUserId()
         )
         
@@ -84,16 +85,16 @@ final class SetRemindNotiViewModel: BaseViewModel {
             loadingRelay.accept(false)
             successToSaveReminderRelay.accept(())
             
-            let reminderData = ReminderData(
-                id: reminderDetailData.id,
-                content: reminderDetailData.content,
-                sendTime: reminderDetailData.sendTime,
-                isActive: reminderDetailData.isActive,
-                dayOfWeeks: reminderDetailData.dayOfWeeks
-            )
-            var currentReminderList = reminderListRelay.value
-            currentReminderList.append(reminderData)
-            reminderListRelay.accept(currentReminderList)
+//            let reminderData = ReminderData(
+//                id: reminderDetailData.id,
+//                content: reminderDetailData.content,
+//                sendTime: reminderDetailData.sendTime,
+//                isActive: reminderDetailData.isActive,
+//                dayOfWeeks: reminderDetailData.dayOfWeeks
+//            )
+//            var currentReminderList = reminderListRelay.value
+//            currentReminderList.append(reminderData)
+//            reminderListRelay.accept(currentReminderList)
         case .failure(let error):
             loadingRelay.accept(false)
             toastMessageRelay.accept(error.localizedDescription)
@@ -127,18 +128,18 @@ final class SetRemindNotiViewModel: BaseViewModel {
             loadingRelay.accept(false)
             successToSaveReminderRelay.accept(())
             
-            var currentReminderList = reminderListRelay.value
-            if let index = currentReminderList.firstIndex(where: { $0.id == reminderId }) {
-                let updatedReminder = ReminderData(
-                    id: reminderDetailData.id,
-                    content: reminderDetailData.content,
-                    sendTime: reminderDetailData.sendTime,
-                    isActive: reminderDetailData.isActive,
-                    dayOfWeeks: reminderDetailData.dayOfWeeks
-                )
-                currentReminderList[index] = updatedReminder
-                reminderListRelay.accept(currentReminderList)
-            }
+//            var currentReminderList = reminderListRelay.value
+//            if let index = currentReminderList.firstIndex(where: { $0.id == reminderId }) {
+//                let updatedReminder = ReminderData(
+//                    id: reminderDetailData.id,
+//                    content: reminderDetailData.content,
+//                    sendTime: reminderDetailData.sendTime,
+//                    isActive: reminderDetailData.isActive,
+//                    dayOfWeeks: reminderDetailData.dayOfWeeks
+//                )
+//                currentReminderList[index] = updatedReminder
+//                reminderListRelay.accept(currentReminderList)
+//            }
             toastMessageRelay.accept("알림이 수정되었습니다.")
         case .failure(let error):
             loadingRelay.accept(false)
