@@ -44,7 +44,7 @@ final class MealTimePickerView: UIView {
         let separatorView = UIView()
         separatorView.backgroundColor = .systemGray4
         
-        let mainStackView = UIStackView(arrangedSubviews: [timePickerStackView, separatorView, inputTimeView])
+        let mainStackView = UIStackView(arrangedSubviews: [timePickerStackView])
         mainStackView.axis = .vertical
         mainStackView.spacing = 16
         

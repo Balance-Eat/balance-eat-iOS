@@ -21,8 +21,6 @@ final class CreateDietViewModel: BaseViewModel {
     let saveDietSuccessRelay = PublishRelay<Void>()
     let mealTimeRelay = BehaviorRelay<MealType>(value: .breakfast)
     let dateRelay: BehaviorRelay<Date> = BehaviorRelay(value: Date())
-    let ateTimeRelay: BehaviorRelay<Date> = BehaviorRelay(value: Date())
-    let mealTimePickerViewTimeRelay: BehaviorRelay<Date> = BehaviorRelay(value: Date())
     
     let dataChangedRelay: BehaviorRelay<Bool> = BehaviorRelay(value: false)
     let deleteButtonIsEnabledRelay: BehaviorRelay<Bool> = BehaviorRelay(value: false)
@@ -77,21 +75,18 @@ final class CreateDietViewModel: BaseViewModel {
                 var deleteButtonIsEnabled: Bool
                 if currentFoods == nil {
                     deleteButtonIsEnabled = false
-                    ateTimeRelay.accept(dateRelay.value)
                 } else if currentFoods?.id == -1 {
                     deleteButtonIsEnabled = false
-                    ateTimeRelay.accept(dateRelay.value)
                 } else {
                     deleteButtonIsEnabled = true
-                    ateTimeRelay.accept(currentFoods?.consumedAt.toDate(format: "yyyy-MM-dd'T'HH:mm:ss") ?? Date())
                 }
                     
                 self.deleteButtonIsEnabledRelay.accept(deleteButtonIsEnabled)
             })
             .disposed(by: disposeBag)
         
-        Observable.combineLatest(currentFoodsRelay, mealTimeRelay, intakeRelay, mealTimePickerViewTimeRelay)
-            .subscribe(onNext: { [weak self] currentFoods, mealTime, intake, mealTimePickerViewTime in
+        Observable.combineLatest(currentFoodsRelay, mealTimeRelay, intakeRelay)
+            .subscribe(onNext: { [weak self] currentFoods, mealTime, intake in
                 guard let self else { return }
                 
                 var isIntakeCorrect: Bool = true
@@ -104,7 +99,7 @@ final class CreateDietViewModel: BaseViewModel {
                 }
                 
                 let mealTimeKey = mealTime.rawValue
-                if originalDietFoodDatas[mealTimeKey]?.items ?? [] == currentFoods?.items ?? [] && isIntakeCorrect && mealTimePickerViewTime == currentFoods?.consumedAt.toDate(format: "yyyy-MM-dd'T'HH:mm:ss") ?? Date() {
+                if originalDietFoodDatas[mealTimeKey]?.items ?? [] == currentFoods?.items ?? [] && isIntakeCorrect {
                     dataChangedRelay.accept(false)
                 } else {
                     dataChangedRelay.accept(true)

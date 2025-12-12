@@ -158,14 +158,6 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             .bind(to: dateLabel.rx.text)
             .disposed(by: disposeBag)
         
-        viewModel.ateTimeRelay
-            .subscribe(onNext: { [weak self] ateTime in
-                guard let self else { return }
-                
-                
-                mealTimePickerView.setTime(ateTime)
-            })
-            .disposed(by: disposeBag)
         
         searchInputField.textField.rx.controlEvent(.editingDidBegin)
             .observe(on: MainScheduler.instance)
@@ -256,17 +248,13 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             .bind(to: viewModel.intakeRelay)
             .disposed(by: disposeBag)
         
-        mealTimePickerView.timeRelay
-            .bind(to: viewModel.mealTimePickerViewTimeRelay)
-            .disposed(by: disposeBag)
-        
         saveButton.rx.tap
             .subscribe(
                 onNext: { [weak self] in
                     guard let self else { return }
                     
                     let mealType = viewModel.mealTimeRelay.value
-                    let consumedAt = mealTimePickerView.timeRelay.value.toString(format: "yyyy-MM-dd'T'HH:mm:ss")
+                    let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
 //                    let todayConsumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
                     let mealTypeString = mealType.rawValue
                     if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
