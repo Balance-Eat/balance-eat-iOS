@@ -85,6 +85,8 @@ final class BottomNavigationBarTabButton: UIView {
                 guard let self = self else { return }
                 let newValue = !self.isSelected.value
                 self.isSelected.accept(newValue)
+                
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             })
             .bind { [weak self] _ in
                 self?.tap.onNext(())
