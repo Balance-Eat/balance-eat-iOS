@@ -58,8 +58,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         switch createNotificationResult {
                         case .success(let notificationResponseDTO):
                             print("create noti success: \(notificationResponseDTO)")
+                            userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
                         case .failure(let error):
-                            print("create noti failed : \(error)")
+                            if error.description.contains("NOTIFICATION_DEVICE_ALREADY_EXISTS") {
+                                userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
+                            }
+                            print("create noti failed : \(error.description)")
                         }
                     }
                     

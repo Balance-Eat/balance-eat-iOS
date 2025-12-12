@@ -49,13 +49,16 @@ final class APIClient {
                     let statusCode = response.response?.statusCode
                     let responseDataString = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "No Body"
                     
+                    var statusMessage = "Unknown Error"
                     var serverMessage = afError.localizedDescription
                     
                     if let data = response.data {
                         if let apiError = try? JSONDecoder().decode(BaseResponse<EmptyData>.self, from: data) {
+                            statusMessage = apiError.status
                             serverMessage = apiError.message
                         } else if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                                  let message = json["message"] as? String {
+                                  let message = json["message"] as? String, let status = json["status"] as? String {
+                            statusMessage = status
                             serverMessage = message
                         }
                     }
@@ -73,7 +76,7 @@ final class APIClient {
                     print(errorMessage)
                     print("query parameters: \(endpoint.queryParameters ?? [:])")
                     print("parameters: \(endpoint.parameters ?? [:])")
-                    continuation.resume(returning: .failure(.requestFailed(serverMessage)))
+                    continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage)))
                 }
             }
         }
@@ -93,13 +96,27 @@ final class APIClient {
             .validate()
             .response { response in
                 let statusCode = response.response?.statusCode ?? 0
+                
+                var statusMessage = "Unknown Error"
+                var serverMessage = response.error?.localizedDescription
+                
+                if let data = response.data {
+                    if let apiError = try? JSONDecoder().decode(BaseResponse<EmptyData>.self, from: data) {
+                        statusMessage = apiError.status
+                        serverMessage = apiError.message
+                    } else if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                              let message = json["message"] as? String, let status = json["status"] as? String {
+                        statusMessage = status
+                        serverMessage = message
+                    }
+                }
 
                 if (200..<300).contains(statusCode) {
                     print("🅾️ API Request Success (Void)")
                     continuation.resume(returning: .success(()))
                 } else {
                     let message = response.error?.localizedDescription ?? "알 수 없는 오류"
-                    continuation.resume(returning: .failure(.requestFailed(message)))
+                    continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage ?? "")))
                 }
             }
         }

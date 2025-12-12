@@ -12,7 +12,7 @@ public enum NetworkError: Error {
     case failToDecode(String)
     case dataNil
     case serverError(Int)
-    case requestFailed(String)
+    case requestFailed(String, String)
     
     public var description: String {
         switch self {
@@ -24,8 +24,8 @@ public enum NetworkError: Error {
             "데이터가 없습니다."
         case .serverError(let statusCode):
             "서버 에러 \(statusCode)"
-        case .requestFailed(let message):
-            "서버 요청 실패 \(message)"
+        case .requestFailed(let status, let message):
+            "서버 요청 실패 \(status) \(message)"
         }
     }
 }
