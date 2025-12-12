@@ -213,7 +213,11 @@ final class SetNotiTimeView: UIView {
         textField.textColor = .black
         return textField
     }()
-    private let timePicker = UIDatePicker()
+    private let timePicker: UIDatePicker = {
+        let timePicker = UIDatePicker()
+        timePicker.minuteInterval = 5
+        return timePicker
+    }()
     private let toolbar: UIToolbar = {
         let toolbar = UIToolbar()
         toolbar.sizeToFit()
