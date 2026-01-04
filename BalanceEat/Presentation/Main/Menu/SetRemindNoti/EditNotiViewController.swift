@@ -16,6 +16,7 @@ enum EditNotiCase {
 }
 
 final class EditNotiViewController: UIViewController {
+    private var bottomConstraint: Constraint?
     private let editNotiCase: EditNotiCase
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -90,6 +91,8 @@ final class EditNotiViewController: UIViewController {
         
         setUpView()
         setBinding()
+        setUpKeyboardDismissGesture()
+        observeKeyboard()
     }
     
     private func setUpView() {
@@ -110,6 +113,7 @@ final class EditNotiViewController: UIViewController {
         contentView.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.leading.trailing.equalToSuperview().inset(32)
+            
         }
         
         contentView.addSubview(mainStackView)
@@ -195,6 +199,46 @@ final class EditNotiViewController: UIViewController {
         setNotiMemoView.setMemo(memo: reminderData.content)
         let dayOfWeeksSet = Set(reminderData.dayOfWeeks.compactMap { DayOfWeek(rawValue: $0) })
         selectedDaysRelay.accept(dayOfWeeksSet)
+    }
+    
+    private func setUpKeyboardDismissGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
+    private func observeKeyboard() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillShow(_:)),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyboardWillHide(_:)),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+    }
+
+    @objc private func keyboardWillShow(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let frame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        
+        let keyboardHeight = frame.height
+        
+        bottomConstraint?.update(inset: keyboardHeight)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
+    }
+
+    @objc private func keyboardWillHide(_ notification: Notification) {
+        bottomConstraint?.update(inset: 0)
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+        }
     }
     
     private func timeStringToDate(_ time: String) -> Date? {
