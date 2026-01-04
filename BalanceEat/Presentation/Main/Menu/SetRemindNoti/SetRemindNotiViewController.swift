@@ -234,7 +234,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             .bind { [weak self] in
                 guard let self else { return }
                 
-                getDatas(page: 0, size: 10)
+                getDatas(page: 0, size: 100)
             }
             .disposed(by: disposeBag)
     }
@@ -267,8 +267,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             .subscribe(onNext: { [weak self] _ in
                 guard let self else { return }
                                 
-                let size = viewModel.reminderListRelay.value.count + 1
-                getDatas(page: 0, size: size)
+                getDatas(page: 0, size: 100)
             })
             .disposed(by: disposeBag)
         
