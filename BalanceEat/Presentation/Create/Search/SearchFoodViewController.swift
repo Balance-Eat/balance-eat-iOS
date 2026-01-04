@@ -50,6 +50,12 @@ class SearchFoodViewController: UIViewController {
             gradientColors: [.systemGreen, .systemGreen.withAlphaComponent(0.5)]
         )
     )
+    private let toolbar: UIToolbar = {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        return toolbar
+    }()
+    private let doneButton = UIBarButtonItem(title: "완료", style: .done, target: nil, action: nil)
     
     private let searchHistory = BehaviorRelay<[FoodDTO]>(
         value: [
@@ -122,6 +128,14 @@ class SearchFoodViewController: UIViewController {
             make.center.equalToSuperview()
         }
         
+        let flexSpace = UIBarButtonItem(
+            barButtonSystemItem: .flexibleSpace,
+            target: nil,
+            action: nil
+        )
+
+        toolbar.items = [flexSpace, doneButton]
+        searchBar.searchTextField.inputAccessoryView = toolbar
         
         navigationItem.titleView = searchBar
         navigationItem.leftBarButtonItem = UIBarButtonItem(
@@ -160,6 +174,14 @@ class SearchFoodViewController: UIViewController {
                     await self.viewModel.searchFood(foodName: query)
                 }
             })
+            .disposed(by: disposeBag)
+        
+        doneButton.rx.tap
+            .bind { [weak self] in
+                guard let self else { return }
+                
+                searchBar.searchTextField.resignFirstResponder()
+            }
             .disposed(by: disposeBag)
         
         viewModel.searchFoodResultRelay
