@@ -292,7 +292,13 @@ final class SetNotiTimeView: UIView {
         timePicker.preferredDatePickerStyle = .wheels
         timePicker.locale = Locale(identifier: "ko_KR")
         
-        toolbar.items = [doneButton]
+        let flexSpace = UIBarButtonItem(
+            barButtonSystemItem: .flexibleSpace,
+            target: nil,
+            action: nil
+        )
+
+        toolbar.items = [flexSpace, doneButton]
         
         textField.inputView = timePicker
         textField.inputAccessoryView = toolbar
