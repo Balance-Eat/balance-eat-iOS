@@ -191,6 +191,7 @@ class SearchFoodViewController: UIViewController {
                 if let cell = cell as? SearchResultFoodCell {
                     cell.configure(
                         title: element.name,
+                        brand: element.brand == "없음" ? "(제조사 정보 없음)" : element.brand,
                         calory: String(calory),
                         carbon: String(element.carbohydrates),
                         protein: String(element.protein),
@@ -302,6 +303,13 @@ final class SearchResultFoodCell: UITableViewCell {
         return label
     }()
     
+    private let brandLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .gray
+        return label
+    }()
+    
     private let horizontalStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
@@ -373,6 +381,7 @@ final class SearchResultFoodCell: UITableViewCell {
         addSubview(containerView)
         containerView.addSubview(mainStackView)
         mainStackView.addArrangedSubview(titleLabel)
+        mainStackView.addArrangedSubview(brandLabel)
         
         let hStackContainer = UIView()
         hStackContainer.addSubview(horizontalStackView)
@@ -405,8 +414,9 @@ final class SearchResultFoodCell: UITableViewCell {
         }
     }
     
-    func configure(title: String, calory: String, carbon: String, protein: String, fat: String, info: String) {
+    func configure(title: String, brand: String, calory: String, carbon: String, protein: String, fat: String, info: String) {
         titleLabel.text = title
+        brandLabel.text = brand
         kcalLabel.text = "\(calory)kcal"
         carbLabel.text = "탄 \(carbon)g"
         proteinLabel.text = "단 \(protein)g"
