@@ -12,6 +12,7 @@ struct SearchFoodResponseDTO: Codable {
     let currentPage: Int
     let itemsPerPage: Int
     let items: [FoodDTOForSearch]
+    let totalPages: Int
 }
 
 struct FoodDTOForSearch: Codable {

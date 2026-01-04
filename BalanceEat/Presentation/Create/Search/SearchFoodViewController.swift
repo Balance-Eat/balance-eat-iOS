@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
+import Toast
 
 class SearchFoodViewController: UIViewController {
     private let viewModel: SearchFoodViewModel
@@ -132,19 +133,31 @@ class SearchFoodViewController: UIViewController {
     }
     
     private func setBinding() {
+        
+        viewModel.toastMessageRelay
+            .observe(on: MainScheduler.instance)
+            .compactMap { $0 }
+            .subscribe(onNext: { [weak self] message in
+                self?.view.makeToast(message, duration: 1.5, position: .center)
+            })
+            .disposed(by: disposeBag)
+        
         searchBar.rx.text.orEmpty
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] query in
                 guard let self else { return }
+                
+                viewModel.searchQueryRelay.accept(query)
+                
                 if query.isEmpty {
                     viewModel.searchFoodResultRelay.accept([])
                     return
                 }
                 
                 Task {
-                    await self.viewModel.searchFood(foodName: query, isNew: true)
+                    await self.viewModel.searchFood(foodName: query)
                 }
             })
             .disposed(by: disposeBag)
@@ -173,6 +186,30 @@ class SearchFoodViewController: UIViewController {
                 let foodData = food.toFoodData()
                 selectedFoodDataRelay.accept(foodData)
                 navigationController?.popViewController(animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+        tableView.rx.contentOffset
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] offset in
+                guard let self else { return }
+
+                let offsetY = offset.y
+                let contentHeight = self.tableView.contentSize.height
+                let visibleHeight = self.tableView.frame.height - self.tableView.contentInset.bottom
+
+                print("검색결과: \(offsetY) / \(contentHeight) / \(visibleHeight) / \(self.viewModel.isLastPage) / \(self.viewModel.isLoadingNextPageRelay.value)")
+                
+                if offsetY > contentHeight - visibleHeight - 50,
+                   !self.viewModel.isLastPage,
+                   !self.viewModel.isLoadingNextPageRelay.value {
+
+                    Task {
+                        await self.viewModel.fetchSearchFood(
+                            foodName: self.viewModel.searchQueryRelay.value
+                        )
+                    }
+                }
             })
             .disposed(by: disposeBag)
         
