@@ -91,7 +91,7 @@ final class AddedFoodListView: UIView, UITableViewDelegate, UITableViewDataSourc
         
         emptyLabel.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.top.equalTo(titleLabel.snp.bottom)
+            make.top.equalTo(titleLabel.snp.bottom).inset(8)
             make.leading.trailing.equalToSuperview()
             self.emptyLabelHeightConstraint = make.height.equalTo(0).constraint
         }
