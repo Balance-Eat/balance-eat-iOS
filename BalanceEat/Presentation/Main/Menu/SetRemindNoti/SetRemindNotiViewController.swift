@@ -75,7 +75,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             self.bottomConstraint = make.bottom.equalToSuperview().inset(0).constraint
         }
         
-        view.addSubview(dataEmptyLabel)
+        tableView.addSubview(dataEmptyLabel)
         
         dataEmptyLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
