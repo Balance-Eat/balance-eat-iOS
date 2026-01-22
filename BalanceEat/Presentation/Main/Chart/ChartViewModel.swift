@@ -40,11 +40,10 @@ final class ChartViewModel: BaseViewModel {
         
         switch getUserResponse {
         case .success(let user):
-            print("사용자 정보: \(user)")
             userDataRelay.accept(user)
             loadingRelay.accept(false)
         case .failure(let failure):
-            toastMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.description)")
             loadingRelay.accept(false)
         }
     }
@@ -56,7 +55,7 @@ final class ChartViewModel: BaseViewModel {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
-            toastMessageRelay.accept("UUID 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("UUID 불러오기 실패: \(failure.description)")
             return ""
         }
         

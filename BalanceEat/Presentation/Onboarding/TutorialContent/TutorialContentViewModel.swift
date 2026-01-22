@@ -40,7 +40,7 @@ final class TutorialContentViewModel {
     
     private func saveUserUUID(_ userUUID: String) {
         if case .failure(let error) = userUseCase.saveUserUUID(userUUID) {
-            print("UUID 저장 실패: \(error.localizedDescription)")
+            print("UUID 저장 실패: \(error.description)")
         }
     }
 
@@ -52,7 +52,7 @@ final class TutorialContentViewModel {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
-            print("UUID 불러오기 실패: \(failure.localizedDescription)")
+            print("UUID 불러오기 실패: \(failure.description)")
             return ""
         }
         

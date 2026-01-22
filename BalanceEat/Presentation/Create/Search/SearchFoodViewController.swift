@@ -220,8 +220,6 @@ class SearchFoodViewController: UIViewController {
                 let offsetY = offset.y
                 let contentHeight = self.tableView.contentSize.height
                 let visibleHeight = self.tableView.frame.height - self.tableView.contentInset.bottom
-
-                print("검색결과: \(offsetY) / \(contentHeight) / \(visibleHeight) / \(self.viewModel.isLastPage) / \(self.viewModel.isLoadingNextPageRelay.value)")
                 
                 if offsetY > contentHeight - visibleHeight - 50,
                    !self.viewModel.isLastPage,

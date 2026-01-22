@@ -22,7 +22,7 @@ struct FoodRepository: FoodRepositoryProtocol {
             print("create food success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("create food failed: \(error.localizedDescription)")
+            print("create food failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -39,7 +39,7 @@ struct FoodRepository: FoodRepositoryProtocol {
             print("search food success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("search food failed: \(error.localizedDescription)")
+            print("search food failed: \(error.description)")
             return .failure(error)
         }
     }

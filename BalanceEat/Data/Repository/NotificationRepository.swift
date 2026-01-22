@@ -22,7 +22,7 @@ struct NotificationRepository: NotificationRepositoryProtocol {
             print("create notification success")
             return .success(response.data)
         case .failure(let error):
-            print("create notification failed: \(error.localizedDescription)")
+            print("create notification failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -39,7 +39,7 @@ struct NotificationRepository: NotificationRepositoryProtocol {
             print("update notification activation success")
             return .success(response.data)
         case .failure(let error):
-            print("update notification activation failed: \(error.localizedDescription)")
+            print("update notification activation failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -56,7 +56,7 @@ struct NotificationRepository: NotificationRepositoryProtocol {
             print("get current device success")
             return .success(response.data)
         case .failure(let error):
-            print("get current device failed: \(error.localizedDescription)")
+            print("get current device failed: \(error.description)")
             return .failure(error)
         }
     }

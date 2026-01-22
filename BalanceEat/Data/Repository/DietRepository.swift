@@ -22,7 +22,7 @@ struct DietRepository: DietRepositoryProtocol {
             print("create diet success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("create diet failed: \(error.localizedDescription)")
+            print("create diet failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -39,7 +39,7 @@ struct DietRepository: DietRepositoryProtocol {
             print("update diet success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("update diet failed: \(error.localizedDescription)")
+            print("update diet failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -56,7 +56,7 @@ struct DietRepository: DietRepositoryProtocol {
             print("delete diet success \(response)")
             return .success(())
         case .failure(let error):
-            print("delete diet failed: \(error.localizedDescription)")
+            print("delete diet failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -73,7 +73,7 @@ struct DietRepository: DietRepositoryProtocol {
             print("get daily diet success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("get daily diet failed: \(error.localizedDescription)")
+            print("get daily diet failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -91,7 +91,7 @@ struct DietRepository: DietRepositoryProtocol {
             print("get monthly diet success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("get monthly diet failed: \(error.localizedDescription)")
+            print("get monthly diet failed: \(error.description)")
             return .failure(error)
         }
     }

@@ -38,7 +38,7 @@ final class SearchFoodViewModel {
             searchFoodResultRelay.accept(searchResponseDTO.items)
             totalPage = searchResponseDTO.totalPages
         case .failure(let failure):
-            errorMessageRelay.accept(failure.localizedDescription)
+            errorMessageRelay.accept(failure.description)
         }
     }
     

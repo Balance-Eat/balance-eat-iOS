@@ -47,7 +47,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
             totalPage = reminderListData.totalPages
         case .failure(let error):
             loadingRelay.accept(false)
-            toastMessageRelay.accept(error.localizedDescription)
+            toastMessageRelay.accept(error.description)
         }
     }
     
@@ -67,7 +67,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
             reminderListRelay.accept(reminderListRelay.value + reminderListData.items)
             currentPage += 1
         case .failure(let error):
-            toastMessageRelay.accept(error.localizedDescription)
+            toastMessageRelay.accept(error.description)
         }
         
         isLoadingNextPageRelay.accept(false)
@@ -97,7 +97,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
 //            reminderListRelay.accept(currentReminderList)
         case .failure(let error):
             loadingRelay.accept(false)
-            toastMessageRelay.accept(error.localizedDescription)
+            toastMessageRelay.accept(error.description)
         }
     }
     
@@ -113,7 +113,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
             reminderDetailRelay.accept(reminderDetailData)
         case .failure(let error):
             loadingRelay.accept(false)
-            toastMessageRelay.accept(error.localizedDescription)
+            toastMessageRelay.accept(error.description)
         }
     }
     
@@ -143,7 +143,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
             toastMessageRelay.accept("알림이 수정되었습니다.")
         case .failure(let error):
             loadingRelay.accept(false)
-            toastMessageRelay.accept(error.localizedDescription)
+            toastMessageRelay.accept(error.description)
         }
     }
     
@@ -164,7 +164,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
             toastMessageRelay.accept("알림이 삭제되었습니다.")
         case .failure(let error):
             loadingRelay.accept(false)
-            toastMessageRelay.accept(error.localizedDescription)
+            toastMessageRelay.accept(error.description)
         }
     }
     
@@ -179,7 +179,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
             loadingRelay.accept(false)
         case .failure(let error):
             loadingRelay.accept(false)
-            toastMessageRelay.accept(error.localizedDescription)
+            toastMessageRelay.accept(error.description)
         }
     }
     
@@ -190,7 +190,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         case .success(let userId):
             return String(userId)
         case .failure(let failure):
-            toastMessageRelay.accept(failure.localizedDescription)
+            toastMessageRelay.accept(failure.description)
             return ""
         }
     }

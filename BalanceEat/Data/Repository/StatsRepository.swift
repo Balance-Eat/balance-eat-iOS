@@ -22,7 +22,7 @@ struct StatsRepository: StatsRepositoryProtocol {
             print("get stats success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("get stats failed: \(error.localizedDescription)")
+            print("get stats failed: \(error.description)")
             return .failure(error)
         }
     }

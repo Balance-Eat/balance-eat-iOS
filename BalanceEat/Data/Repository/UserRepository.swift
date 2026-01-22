@@ -36,7 +36,7 @@ struct UserRepository: UserRepositoryProtocol {
             print("user created success")
             return .success(())
         case .failure(let error):
-            print("user created failed: \(error.localizedDescription)")
+            print("user created failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -53,7 +53,7 @@ struct UserRepository: UserRepositoryProtocol {
             print("user updated success")
             return .success(())
         case .failure(let error):
-            print("user updated failed: \(error.localizedDescription)")
+            print("user updated failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -70,7 +70,7 @@ struct UserRepository: UserRepositoryProtocol {
             print("get user success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("get user failed: \(error.localizedDescription)")
+            print("get user failed: \(error.description)")
             return .failure(error)
         }
     }

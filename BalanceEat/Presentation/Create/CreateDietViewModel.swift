@@ -147,7 +147,7 @@ final class CreateDietViewModel: BaseViewModel {
             loadingRelay.accept(false)
             toastMessageRelay.accept("식단 저장을 완료했습니다.")
         case .failure(let failure):
-            toastMessageRelay.accept(failure.localizedDescription)
+            toastMessageRelay.accept(failure.description)
             loadingRelay.accept(false)
         }
     }
@@ -163,7 +163,7 @@ final class CreateDietViewModel: BaseViewModel {
             loadingRelay.accept(false)
             toastMessageRelay.accept("식단 수정을 완료했습니다.")
         case .failure(let failure):
-            toastMessageRelay.accept(failure.localizedDescription)
+            toastMessageRelay.accept(failure.description)
             loadingRelay.accept(false)
         }
     }
@@ -179,7 +179,7 @@ final class CreateDietViewModel: BaseViewModel {
             resetCurrentDiet()
             toastMessageRelay.accept("식단 삭제를 완료했습니다.")
         case .failure(let failure):
-            toastMessageRelay.accept(failure.localizedDescription)
+            toastMessageRelay.accept(failure.description)
             loadingRelay.accept(false)
         }
     }
@@ -204,7 +204,7 @@ final class CreateDietViewModel: BaseViewModel {
         case .success(let userId):
             return String(userId)
         case .failure(let failure):
-            toastMessageRelay.accept(failure.localizedDescription)
+            toastMessageRelay.accept(failure.description)
             return ""
         }
     }

@@ -75,7 +75,6 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     ]
     
     init(dietDatas: [DietData], date: Date) {
-        print("time date: \(date)")
         let userRepository = UserRepository()
         let userUseCase = UserUseCase(repository: userRepository)
         
@@ -204,7 +203,6 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 onNext: { [weak self] index in
                     guard let self = self,
                           index < self.favoriteFoods.count else { return }
-                    print("선택된 food index: \(index)")
                     let favoriteFood = self.favoriteFoods[index]
                     let addFoodViewController = AddFoodViewController(
                         foodItem: FooddddItem(

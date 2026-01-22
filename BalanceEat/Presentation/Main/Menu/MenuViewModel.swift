@@ -37,7 +37,7 @@ final class MenuViewModel: BaseViewModel {
             userRelay.accept(user)
             loadingRelay.accept(false)
         case .failure(let failure):
-            toastMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("사용자 정보 불러오기 실패: \(failure.description)")
             loadingRelay.accept(false)
         }
     }
@@ -49,7 +49,7 @@ final class MenuViewModel: BaseViewModel {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
-            toastMessageRelay.accept("UUID 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("UUID 불러오기 실패: \(failure.description)")
             return ""
         }
     }
@@ -61,7 +61,7 @@ final class MenuViewModel: BaseViewModel {
         case .success(let userId):
             return String(userId)
         case .failure(let failure):
-            toastMessageRelay.accept(failure.localizedDescription)
+            toastMessageRelay.accept(failure.description)
             return ""
         }
     }
@@ -76,7 +76,7 @@ final class MenuViewModel: BaseViewModel {
             notificationRelay.accept(notificationData)
             loadingRelay.accept(false)
         case .failure(let failure):
-            toastMessageRelay.accept("알림 정보 불러오기 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("알림 정보 불러오기 실패: \(failure.description)")
             loadingRelay.accept(false)
         }
     }
@@ -88,7 +88,7 @@ final class MenuViewModel: BaseViewModel {
         case .success:
             break
         case .failure(let failure):
-            toastMessageRelay.accept("알림 정보 업데이트 실패: \(failure.localizedDescription)")
+            toastMessageRelay.accept("알림 정보 업데이트 실패: \(failure.description)")
         }
     }
 }

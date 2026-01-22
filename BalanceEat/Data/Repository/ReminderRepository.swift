@@ -22,7 +22,7 @@ struct ReminderRepository: ReminderRepositoryProtocol {
             print("get reminder list success")
             return .success(response.data)
         case .failure(let error):
-            print("get reminder list failed: \(error)")
+            print("get reminder list failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -38,7 +38,7 @@ struct ReminderRepository: ReminderRepositoryProtocol {
             print("create reminder success")
             return .success(response.data)
         case .failure(let error):
-            print("create reminder failed: \(error)")
+            print("create reminder failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -54,7 +54,7 @@ struct ReminderRepository: ReminderRepositoryProtocol {
             print("get reminder detail success")
             return .success(response.data)
         case .failure(let error):
-            print("get reminder detail failed: \(error)")
+            print("get reminder detail failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -70,7 +70,7 @@ struct ReminderRepository: ReminderRepositoryProtocol {
             print("update reminder success")
             return .success(response.data)
         case .failure(let error):
-            print("update reminder failed: \(error)")
+            print("update reminder failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -90,7 +90,7 @@ struct ReminderRepository: ReminderRepositoryProtocol {
             print("update reminder activation success")
             return .success(response.data)
         case .failure(let error):
-            print("update reminder activation failed: \(error)")
+            print("update reminder activation failed: \(error.description)")
             return .failure(error)
         }
     }
