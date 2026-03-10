@@ -9,7 +9,8 @@ import Foundation
 
 protocol FoodUseCaseProtocol {
     func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodData, NetworkError>
-    func searchFood(foodName: String, page: Int, size: Int) async -> Result<SearchFoodResponseDTO, NetworkError>
+    func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult,
+                                                                            NetworkError>
 }
 
 struct FoodUseCase: FoodUseCaseProtocol {
@@ -20,24 +21,10 @@ struct FoodUseCase: FoodUseCaseProtocol {
     }
     
     func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodData, NetworkError> {
-        let response = await repository.createFood(createFoodDTO: createFoodDTO)
-        
-        switch response {
-        case .success(let foodDTO):
-            return .success(foodDTO.DTOToModel())
-        case .failure(let failure):
-            return .failure(failure)
-        }
+        await repository.createFood(createFoodDTO: createFoodDTO)
     }
     
-    func searchFood(foodName: String, page: Int, size: Int) async -> Result<SearchFoodResponseDTO, NetworkError> {
-        let response = await repository.searchFood(foodName: foodName, page: page, size: size)
-        
-        switch response {
-        case .success(let searchFoodResponseDTO):
-            return .success(searchFoodResponseDTO)
-        case .failure(let failure):
-            return .failure(failure)
-        }
-    }
+    func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult, NetworkError> {
+          await repository.searchFood(foodName: foodName, page: page, size: size)
+      }
 }

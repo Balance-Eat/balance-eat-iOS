@@ -13,6 +13,13 @@ final class HomeViewModel: BaseViewModel {
     private let userUseCase: UserUseCaseProtocol
     private let dietUseCase: DietUseCaseProtocol
     
+    private static let isoFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        f.timeZone = TimeZone(identifier: "Asia/Seoul")
+        return f
+    }()
+    
     let userResponseRelay = BehaviorRelay<UserData?>(value: nil)
     let dietResponseRelay = BehaviorRelay<[DietData]?>(value: nil)
     
@@ -50,7 +57,6 @@ final class HomeViewModel: BaseViewModel {
         
         switch getUserResponse {
         case .success(let user):
-            print("사용자 정보: \(user)")
             userResponseRelay.accept(user)
             saveUserId(user.id)
             loadingRelay.accept(false)
@@ -88,14 +94,27 @@ final class HomeViewModel: BaseViewModel {
         let getDailyDietResponse = await dietUseCase.getDailyDiet(date: Date(), userId: String(userId))
         
         switch getDailyDietResponse {
-        case .success(let dietDTOs):
-            print("일일 식단 정보: \(dietDTOs)")
-            let dietDataList: [DietData] = dietDTOs.map { $0.toDietData() }
+        case .success(let dietDataList):
+            #if DEBUG
+            print("일일 식단 정보: \(dietDataList)")
+            #endif
             dietResponseRelay.accept(dietDataList)
             loadingRelay.accept(false)
         case .failure(let failure):
             toastMessageRelay.accept("일일 식단 정보 불러오기 실패: \(failure.description)")
             loadingRelay.accept(false)
         }
+    }
+    
+    private static let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        f.timeZone = TimeZone(identifier: "Asia/Seoul")
+        return f
+    }()
+
+    func formatConsumedTime(_ dateString: String) -> String {
+        guard let date = HomeViewModel.isoFormatter.date(from: dateString) else { return "" }
+        return HomeViewModel.timeFormatter.string(from: date)
     }
 }

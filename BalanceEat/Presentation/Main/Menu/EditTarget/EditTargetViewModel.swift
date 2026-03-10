@@ -12,7 +12,6 @@ import RxCocoa
 final class EditTargetViewModel: BaseViewModel {
     private let userUseCase: UserUseCaseProtocol
     
-    let userRelay = BehaviorRelay<User?>(value: nil)
     let updateUserResultRelay = PublishRelay<Bool>()
     
     init(userUseCase: UserUseCaseProtocol) {
@@ -26,7 +25,9 @@ final class EditTargetViewModel: BaseViewModel {
         
         switch updateUserResponse {
         case .success(()):
+            #if DEBUG
             print("사용자 정보 수정 성공")
+            #endif
             updateUserResultRelay.accept(true)
             loadingRelay.accept(false)
         case .failure(let failure):

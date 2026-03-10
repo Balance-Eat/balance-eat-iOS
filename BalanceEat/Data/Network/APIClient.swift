@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Alamofire
+@preconcurrency import Alamofire
 
 final class APIClient {
     static let shared = APIClient()
@@ -19,8 +19,12 @@ final class APIClient {
         responseType: T.Type
     ) async -> Result<T, NetworkError> {
         let url = baseURL + endpoint.path
-        
-        
+        #if DEBUG
+        let debugHeaders = endpoint.headers?.description ?? ""
+        let debugQueryParameters = String(describing: endpoint.queryParameters ?? [:])
+        let debugParameters = String(describing: endpoint.parameters ?? [:])
+        #endif
+
         return await withCheckedContinuation { continuation in
             AF.request(url,
                        method: endpoint.method,
@@ -35,6 +39,7 @@ final class APIClient {
                     let statusCode = response.response?.statusCode
                     let responseData = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "No Body"
                     
+                    #if DEBUG
                     let message = """
                                     🅾️ API Request Success
                                     - URL: \(url)
@@ -42,8 +47,8 @@ final class APIClient {
                                     - Response Body: \(responseData)
                                     - value: \(value)
                                     """
-                    
                     print(message)
+                    #endif
                     continuation.resume(returning: .success(value))
                 case .failure(let afError):
                     let statusCode = response.response?.statusCode
@@ -63,6 +68,7 @@ final class APIClient {
                         }
                     }
                     
+                    #if DEBUG
                     let errorMessage = """
                                         ❌ API Request Failed
                                         - URL: \(url)
@@ -70,12 +76,12 @@ final class APIClient {
                                         - Error: \(serverMessage)
                                         - Response Body: \(responseDataString)
                                         - afError: \(afError.localizedDescription)
-                                        - headers: \(endpoint.headers?.description ?? "")
+                                        - headers: \(debugHeaders)
                                         """
-                    
                     print(errorMessage)
-                    print("query parameters: \(endpoint.queryParameters ?? [:])")
-                    print("parameters: \(endpoint.parameters ?? [:])")
+                    print("query parameters: \(debugQueryParameters)")
+                    print("parameters: \(debugParameters)")
+                    #endif
                     continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage)))
                 }
             }
@@ -112,11 +118,12 @@ final class APIClient {
                 }
 
                 if (200..<300).contains(statusCode) {
+                    #if DEBUG
                     print("🅾️ API Request Success (Void)")
+                    #endif
                     continuation.resume(returning: .success(()))
                 } else {
-                    let message = response.error?.localizedDescription ?? "알 수 없는 오류"
-                    continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage ?? "")))
+                        continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage ?? "")))
                 }
             }
         }

@@ -31,7 +31,7 @@ final class EstimatedDailyCalorieView: UIView {
     }()
     
     let calorieRelay: PublishRelay<Double> = PublishRelay<Double>()
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
     
     init(title: String) {
         super.init(frame: .zero)

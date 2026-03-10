@@ -40,7 +40,6 @@ final class SetRemindNotiViewModel: BaseViewModel {
         
         switch getReminderListResponse {
         case .success(let reminderListData):
-            print("리마인더 리스트 불러오기 성공: \(reminderListData)")
             loadingRelay.accept(false)
             reminderListRelay.accept(reminderListData.items)
             currentPage += 1
@@ -80,27 +79,18 @@ final class SetRemindNotiViewModel: BaseViewModel {
         let createReminderResponse = await reminderUseCase.createReminder(reminderDataForCreate: reminderDataForCreate, userId: getUserId())
         
         switch createReminderResponse {
-        case .success(let reminderDetailData):
+        case .success:
+            #if DEBUG
             print("리마인더 생성 성공")
+            #endif
             loadingRelay.accept(false)
             successToSaveReminderRelay.accept(())
-            
-//            let reminderData = ReminderData(
-//                id: reminderDetailData.id,
-//                content: reminderDetailData.content,
-//                sendTime: reminderDetailData.sendTime,
-//                isActive: reminderDetailData.isActive,
-//                dayOfWeeks: reminderDetailData.dayOfWeeks
-//            )
-//            var currentReminderList = reminderListRelay.value
-//            currentReminderList.append(reminderData)
-//            reminderListRelay.accept(currentReminderList)
         case .failure(let error):
             loadingRelay.accept(false)
             toastMessageRelay.accept(error.description)
         }
     }
-    
+
     func getReminderDetail(reminderId: Int) async {
         loadingRelay.accept(true)
         
@@ -108,7 +98,9 @@ final class SetRemindNotiViewModel: BaseViewModel {
         
         switch reminderDetailResponse {
         case .success(let reminderDetailData):
+            #if DEBUG
             print("리마인더 상세 조회 성공")
+            #endif
             loadingRelay.accept(false)
             reminderDetailRelay.accept(reminderDetailData)
         case .failure(let error):
@@ -123,23 +115,12 @@ final class SetRemindNotiViewModel: BaseViewModel {
         let reminderUpdateResponse = await reminderUseCase.updateReminder(reminderDataForCreate: reminderDataForCreate, reminderId: reminderId, userId: getUserId())
         
         switch reminderUpdateResponse {
-        case .success(let reminderDetailData):
+        case .success:
+            #if DEBUG
             print("리마인더 수정 성공")
+            #endif
             loadingRelay.accept(false)
             successToSaveReminderRelay.accept(())
-            
-//            var currentReminderList = reminderListRelay.value
-//            if let index = currentReminderList.firstIndex(where: { $0.id == reminderId }) {
-//                let updatedReminder = ReminderData(
-//                    id: reminderDetailData.id,
-//                    content: reminderDetailData.content,
-//                    sendTime: reminderDetailData.sendTime,
-//                    isActive: reminderDetailData.isActive,
-//                    dayOfWeeks: reminderDetailData.dayOfWeeks
-//                )
-//                currentReminderList[index] = updatedReminder
-//                reminderListRelay.accept(currentReminderList)
-//            }
             toastMessageRelay.accept("알림이 수정되었습니다.")
         case .failure(let error):
             loadingRelay.accept(false)
@@ -154,7 +135,6 @@ final class SetRemindNotiViewModel: BaseViewModel {
         
         switch reminderDeleteResponse {
         case .success(()):
-            print("리마인더 삭제 성공")
             loadingRelay.accept(false)
             var currentReminderList = reminderListRelay.value
             if let index = currentReminderList.firstIndex(where: { $0.id == reminderId }) {
@@ -174,8 +154,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         let reminderUpdateActivationResponse = await reminderUseCase.updateReminderActivation(isActive: isActive, reminderId: reminderId, userId: getUserId())
         
         switch reminderUpdateActivationResponse {
-        case .success(_):
-            print("리마인더 활성화 변경 성공")
+        case .success:
             loadingRelay.accept(false)
         case .failure(let error):
             loadingRelay.accept(false)

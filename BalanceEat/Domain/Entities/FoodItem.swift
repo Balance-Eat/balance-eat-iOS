@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FooddddItem: Identifiable, Equatable, Codable {
+struct FoodItem: Identifiable, Equatable, Codable {
     let id: UUID
     let name: String
     let amount: Double

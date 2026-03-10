@@ -10,7 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class HomeViewController: BaseViewController<HomeViewModel> {
+final class HomeViewController: BaseViewController<HomeViewModel> {
     
     private let refreshControl = UIRefreshControl()
     private let welcomeBackgroundView = GradientView()
@@ -53,6 +53,10 @@ class HomeViewController: BaseViewController<HomeViewModel> {
         isTarget: true
     )
     
+    var onGoToDiet: (([DietData], Date) -> Void)?
+    var onAddDiet: (() -> Void)?
+    var onEditTarget: ((UserData) -> Void)?
+
     private let todayCalorieView: TodayCalorieView = TodayCalorieView(
         currentCalorie: 0,
         targetCalorie: 0,
@@ -64,7 +68,7 @@ class HomeViewController: BaseViewController<HomeViewModel> {
         targetFat: 0
     )
     
-    private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date())!)
+    private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date()) ?? Date())
     
     private lazy var todayAteMealLogListView: MealLogListView = {
         let mealLogs: [MealLogView] = []
@@ -72,15 +76,8 @@ class HomeViewController: BaseViewController<HomeViewModel> {
     }()
     
     
-    init() {
-        let userRepository = UserRepository()
-        let userUseCase = UserUseCase(repository: userRepository)
-        
-        let dietRepository = DietRepository()
-        let dietUseCase = DietUseCase(repository: dietRepository)
-        
-        let vm = HomeViewModel(userUseCase: userUseCase, dietUseCase: dietUseCase)
-        super.init(viewModel: vm)
+    override init(viewModel: HomeViewModel) {
+        super.init(viewModel: viewModel)
     }
     
     required init?(coder: NSCoder) {
@@ -138,7 +135,6 @@ class HomeViewController: BaseViewController<HomeViewModel> {
         }
         
         todayAteMealLogListView.snp.makeConstraints { make in
-//            make.top.equalTo(proteinRemindCardView.snp.bottom).inset(-40)
             make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().inset(20)
         }
@@ -174,30 +170,22 @@ class HomeViewController: BaseViewController<HomeViewModel> {
         
         Observable.merge(nowBodyStatusCardView.goToEditTapRelay.asObservable(), targetBodyStatusCardView.goToEditTapRelay.asObservable())
             .subscribe(onNext: { [weak self] in
-                guard let self else {
-                    return
-                }
-                guard let userData = viewModel.userResponseRelay.value else {
-                    return
-                }
-                                
-                navigationController?.pushViewController(EditTargetViewController(userData: userData), animated: true)
+                guard let self else { return }
+                guard let userData = viewModel.userResponseRelay.value else { return }
+                onEditTarget?(userData)
             })
             .disposed(by: disposeBag)
-        
+
         todayAteMealLogListView.goToDietButtonTapRelay
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                
-                navigationController?.pushViewController(CreateDietViewController(dietDatas: viewModel.dietResponseRelay.value ?? [], date: Date()), animated: true)
+                onGoToDiet?(viewModel.dietResponseRelay.value ?? [], Date())
             })
             .disposed(by: disposeBag)
-        
+
         todayAteMealLogListView.addDietButtonTapRelay
             .subscribe(onNext: { [weak self] in
-                guard let self else { return }
-                
-                navigationController?.pushViewController(CreateDietViewController(dietDatas: [], date: Date()), animated: true)
+                self?.onAddDiet?()
             })
             .disposed(by: disposeBag)
         
@@ -247,14 +235,14 @@ class HomeViewController: BaseViewController<HomeViewModel> {
     
     private func updateUIForDailyDietDate(dietList: [DietData]) {
         let currentCalorie = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.calories } }
-        let currentCarbonhydrate = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.carbohydrates } }
+        let currentCarbohydrate = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.carbohydrates } }
         let currentProtein = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.protein } }
         let currentFat = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.fat } }
         
         todayCalorieView.update(
             currentCalorie: Int(currentCalorie),
             targetCalorie: Int(viewModel.userResponseRelay.value?.targetCalorie ?? 0),
-            currentCarbohydrate: Int(currentCarbonhydrate),
+            currentCarbohydrate: Int(currentCarbohydrate),
             targetCarbohydrate: Int(viewModel.userResponseRelay.value?.targetCarbohydrates ?? 0),
             currentProtein: Int(currentProtein),
             targetProtein: Int(viewModel.userResponseRelay.value?.targetProtein ?? 0),
@@ -267,7 +255,7 @@ class HomeViewController: BaseViewController<HomeViewModel> {
             let mealLogView = MealLogView(
                 icon: UIImage(systemName: diet.mealType.icon),
                 title: diet.mealType.title,
-                ateTime: extractHourMinute(from: diet.consumedAt) ?? "",
+                ateTime: viewModel.formatConsumedTime(diet.consumedAt),
                 consumedCalories: diet.items.reduce(0) { $0 + Int($1.calories) },
                 foodDatas: diet.items
             )
@@ -275,20 +263,6 @@ class HomeViewController: BaseViewController<HomeViewModel> {
             mealLogs.append(mealLogView)
         }
         todayAteMealLogListView.mealLogsRelay.accept(mealLogs)
-    }
-    
-    func extractHourMinute(from dateString: String) -> String? {
-        let isoFormatter = ISO8601DateFormatter()
-        isoFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        isoFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        
-        guard let date = isoFormatter.date(from: dateString) else { return nil }
-        
-        let timeFormatter = DateFormatter()
-        timeFormatter.dateFormat = "HH:mm"
-        timeFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        
-        return timeFormatter.string(from: date)
     }
 }
 

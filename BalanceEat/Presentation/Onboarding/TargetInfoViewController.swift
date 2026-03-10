@@ -12,7 +12,7 @@ import RxCocoa
 import FlexLayout
 import PinLayout
 
-class TargetInfoViewController: UIViewController {
+final class TargetInfoViewController: UIViewController {
     private let mainStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -87,7 +87,7 @@ class TargetInfoViewController: UIViewController {
         
         let currentWeightView = self.currentWeightView()
         
-        let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "목표 체중을 입력해주세요.", unit: "kg")
+        let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass"), placeholder: "목표 체중을 입력해주세요.", unit: "kg")
         let weightInputView = TitledInputInfoView(title: "목표 체중", inputView: weightInputField)
         self.targetWeightText = weightInputField.textObservable
         
@@ -160,13 +160,6 @@ class TargetInfoViewController: UIViewController {
         let targetSMITitledInputView = TitledInputInfoView(title: "목표 골격근량", inputView: targetSMIInputView)
         self.targetSMIText = targetSMIInputView.textObservable
         
-//        let SMIStackView: UIStackView = {
-//            let stackView = UIStackView(arrangedSubviews: [currentSMITitledInputView, targetSMITitledInputView])
-//            stackView.axis = .horizontal
-//            stackView.distribution = .fillEqually
-//            stackView.spacing = 8
-//            return stackView
-//        }()
         
         let currentFatPercentageInputView = InputFieldWithIcon(
             icon: UIImage(systemName: "drop.fill") ?? UIImage(),
@@ -186,13 +179,6 @@ class TargetInfoViewController: UIViewController {
         let targetFatTitledInputView = TitledInputInfoView(title: "목표 체지방률", inputView: targetFatPercentageInputView)
         self.targetFatPercentageText = targetFatPercentageInputView.textObservable
         
-//        let fatPercentageStackView: UIStackView = {
-//            let stackView = UIStackView(arrangedSubviews: [currentFatTitledInputView, targetFatTitledInputView])
-//            stackView.axis = .horizontal
-//            stackView.distribution = .fillEqually
-//            stackView.spacing = 8
-//            return stackView
-//        }()
         
         optionalIsOpen
             .subscribe(onNext: { isOpen in
@@ -289,7 +275,7 @@ class TargetInfoViewController: UIViewController {
     
     private func currentWeightView() -> UIView {
         let view = UIView()
-        view.backgroundColor = .cyan.withAlphaComponent(0.3)
+        view.backgroundColor = .systemBlue.withAlphaComponent(0.08)
         view.layer.cornerRadius = 8
         
         let titleLabel = UILabel()
@@ -323,91 +309,6 @@ class TargetInfoViewController: UIViewController {
             }
             .bind(to: currentWeightLabel.rx.text)
             .disposed(by: disposeBag)
-    }
-}
-
-enum GoalType: String, Codable {
-    case diet = "DIET"
-    case bulkUp = "BULK_UP"
-    case maintain = "MAINTAIN"
-    case none
-    
-    var title: String {
-        switch self {
-        case .diet:
-            return "DIET"
-        case .bulkUp:
-            return "BULK_UP"
-        case .maintain:
-            return "MAINTAIN"
-        case .none:
-            return ""
-        }
-    }
-    
-    var coefficient: Double {
-        switch self {
-        case .diet:
-            return 0.8
-        case .bulkUp:
-            return 1.15
-        case .maintain:
-            return 1
-        case .none:
-            return 0
-        }
-    }
-    
-    var description: String {
-        switch self {
-        case .diet:
-            return "다이어트 🔥"
-        case .bulkUp:
-            return "근육량 증가 💪"
-        case .maintain:
-            return "현재 체중 유지 ⚖️"
-        case .none:
-            return ""
-        }
-    }
-    
-    var recommendedCarbonRatio: Double {
-        switch self {
-        case .diet:
-            return 0.35
-        case .bulkUp:
-            return 0.5
-        case .maintain:
-            return 0.45
-        case .none:
-            return 0
-        }
-    }
-    
-    var recommendedProteinRatio: Double {
-        switch self {
-        case .diet:
-            return 0.4
-        case .bulkUp:
-            return 0.3
-        case .maintain:
-            return 0.3
-        case .none:
-            return 0
-        }
-    }
-    
-    var recommendedFatRatio: Double {
-        switch self {
-        case .diet:
-            return 0.25
-        case .bulkUp:
-            return 0.2
-        case .maintain:
-            return 0.25
-        case .none:
-            return 0
-        }
     }
 }
 

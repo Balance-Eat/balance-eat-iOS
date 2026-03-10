@@ -27,8 +27,7 @@ final class CreateFoodViewModel: BaseViewModel {
         case .success(let foodData):
             createFoodResultRelay.accept(foodData)
             loadingRelay.accept(false)
-        case .failure(let failure):
-            print("fail to create food: \(failure.description)")
+        case .failure:
             loadingRelay.accept(false)
             toastMessageRelay.accept("음식 생성에 실패했습니다.")
         }

@@ -25,17 +25,8 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         return label
     }()
     
-    init() {
-        let notificationRepository = NotificationRepository()
-        let notificationUseCase = NotificationUseCase(repository: notificationRepository)
-        let reminderRepository = ReminderRepository()
-        let reminderUseCase = ReminderUseCase(repository: reminderRepository)
-        let userRepository = UserRepository()
-        let userUseCase = UserUseCase(repository: userRepository)
-        let vm = SetRemindNotiViewModel(notificationUseCase: notificationUseCase, reminderUseCase: reminderUseCase, userUseCase: userUseCase)
-        
-        super.init(viewModel: vm)
-        
+    override init(viewModel: SetRemindNotiViewModel) {
+        super.init(viewModel: viewModel)
         setBinding()
     }
     

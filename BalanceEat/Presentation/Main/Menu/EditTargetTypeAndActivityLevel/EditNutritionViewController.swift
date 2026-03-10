@@ -116,7 +116,7 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
                     carbon = (calories - protein * 4 - fat * 9) / 4
                 case .maintain:
                     protein = (data?.weight ?? 0) * 1.7
-                    fat = calories * 0.2
+                    fat = calories * 0.2 / 9
                     carbon = (calories - protein * 4 - fat * 9) / 4
                 case .none:
                     break
@@ -143,27 +143,6 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
         editNutritionInfoView.fatRelay
             .bind(to: viewModel.userFatRelay)
             .disposed(by: disposeBag)
-        
-//        viewModel.userCarbonRelay
-//            .subscribe(onNext: { [weak self] carbon in
-//                guard let self else { return }
-//                editNutritionInfoView.setCarbonText(text: String(format: "%.0f", carbon))
-//            })
-//            .disposed(by: disposeBag)
-//        
-//        viewModel.userProteinRelay
-//            .subscribe(onNext: { [weak self] protein in
-//                guard let self else { return }
-//                editNutritionInfoView.setProteinText(text: String(format: "%.0f", protein))
-//            })
-//            .disposed(by: disposeBag)
-//        
-//        viewModel.userFatRelay
-//            .subscribe(onNext: { [weak self] fat in
-//                guard let self else { return }
-//                editNutritionInfoView.setFatText(text: String(format: "%.0f", fat))
-//            })
-//            .disposed(by: disposeBag)
         
         viewModel.updateUserResultRelay
             .observe(on: MainScheduler.instance)

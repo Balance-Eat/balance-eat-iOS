@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 import Toast
 
-class TutorialContentViewController: UIViewController {
+final class TutorialContentViewController: UIViewController {
     private let viewModel: TutorialContentViewModel
     
     private let pageTitle: [String] = [
@@ -40,14 +40,14 @@ class TutorialContentViewController: UIViewController {
     
     private var bottomConstraint: Constraint?
     
+    var onComplete: (() -> Void)?
+
     private let disposeBag = DisposeBag()
-        
-    init() {
-        let repository = UserRepository()
-        let useCase = UserUseCase(repository: repository)
-        self.viewModel = TutorialContentViewModel(userUseCase: useCase)
+
+    init(viewModel: TutorialContentViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        
+
         setUpView()
         setBinding()
         addTutorialPageViewController()
@@ -144,54 +144,9 @@ class TutorialContentViewController: UIViewController {
         viewModel.onCreateUserSuccessRelay
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] in
-                guard let self else { return }
-                
-                let mainVC = MainViewController(uuid: viewModel.getUserUUID())
-                navigationController?.setViewControllers([mainVC], animated: true)
+                self?.onComplete?()
             })
             .disposed(by: disposeBag)
-        
-//        tutorialPageViewController.goToNextPageRelay
-//            .flatMapLatest { [weak self] createUserDTO -> Observable<Void> in
-//                guard let self = self else { return .empty() }
-//
-//                return Observable.create { observer in
-//                    let successDisposable = self.viewModel.onCreateUserSuccessRelay
-//                        .take(1)
-//                        .subscribe(onNext: {
-//                            observer.onNext(())
-//                            observer.onCompleted()
-//                        })
-//
-//                    let failureDisposable = self.viewModel.onCreateUserFailureRelay
-//                        .take(1)
-//                        .subscribe(onNext: { errorMessage in
-//                            observer.onError(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: errorMessage]))
-//                        })
-//
-//                    Task {
-//                        await self.viewModel.createUser(createUserDTO: createUserDTO)
-//                    }
-//
-//                    return Disposables.create {
-//                        successDisposable.dispose()
-//                        failureDisposable.dispose()
-//                    }
-//                }
-//            }
-//            .observe(on: MainScheduler.instance)
-//            .subscribe(
-//                onNext: { [weak self] in
-//                    guard let self = self else { return }
-//                    let mainVC = MainViewController(uuid: self.viewModel.getUserUUID())
-//                    self.navigationController?.setViewControllers([mainVC], animated: true)
-//                },
-//                onError: { error in
-//                    print("유저 생성 실패: \(error.localizedDescription)")
-//                }
-//            )
-//            .disposed(by: disposeBag)
-        
         viewModel.loadingRelay
             .bind(to: loadingView.isLoading)
             .disposed(by: disposeBag)
@@ -206,6 +161,7 @@ class TutorialContentViewController: UIViewController {
     }
     
     private func addTutorialPageViewController() {
+        addChild(tutorialPageViewController)
         contentView.addSubview(tutorialPageViewController.view)
         
         tutorialPageViewController.view.snp.makeConstraints { make in

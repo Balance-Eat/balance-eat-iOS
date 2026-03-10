@@ -15,7 +15,7 @@ final class TutorialPageViewModel {
     let dataRelay = BehaviorRelay<TutorialData>(value: TutorialData())
     let goalTypeRelay = BehaviorRelay<GoalType>(value: .none)
     
-    var BMRObservable: Observable<Int> {
+    private var bmrObservable: Observable<Int> {
         dataRelay
             .map { data -> Int in
                 let weight = Double(data.weight ?? 0)
@@ -40,7 +40,7 @@ final class TutorialPageViewModel {
     let userFatRelay = BehaviorRelay<Double>(value: 0)
     
     var targetCaloriesObservable: Observable<Double> {
-        Observable.combineLatest(BMRObservable, goalTypeRelay, dataRelay) { bmr, goal, data -> Double in
+        Observable.combineLatest(bmrObservable, goalTypeRelay, dataRelay) { bmr, goal, data -> Double in
             guard let activityCoef = data.activityLevel?.coefficient else { return 0 }
             var goalDiff: Double = 0
             
@@ -60,47 +60,12 @@ final class TutorialPageViewModel {
         }
     }
     
-//    /// 목표에 따른 탄단지 비율
-//    /// - 1. 다이어트 : 탄 (35%), 단(40%), 지(25%)
-//    /// - 2. 벌크업 : 탄 (50%), 단(30%), 지(20%)
-//    /// - 3. 유지 : 탄(45%), 단(30%), 지(25%)
-//    var userCarbonObservable: Observable<Int> {
-//        Observable.combineLatest(targetCaloriesRelay, goalTypeRelay) { calory, goal -> Int in
-//            return Int(Double(calory) * goal.recommendedCarbonRatio)
-//        }
-//    }
-//    var userProteinObservable: Observable<Int> {
-//        Observable.combineLatest(targetCaloriesRelay, goalTypeRelay) { calory, goal -> Int in
-//            return Int(Double(calory) * goal.recommendedProteinRatio)
-//        }
-//    }
-//    var userFatObservable: Observable<Int> {
-//        Observable.combineLatest(targetCaloriesRelay, goalTypeRelay) { calory, goal -> Int in
-//            return Int(Double(calory) * goal.recommendedFatRatio)
-//        }
-//    }
-    
-    let disposeBag = DisposeBag()
-    
+    private let disposeBag = DisposeBag()
+
     private init() {
         targetCaloriesObservable
             .bind(to: targetCaloriesRelay)
             .disposed(by: disposeBag)
-        
-//        userCarbonObservable
-//            .map { Float($0) }
-//            .bind(to: userCarbonRelay)
-//            .disposed(by: disposeBag)
-//        
-//        userProteinObservable
-//            .map { Float($0) }
-//            .bind(to: userProteinRelay)
-//            .disposed(by: disposeBag)
-//        
-//        userFatObservable
-//            .map { Float($0) }
-//            .bind(to: userFatRelay)
-//            .disposed(by: disposeBag)
     }
     
     

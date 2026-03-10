@@ -35,14 +35,7 @@ struct UserUseCase: UserUseCaseProtocol {
     }
     
     func getUser(uuid: String) async -> Result<UserData, NetworkError> {
-        let response = await repository.getUser(uuid: uuid)
-        
-        switch response {
-        case .success(let userResponseDTO):
-            return .success(UserData.responseDTOToModel(userResponseDTO: userResponseDTO))
-        case .failure(let failure):
-            return .failure(failure)
-        }
+        await repository.getUser(uuid: uuid)
     }
     
     func getUserUUID() -> Result<String, CoreDataError> {

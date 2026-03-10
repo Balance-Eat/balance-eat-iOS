@@ -20,14 +20,10 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
     private let todayAteMealLogListView = MealLogListView()
     private let dietEmptyInfoView = DietEmptyInfoView()
     
-    init() {
-        let userRepository = UserRepository()
-        let userUseCase = UserUseCase(repository: userRepository)
-        let dietRepository = DietRepository()
-        let dietUseCase = DietUseCase(repository: dietRepository)
-        let vm = DietListViewModel(userUseCase: userUseCase, dietUseCase: dietUseCase)
-        super.init(viewModel: vm)
-        
+    var onGoToDiet: (([DietData], Date) -> Void)?
+
+    override init(viewModel: DietListViewModel) {
+        super.init(viewModel: viewModel)
     }
     
     @MainActor required init?(coder: NSCoder) {
@@ -175,7 +171,6 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
         formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
         
         guard let date = formatter.date(from: dateString) else {
-            print("dateString parsing failed: \(dateString)")
             return nil
         }
         
@@ -184,7 +179,7 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
     }
 
     private func goToDiet() {
-        navigationController?.pushViewController(CreateDietViewController(dietDatas: viewModel.selectedDayDataCache.value, date: viewModel.selectedDate.value), animated: true)
+        onGoToDiet?(viewModel.selectedDayDataCache.value, viewModel.selectedDate.value)
     }
 }
 

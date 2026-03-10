@@ -10,7 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class OnboardingStartViewController: UIViewController {
+final class OnboardingStartViewController: UIViewController {
     
     private let stackView: UIStackView = {
         let stackView = UIStackView()
@@ -20,7 +20,7 @@ class OnboardingStartViewController: UIViewController {
         return stackView
     }()
     
-    private let logoImageVIew: UIImageView = {
+    private let logoImageView: UIImageView = {
         let imageView = UIImageView(image: .balanceEatLogo)
         imageView.contentMode = .scaleAspectFit
         return imageView
@@ -45,14 +45,6 @@ class OnboardingStartViewController: UIViewController {
         return label
     }()
     
-    private let gradientBackgroundView: GradientView = {
-        let view = GradientView()
-        view.colors = [.proteinTimeCardStartBackground, .proteinTimeCardEndBackground]
-        view.layer.cornerRadius = 8
-        view.clipsToBounds = true
-        return view
-    }()
-    
     private let startButton: TitledButton = {
         let style = TitledButtonStyle(
             backgroundColor: nil,
@@ -64,8 +56,10 @@ class OnboardingStartViewController: UIViewController {
         return button
     }()
     
+    var onStart: (() -> Void)?
+
     private let disposeBag = DisposeBag()
-    
+
     init() {
         super.init(nibName: nil, bundle: nil)
         
@@ -81,7 +75,7 @@ class OnboardingStartViewController: UIViewController {
         view.backgroundColor = .white
         view.addSubview(stackView)
 
-        [logoImageVIew, titleLabel, subtitleLabel].forEach {
+        [logoImageView, titleLabel, subtitleLabel].forEach {
             stackView.addArrangedSubview($0)
         }
 
@@ -124,7 +118,7 @@ class OnboardingStartViewController: UIViewController {
             make.centerY.equalToSuperview()
         }
 
-        logoImageVIew.snp.makeConstraints { make in
+        logoImageView.snp.makeConstraints { make in
             make.width.height.equalTo(240)
         }
 
@@ -133,7 +127,7 @@ class OnboardingStartViewController: UIViewController {
             make.width.equalToSuperview()
         }
 
-        stackView.setCustomSpacing(-40, after: logoImageVIew)
+        stackView.setCustomSpacing(-40, after: logoImageView)
         stackView.setCustomSpacing(12, after: titleLabel)
         stackView.setCustomSpacing(40, after: subtitleLabel)
         stackView.setCustomSpacing(40, after: thirdIconAndTitleHorizontalView)
@@ -144,22 +138,13 @@ class OnboardingStartViewController: UIViewController {
         startButton.rx.tap
             .throttle(.milliseconds(500), scheduler: MainScheduler.instance)
             .bind { [weak self] in
-                guard let self = self else { return }
-                let nextVC = TutorialContentViewController()
-                self.navigationController?.setViewControllers([nextVC], animated: true)
+                self?.onStart?()
             }
             .disposed(by: disposeBag)
     }
 
-    
-    @objc private func buttonTouchDown() {
-        gradientBackgroundView.alpha = 0.7
-    }
-    
-    @objc private func buttonTouchUp() {
-        gradientBackgroundView.alpha = 1.0
-    }
 }
+
 
 final class IconAndTitleHorizontalView: UIView {
     private let iconImage: UIImage

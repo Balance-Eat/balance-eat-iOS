@@ -86,7 +86,7 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
     private let fatInputField = InputFieldWithIcon(placeholder: "")
     private lazy var fatTitledInfoView = TitledInputInfoView(title: "지방 (g)", inputView: fatInputField, useBalanceEatWrapper: false)
     
-    private lazy var nutiritionInfoTitledContainerView: TitledContainerView = {
+    private lazy var nutritionInfoTitledContainerView: TitledContainerView = {
         let nutritionStackView = UIStackView(arrangedSubviews: [carbonTitledInfoView, proteinTitledInfoView, fatTitledInfoView])
         nutritionStackView.axis = .horizontal
         nutritionStackView.spacing = 16
@@ -145,11 +145,8 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
     private var bottomConstraint: Constraint?
     
     
-    init() {
-        let foodRepository = FoodRepository()
-        let foodUseCase = FoodUseCase(repository: foodRepository)
-        let vm = CreateFoodViewModel(foodUseCase: foodUseCase)
-        super.init(viewModel: vm)
+    override init(viewModel: CreateFoodViewModel) {
+        super.init(viewModel: viewModel)
     }
     
     required init?(coder: NSCoder) {
@@ -186,7 +183,7 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
             make.height.equalTo(44)
         }
         
-        [basicInfoTitledContainerView, servingSizeInfoTitledContainerView, nutiritionInfoTitledContainerView, willCreateFoodPreviewView, createButton, resetButton].forEach(mainStackView.addArrangedSubview)
+        [basicInfoTitledContainerView, servingSizeInfoTitledContainerView, nutritionInfoTitledContainerView, willCreateFoodPreviewView, createButton, resetButton].forEach(mainStackView.addArrangedSubview)
         
         unitInputField.textField.delegate = self
     }
@@ -310,15 +307,6 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
                     $0.setText("")
                     $0.textField.sendActions(for: .editingChanged)
                 }
-                
-                foodNameInputField.setText("")
-                brandNameInputField.setText("")
-                calorieInputField.setText("")
-                carbonInputField.setText("")
-                proteinInputField.setText("")
-                fatInputField.setText("")
-                amountInputField.setText("")
-                unitInputField.setText("")
             })
             .disposed(by: disposeBag)
         

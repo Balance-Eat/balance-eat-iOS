@@ -29,7 +29,9 @@ struct UserCoreData: UserCoreDataProtocol {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
         do {
             let result = try viewContext.fetch(fetchRequest)
+            #if DEBUG
             print("getUserUUID result: \(result)")
+            #endif
             guard let uuid = result.first?.uuid else {
                 return .failure(.readError("uuid not found"))
             }
@@ -74,7 +76,9 @@ struct UserCoreData: UserCoreDataProtocol {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
         do {
             let result = try viewContext.fetch(fetchRequest)
+            #if DEBUG
             print("getUserId result: \(result)")
+            #endif
             guard let userId = result.first?.userId else {
                 return .failure(.readError("userId not found"))
             }
@@ -91,20 +95,28 @@ struct UserCoreData: UserCoreDataProtocol {
             let results = try viewContext.fetch(fetchRequest)
             if let existingUser = results.first {
                 if existingUser.userId != 0 {
+                    #if DEBUG
                     print("userId already exists, skip save")
+                    #endif
                     return .success(())
                 } else {
                     existingUser.userId = userId
                     try viewContext.save()
+                    #if DEBUG
                     print("update userId success: \(userId)")
+                    #endif
                     return .success(())
                 }
             } else {
+                #if DEBUG
                 print("failure: uuid must exist before saving userId")
+                #endif
                 return .failure(.entityNotFound("User with uuid not found"))
             }
         } catch {
+            #if DEBUG
             print("save userId failure: \(error.localizedDescription)")
+            #endif
             return .failure(.saveError(error.localizedDescription))
         }
     }
@@ -113,7 +125,7 @@ struct UserCoreData: UserCoreDataProtocol {
     
     func deleteUserId(_ userId: Int64) -> Result<Void, CoreDataError> {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "userId == %@", userId)
+        fetchRequest.predicate = NSPredicate(format: "userId == %lld", userId)
         
         do {
             let result = try viewContext.fetch(fetchRequest)

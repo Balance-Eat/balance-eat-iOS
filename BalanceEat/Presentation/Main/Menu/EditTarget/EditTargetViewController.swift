@@ -10,14 +10,13 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class EditTargetViewController: BaseViewController<EditTargetViewModel> {
+final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
     private let userData: UserData
     
     private let weightEditTargetItemView = EditTargetItemView(editTargetItemType: .weight)
     private let smiEditTargetItemView = EditTargetItemView(editTargetItemType: .smi)
     private let fatPercentageEditTargetItemView = EditTargetItemView(editTargetItemType: .fatPercentage)
-//    private let editNutritionInfoView = EditNutritionInfoView()
-    
+
     private let saveButton = MenuSaveButton()
     
     private let resetButton = MenuResetButton()
@@ -45,12 +44,9 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
     private let valueOfAllChangedRelay = BehaviorRelay<Bool>(value: false)
     private let nutritionValueChangedRelay = BehaviorRelay<Bool>(value: false)
         
-    init(userData: UserData) {
+    init(userData: UserData, viewModel: EditTargetViewModel) {
         self.userData = userData
-        let userRepository = UserRepository()
-        let userUseCase = UserUseCase(repository: userRepository)
-        let vm = EditTargetViewModel(userUseCase: userUseCase)
-        super.init(viewModel: vm)
+        super.init(viewModel: viewModel)
     }
     
     required init?(coder: NSCoder) {
@@ -193,17 +189,7 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
             subtitleText: EditTargetItemType.fatPercentage.subtitle,
             subView: fatPercentageEditTargetItemView
         )
-//        let nutritionEditTargetContentView = EditDataContentView(
-//            systemImageString: "chart.bar.fill",
-//            imageBackgroundColor: .orange,
-//            titleText: "탄단지",
-//            subtitleText: "하루 탄단지 섭취량을 설정하세요",
-//            subView: editNutritionInfoView
-//        )
-//        editNutritionInfoView.setCarbonText(text: String(format: "%.0f", userData.targetCarbohydrates ?? 0))
-//        editNutritionInfoView.setProteinText(text: String(format: "%.0f", userData.targetProtein ?? 0))
-//        editNutritionInfoView.setFatText(text: String(format: "%.0f", userData.targetFat ?? 0))
-        
+
         [showTargetGuideButton, weightEditTargetContentView, smiEditTargetContentView, fatPercentageEditTargetContentView, goalSummaryView, saveButton, resetButton, menuEditedWarningView, measurementTipsView].forEach {
             mainStackView.addArrangedSubview($0)
         }
@@ -272,15 +258,15 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
                     
                     let currentUser = userData
                     
-                    let edittedCurrentWeight = currentWeightRelay.value ?? 0
-                    let edittedTargetWeight = targetWeightRelay.value ?? 0
-                    let edittedCurrentSMI = currentSMIRelay.value
-                    let edittedTargetSMI = targetSMIRelay.value
-                    let edittedCurrentFatPercentage = currentFatPercentageRelay.value
-                    let edittedTargetFatPercentage = targetFatPercentageRelay.value
-                    let edittedCarbon = carbonRelay.value
-                    let edittedProtein = proteinRelay.value
-                    let edittedFat = fatRelay.value
+                    let editedCurrentWeight = currentWeightRelay.value ?? 0
+                    let editedTargetWeight = targetWeightRelay.value ?? 0
+                    let editedCurrentSMI = currentSMIRelay.value
+                    let editedTargetSMI = targetSMIRelay.value
+                    let editedCurrentFatPercentage = currentFatPercentageRelay.value
+                    let editedTargetFatPercentage = targetFatPercentageRelay.value
+                    let editedCarbon = carbonRelay.value
+                    let editedProtein = proteinRelay.value
+                    let editedFat = fatRelay.value
                     
                     let userDTO = UserDTO(
                         id: currentUser.id,
@@ -289,19 +275,19 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
                         gender: currentUser.gender,
                         age: currentUser.age,
                         height: currentUser.height,
-                        weight: edittedCurrentWeight,
+                        weight: editedCurrentWeight,
                         goalType: currentUser.goalType,
                         email: currentUser.email,
                         activityLevel: currentUser.activityLevel,
-                        smi: edittedCurrentSMI,
-                        fatPercentage: edittedCurrentFatPercentage,
-                        targetWeight: edittedTargetWeight,
+                        smi: editedCurrentSMI,
+                        fatPercentage: editedCurrentFatPercentage,
+                        targetWeight: editedTargetWeight,
                         targetCalorie: currentUser.targetCalorie,
-                        targetSmi: edittedTargetSMI,
-                        targetFatPercentage: edittedTargetFatPercentage,
-                        targetCarbohydrates: edittedCarbon,
-                        targetProtein: edittedProtein,
-                        targetFat: edittedFat,
+                        targetSmi: editedTargetSMI,
+                        targetFatPercentage: editedTargetFatPercentage,
+                        targetCarbohydrates: editedCarbon,
+                        targetProtein: editedProtein,
+                        targetFat: editedFat,
                         providerId: currentUser.providerId,
                         providerType: currentUser.providerType
                     )
@@ -322,10 +308,6 @@ class EditTargetViewController: BaseViewController<EditTargetViewModel> {
                 smiEditTargetItemView.setTargetText(String(userData.targetSmi ?? 0))
                 fatPercentageEditTargetItemView.setCurrentText(String(userData.fatPercentage ?? 0))
                 fatPercentageEditTargetItemView.setTargetText(String(userData.targetFatPercentage ?? 0))
-                
-//                editNutritionInfoView.setCarbonText(text: String(format: "%.0f", userData.targetCarbohydrates ?? 0))
-//                editNutritionInfoView.setProteinText(text: String(format: "%.0f", userData.targetProtein ?? 0))
-//                editNutritionInfoView.setFatText(text: String(format: "%.0f", userData.targetFat ?? 0))
             })
             .disposed(by: disposeBag)
         
@@ -845,30 +827,6 @@ final class GoalSummaryView: UIView {
             currentRelay: currentFatPercentageRelay,
             targetRelay: targetFatPercentageRelay
         )
-//        let carbonGoalSummaryNutritionContentView = GoalSummaryNutritionContentView(
-//            iconImage: UIImage(systemName: "bolt.fill") ?? UIImage(),
-//            iconColor: .carbonText,
-//            title: "탄수화물",
-//            valueRelay: carbonRelay
-//        )
-//        let proteinGoalSummaryNutritionContentView = GoalSummaryNutritionContentView(
-//            iconImage: UIImage(systemName: "dumbbell.fill") ?? UIImage(),
-//            iconColor: .proteinText,
-//            title: "단백질",
-//            valueRelay: proteinRelay
-//        )
-//        let fatGoalSummaryNutritionContentView = GoalSummaryNutritionContentView(
-//            iconImage: UIImage(systemName: "circle.lefthalf.filled") ?? UIImage(),
-//            iconColor: .fatText,
-//            title: "지방",
-//            valueRelay: fatRelay
-//        )
-//        let calorieSummaryNutritionContentView = GoalSummaryNutritionContentView(
-//            iconImage: UIImage(systemName: "flame.fill") ?? UIImage(),
-//            iconColor: .red,
-//            title: "칼로리",
-//            valueRelay: calorieRelay
-//        )
         let stackView = UIStackView(arrangedSubviews: [
             weightGoalSummaryContentView,
             smiGoalSummaryContentView,
@@ -1021,74 +979,6 @@ final class GoalSummaryContentView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-}
-
-final class GoalSummaryNutritionContentView: UIView {
-    private let iconImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        return imageView
-    }()
-    private let titleLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 14, weight: .medium)
-        label.textColor = .black
-        return label
-    }()
-    private let valueLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 14, weight: .bold)
-        label.textColor = .black
-        return label
-    }()
-    
-    private let disposeBag = DisposeBag()
-    
-    init(iconImage: UIImage, iconColor: UIColor, title: String, valueRelay: BehaviorRelay<Double>) {
-        super.init(frame: .zero)
-        
-        self.backgroundColor = .white
-        self.layer.cornerRadius = 8
-        
-        iconImageView.image = iconImage
-        iconImageView.tintColor = iconColor
-        titleLabel.text = title
-        
-        setUpView()
-        setBinding()
-
-        valueRelay
-            .map { String(format: "%.0f", $0) }
-            .bind(to: valueLabel.rx.text)
-            .disposed(by: disposeBag)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func setUpView() {
-        [iconImageView, titleLabel, valueLabel].forEach(addSubview(_:))
-        iconImageView.snp.makeConstraints { make in
-            make.leading.equalToSuperview().inset(8)
-            make.top.bottom.equalToSuperview().inset(12)
-            make.width.height.equalTo(16)
-        }
-        
-        titleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(iconImageView.snp.trailing).offset(8)
-            make.centerY.equalToSuperview()
-        }
-        
-        valueLabel.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().inset(8)
-            make.centerY.equalToSuperview()
-        }
-    }
-    
-    private func setBinding() {
-        
     }
 }
 

@@ -33,7 +33,6 @@ final class MenuViewModel: BaseViewModel {
         
         switch getUserResponse {
         case .success(let user):
-            print("사용자 정보: \(user)")
             userRelay.accept(user)
             loadingRelay.accept(false)
         case .failure(let failure):

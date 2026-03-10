@@ -10,15 +10,15 @@ import RxSwift
 import RxCocoa
 
 final class TutorialContentViewModel {
-    private let userUseCase: UserUseCase
-    
+    private let userUseCase: UserUseCaseProtocol
+
     let onCreateUserSuccessRelay: PublishRelay<Void> = .init()
-    
+
     let loadingRelay = BehaviorRelay<Bool>(value: false)
-    
+
     let toastMessageRelay = BehaviorRelay<String?>(value: nil)
-    
-    init(userUseCase: UserUseCase) {
+
+    init(userUseCase: UserUseCaseProtocol) {
         self.userUseCase = userUseCase
     }
     
@@ -40,7 +40,7 @@ final class TutorialContentViewModel {
     
     private func saveUserUUID(_ userUUID: String) {
         if case .failure(let error) = userUseCase.saveUserUUID(userUUID) {
-            print("UUID 저장 실패: \(error.description)")
+            toastMessageRelay.accept("UUID 저장 실패: \(error.description)")
         }
     }
 
@@ -52,7 +52,7 @@ final class TutorialContentViewModel {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
-            print("UUID 불러오기 실패: \(failure.description)")
+            toastMessageRelay.accept("UUID 불러오기 실패: \(failure.description)")
             return ""
         }
         

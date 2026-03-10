@@ -44,9 +44,9 @@ struct Meal: Identifiable, Equatable, Codable {
     let id: UUID
     let date: Date
     let type: MealType
-    var foodItems: [FooddddItem]
-    
-    init(id: UUID, date: Date, type: MealType, foodItems: [FooddddItem]) {
+    var foodItems: [FoodItem]
+
+    init(id: UUID, date: Date, type: MealType, foodItems: [FoodItem]) {
         self.id = id
         self.date = date
         self.type = type

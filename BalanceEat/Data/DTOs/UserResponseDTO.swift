@@ -39,3 +39,30 @@ struct UserResponseDTO: Codable {
         }
 }
 
+extension UserResponseDTO {
+    func toDomain() -> UserData {
+        UserData(
+            id: self.id,
+            uuid: self.uuid,
+            name: self.name,
+            email: self.email,
+            gender: self.gender,
+            age: self.age,
+            weight: self.weight,
+            height: self.height,
+            goalType: self.goalType,
+            activityLevel: self.activityLevel,
+            smi: self.smi,
+            fatPercentage: self.fatPercentage,
+            targetWeight: self.targetWeight,
+            targetCalorie: self.targetCalorie,
+            targetSmi: self.targetSmi,
+            targetFatPercentage: self.targetFatPercentage,
+            targetCarbohydrates: self.targetCarbohydrates,
+            targetProtein: self.targetProtein,
+            targetFat: self.targetFat,
+            providerId: self.providerId,
+            providerType: self.providerType
+        )
+    }
+}

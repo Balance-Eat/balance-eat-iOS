@@ -78,6 +78,7 @@ class BaseViewController<VM: BaseViewModel>: UIViewController {
     
     private func setupBindings() {
         viewModel.loadingRelay
+            .observe(on: MainScheduler.instance)
             .bind(to: loadingView.isLoading)
             .disposed(by: disposeBag)
         

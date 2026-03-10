@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 import UUIDV7
 
-class TutorialPageViewController: UIViewController {
+final class TutorialPageViewController: UIViewController {
     private let viewModel: TutorialPageViewModel
     
     let currentPageRelay = PublishRelay<(currentIndex: Int, totalPages: Int)>()
@@ -19,8 +19,7 @@ class TutorialPageViewController: UIViewController {
     
     private var pages: [UIViewController] = []
     private(set) var currentIndex: Int = 0
-    private var previousIndex: Int = 0
-    
+
     private let disposeBag = DisposeBag()
     
     init() {
@@ -124,19 +123,16 @@ class TutorialPageViewController: UIViewController {
         }
         
         currentPageRelay.accept((currentIndex: currentIndex, totalPages: pages.count))
-        previousIndex = currentIndex
     }
     
     func goToNextPage() {
         guard currentIndex + 1 < pages.count else { return }
-        previousIndex = currentIndex
         currentIndex += 1
         displayCurrentPage(animated: true)
     }
     
     func goToPreviousPage() {
         guard currentIndex - 1 >= 0 else { return }
-        previousIndex = currentIndex
         currentIndex -= 1
         displayCurrentPage(animated: true)
     }

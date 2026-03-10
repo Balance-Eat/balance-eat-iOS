@@ -19,10 +19,8 @@ struct StatsRepository: StatsRepositoryProtocol {
         
         switch result {
         case .success(let response):
-            print("get stats success \(response)")
             return .success(response.data)
         case .failure(let error):
-            print("get stats failed: \(error.description)")
             return .failure(error)
         }
     }

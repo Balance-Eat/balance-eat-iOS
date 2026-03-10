@@ -10,7 +10,7 @@ import Foundation
 struct FoodRepository: FoodRepositoryProtocol {
     private let apiClient = APIClient.shared
     
-    func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodDTO, NetworkError> {
+    func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodData, NetworkError> {
         let endPoint = FoodEndPoints.create(createFoodDTO: createFoodDTO)
         let result = await apiClient.request(
             endpoint: endPoint,
@@ -19,15 +19,13 @@ struct FoodRepository: FoodRepositoryProtocol {
         
         switch result {
         case .success(let response):
-            print("create food success \(response)")
-            return .success(response.data)
+            return .success(response.data.DTOToModel())
         case .failure(let error):
-            print("create food failed: \(error.description)")
             return .failure(error)
         }
     }
     
-    func searchFood(foodName: String, page: Int, size: Int) async -> Result<SearchFoodResponseDTO, NetworkError> {
+    func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult, NetworkError> {
         let endPoint = FoodEndPoints.search(foodName: foodName, page: page, size: size)
         let result = await apiClient.request(
             endpoint: endPoint,
@@ -36,10 +34,16 @@ struct FoodRepository: FoodRepositoryProtocol {
         
         switch result {
         case .success(let response):
-            print("search food success \(response)")
-            return .success(response.data)
+            let dto = response.data
+            let result = FoodSearchResult(
+                totalItems: dto.totalItems,
+                currentPage: dto.currentPage,
+                itemsPerPage: dto.itemsPerPage,
+                totalPages: dto.totalPages,
+                items: dto.items.map { $0.toFoodData() }
+            )
+            return .success(result)
         case .failure(let error):
-            print("search food failed: \(error.description)")
             return .failure(error)
         }
     }

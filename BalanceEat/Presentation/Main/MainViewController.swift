@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 
 enum SelectedTab: Int, CaseIterable {
-    case home = 0, create, record, statistics, mypage
+    case home = 0, record, statistics, mypage
 }
 
 struct TabItem {
@@ -20,8 +20,7 @@ struct TabItem {
     var isSelected: BehaviorRelay<Bool> = BehaviorRelay(value: false)
 }
 
-class MainViewController: UIViewController {
-    private let uuid: String
+final class MainViewController: UIViewController {
     private var selectedTab: SelectedTab = .home {
         didSet {
             updateTabsAndViews()
@@ -30,7 +29,6 @@ class MainViewController: UIViewController {
 
     private let tabItems: [TabItem] = [
         TabItem(iconImage: UIImage(systemName: "house.fill") ?? UIImage(), title: "홈"),
-//        TabItem(iconImage: UIImage(systemName: "fork.knife") ?? UIImage(), title: "식단"),
         TabItem(iconImage: UIImage(systemName: "list.bullet.rectangle.portrait.fill") ?? UIImage(), title: "내역"),
         TabItem(iconImage: UIImage(systemName: "chart.line.text.clipboard.fill") ?? UIImage(), title: "통계"),
         TabItem(iconImage: UIImage(systemName: "line.horizontal.3") ?? UIImage(), title: "메뉴")
@@ -44,15 +42,10 @@ class MainViewController: UIViewController {
 
     private let disposeBag = DisposeBag()
 
-    private let viewControllers: [UIViewController] = [
-        HomeViewController(),
-        DietListViewController(),
-        ChartViewController(),
-        MenuViewController()
-    ]
+    private var viewControllers: [UIViewController] = []
 
-    init(uuid: String) {
-        self.uuid = uuid
+    init(viewControllers: [UIViewController]) {
+        self.viewControllers = viewControllers
         super.init(nibName: nil, bundle: nil)
         setupUI()
         setupTabButtons()

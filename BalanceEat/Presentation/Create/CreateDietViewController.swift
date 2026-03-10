@@ -19,8 +19,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         return label
     }()
     private let searchInputField = SearchInputField(placeholder: "음식 이름을 입력하세요")
-    private lazy var favoriteFoodGridView = FavoriteFoodGridView(favoriteFoods: favoriteFoods)
-    
+
     private lazy var searchStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [
             searchInputField,
@@ -67,22 +66,10 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         )
     )
     
-    private let favoriteFoods: [FavoriteFood] = [
-        FavoriteFood(iconImage: .chickenChest, name: "닭가슴살", calorie: 165),
-        FavoriteFood(iconImage: .salad, name: "샐러드", calorie: 100),
-        FavoriteFood(iconImage: .googleLogo, name: "구글", calorie: 999),
-        FavoriteFood(iconImage: .kakaoLogo, name: "카카오", calorie: 1010)
-    ]
-    
-    init(dietDatas: [DietData], date: Date) {
-        let userRepository = UserRepository()
-        let userUseCase = UserUseCase(repository: userRepository)
-        
-        let dietRepository = DietRepository()
-        let dietUseCase = DietUseCase(repository: dietRepository)
-                
-        let vm = CreateDietViewModel(dietUseCase: dietUseCase, userUseCase: userUseCase, dietDatas: dietDatas, date: date)
-        super.init(viewModel: vm)
+    var makeSearchFoodViewController: (() -> SearchFoodViewController?)?
+
+    override init(viewModel: CreateDietViewModel) {
+        super.init(viewModel: viewModel)
     }
     
     required init?(coder: NSCoder) {
@@ -162,7 +149,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             .observe(on: MainScheduler.instance)
             .bind { [weak self] in
                 guard let self else { return }
-                let searchFoodViewController = SearchFoodViewController()
+                guard let searchFoodViewController = makeSearchFoodViewController?() else { return }
                 
                 searchFoodViewController.selectedFoodDataRelay
                     .observe(on: MainScheduler.instance)
@@ -198,29 +185,6 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             }
             .disposed(by: disposeBag)
         
-        favoriteFoodGridView.tappedIndexObservable
-            .subscribe(
-                onNext: { [weak self] index in
-                    guard let self = self,
-                          index < self.favoriteFoods.count else { return }
-                    let favoriteFood = self.favoriteFoods[index]
-                    let addFoodViewController = AddFoodViewController(
-                        foodItem: FooddddItem(
-                            id: UUID(),
-                            name: favoriteFood.name,
-                            amount: 200,
-                            unit: "gram",
-                            nutritionalInfo: NutritionalInfo(calories: Double(favoriteFood.calorie), carbs: 100, protein: 30, fat: 20)
-                        )
-                    )
-                    
-                    addFoodViewController.modalPresentationStyle = .overCurrentContext
-                    addFoodViewController.modalTransitionStyle = .crossDissolve
-                    
-                    present(addFoodViewController, animated: true, completion: nil)
-                })
-            .disposed(by: disposeBag)
-        
         Observable.combineLatest(viewModel.currentFoodsRelay, viewModel.dataChangedRelay)
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] foods, dataChanged in
@@ -253,22 +217,15 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     
                     let mealType = viewModel.mealTimeRelay.value
                     let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
-//                    let todayConsumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
                     let mealTypeString = mealType.rawValue
                     if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
-                        let dietFoods = diet.items.map { [weak self] food in
-                            if let servingSize = self?.addedFoodListView.cellIntakeRelay.value[food.id] {
-                                return FoodItemForCreateDietDTO(
-                                    foodId: food.id,
-                                    intake: servingSize
-                                )
-                            } else {
-                                return FoodItemForCreateDietDTO(
-                                    foodId: -1,
-                                    intake: -1
-                                )
+                        let dietFoods: [DietFoodRequest] = diet.items.compactMap { food in
+                            guard let servingSize = self.addedFoodListView.cellIntakeRelay.value[food.id] else {
+                                return nil
                             }
+                            return DietFoodRequest(foodId: food.id, intake: servingSize)
                         }
+                        guard !dietFoods.isEmpty else { return }
                         
                         let userId = viewModel.getUserId()
                                                 

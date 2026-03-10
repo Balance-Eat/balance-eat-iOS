@@ -180,12 +180,7 @@ enum UserEndPoints: Endpoint {
         }
     }
     
-    var headers: HTTPHeaders? {
-        switch self {
-        default:
-            return nil
-        }
-    }
+    var headers: HTTPHeaders? { nil }
 }
 
 enum DietEndPoints: Endpoint {
@@ -306,13 +301,8 @@ enum NotificationEndpoints: Endpoint {
         }
     }
     
-    var queryParameters: [String : Any]? {
-        switch self {
-        default:
-            return nil
-        }
-    }
-    
+    var queryParameters: [String : Any]? { nil }
+
     var headers: Alamofire.HTTPHeaders? {
         switch self {
         case .create(_, let userId), .updateActivation(_, _, let userId):
@@ -379,12 +369,7 @@ enum FoodEndPoints: Endpoint {
         }
     }
     
-    var headers: HTTPHeaders? {
-        switch self {
-        default:
-            return nil
-        }
-    }
+    var headers: HTTPHeaders? { nil }
 }
 
 enum StatsEndPoints: Endpoint {
@@ -404,13 +389,8 @@ enum StatsEndPoints: Endpoint {
         }
     }
     
-    var parameters: [String : Any?]? {
-        switch self {
-        default:
-            return nil
-        }
-    }
-    
+    var parameters: [String : Any?]? { nil }
+
     var queryParameters: [String : Any]? {
         switch self {
         case .getStats(let period, _):

@@ -10,7 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewModel> {
+final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewModel> {
     private let editNameField = EditNameField()
     private let maleButton = SelectableTitledButton(
         title: "남성",
@@ -57,12 +57,8 @@ class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewModel> {
     
     private let valueChangedRelay = BehaviorRelay<Bool>(value: false)
     
-    init(userData: UserData) {
-        let userRepository = UserRepository()
-        let userUseCase = UserUseCase(repository: userRepository)
-        let vm = EditBasicInfoViewModel(userData: userData, userUseCase: userUseCase)
-        
-        super.init(viewModel: vm)
+    override init(viewModel: EditBasicInfoViewModel) {
+        super.init(viewModel: viewModel)
     }
     
     required init?(coder: NSCoder) {
@@ -254,18 +250,18 @@ class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewModel> {
                     return
                 }
                 
-                let edittedName = nameRelay.value
-                let edittedGender = genderRelay.value
-                let edittedAge = ageRelay.value
-                let edittedHeight = heightRelay.value
+                let editedName = nameRelay.value
+                let editedGender = genderRelay.value
+                let editedAge = ageRelay.value
+                let editedHeight = heightRelay.value
                 
                 let userDTO = UserDTO(
                     id: userData.id ,
                     uuid: userData.uuid,
-                    name: edittedName,
-                    gender: edittedGender,
-                    age: edittedAge,
-                    height: edittedHeight,
+                    name: editedName,
+                    gender: editedGender,
+                    age: editedAge,
+                    height: editedHeight,
                     weight: userData.weight,
                     goalType: userData.goalType,
                     email: userData.email,

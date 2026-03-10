@@ -10,7 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class MenuViewController: BaseViewController<MenuViewModel> {
+final class MenuViewController: BaseViewController<MenuViewModel> {
     private let profileInfoView = ProfileInfoView(name: "", goal: "", currentWeight: 0, goalWeight: 0)
     private let basicInfoMenuItemView = MenuItemView(
         icon: UIImage(systemName: "person.fill") ?? UIImage(),
@@ -51,13 +51,13 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         subtitle: "사용자가 추가로 등록하는 알림 설정"
     )
     
-    init() {
-        let userRepository = UserRepository()
-        let userUseCase = UserUseCase(repository: userRepository)
-        let notificationRepository = NotificationRepository()
-        let notificationUseCase = NotificationUseCase(repository: notificationRepository)
-        let vm = MenuViewModel(userUseCase: userUseCase, notificationUseCase: notificationUseCase)
-        super.init(viewModel: vm)
+    var onEditBasicInfo: ((UserData) -> Void)?
+    var onEditTarget: ((UserData) -> Void)?
+    var onEditTargetTypeAndActivityLevel: ((UserData) -> Void)?
+    var onSetRemindNoti: (() -> Void)?
+
+    override init(viewModel: MenuViewModel) {
+        super.init(viewModel: viewModel)
     }
     
     required init?(coder: NSCoder) {
@@ -129,22 +129,19 @@ class MenuViewController: BaseViewController<MenuViewModel> {
         basicInfoMenuItemView.onTap = { [weak self] in
             guard let self else { return }
             guard let userData = viewModel.userRelay.value else { return }
-            
-            navigationController?.pushViewController(EditBasicInfoViewController(userData: userData), animated: true)
+            onEditBasicInfo?(userData)
         }
-        
+
         editTargetMenuItemView.onTap = { [weak self] in
             guard let self else { return }
             guard let userData = viewModel.userRelay.value else { return }
-            
-            navigationController?.pushViewController(EditTargetViewController(userData: userData), animated: true)
+            onEditTarget?(userData)
         }
-        
+
         targetTypeAndActivityLevelMenuItemView.onTap = { [weak self] in
             guard let self else { return }
             guard let userData = viewModel.userRelay.value else { return }
-            
-            navigationController?.pushViewController(EditTargetTypeAndActivityLevelViewController(userData: userData), animated: true)
+            onEditTargetTypeAndActivityLevel?(userData)
         }
         
         pushNotiSwitchMenuItemView.switchRelay
@@ -152,11 +149,15 @@ class MenuViewController: BaseViewController<MenuViewModel> {
                 guard let self else { return }
                 
                 guard let deviceId = viewModel.notificationRelay.value?.id else {
+                    #if DEBUG
                     print("deviceId is nil")
+                    #endif
                     return
                 }
                 guard let userId = viewModel.notificationRelay.value?.userId else {
+                    #if DEBUG
                     print("userId is nil")
+                    #endif
                     return
                 }
                 
@@ -167,9 +168,7 @@ class MenuViewController: BaseViewController<MenuViewModel> {
             .disposed(by: disposeBag)
         
         remindNotiMenuItemView.onTap = { [weak self] in
-            guard let self else { return }
-            
-            navigationController?.pushViewController(SetRemindNotiViewController(), animated: true)
+            self?.onSetRemindNoti?()
         }
             
     }
@@ -368,7 +367,7 @@ final class MenuItemView: UIView {
     private let isSwitch: Bool
     
     let switchRelay: BehaviorRelay<Bool> = .init(value: false)
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
     var onTap: (() -> Void)?
     
     init(icon: UIImage, iconTintColor: UIColor, iconBackgroundColor: UIColor, title: String, subtitle: String, isSwitch: Bool = false) {

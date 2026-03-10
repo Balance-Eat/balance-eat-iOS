@@ -27,7 +27,6 @@ final class EditBasicInfoViewModel: BaseViewModel {
         
         switch updateUserResponse {
         case .success(()):
-            print("사용자 정보 수정 성공")
             updateUserResultRelay.accept(true)
             loadingRelay.accept(false)
         case .failure(let failure):

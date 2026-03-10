@@ -467,7 +467,7 @@ final class SetNotiRepeatDayOfWeekView: UIView {
     }()
     
     let selectedDays: BehaviorRelay<Set<DayOfWeek>>
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
     
     init(selectedDays: BehaviorRelay<Set<DayOfWeek>>) {
         self.selectedDays = selectedDays
@@ -643,7 +643,7 @@ final class SelectDayOfWeeksView: UIView {
     ]
     
     let selectedDays: BehaviorRelay<Set<DayOfWeek>>
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
     
     init(selectedDays: BehaviorRelay<Set<DayOfWeek>>) {
         self.selectedDays = selectedDays

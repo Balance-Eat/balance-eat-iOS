@@ -29,30 +29,4 @@ struct UserData {
     let targetFat: Double?
     let providerId: String?
     let providerType: String?
-    
-    static func responseDTOToModel(userResponseDTO: UserResponseDTO) -> UserData {
-        UserData(
-            id: userResponseDTO.id,
-            uuid: userResponseDTO.uuid,
-            name: userResponseDTO.name,
-            email: userResponseDTO.email,
-            gender: userResponseDTO.gender,
-            age: userResponseDTO.age,
-            weight: userResponseDTO.weight,
-            height: userResponseDTO.height,
-            goalType: userResponseDTO.goalType,
-            activityLevel: userResponseDTO.activityLevel,
-            smi: userResponseDTO.smi,
-            fatPercentage: userResponseDTO.fatPercentage,
-            targetWeight: userResponseDTO.targetWeight,
-            targetCalorie: userResponseDTO.targetCalorie,
-            targetSmi: userResponseDTO.targetSmi,
-            targetFatPercentage: userResponseDTO.targetFatPercentage,
-            targetCarbohydrates: userResponseDTO.targetCarbohydrates,
-            targetProtein: userResponseDTO.targetProtein,
-            targetFat: userResponseDTO.targetFat,
-            providerId: userResponseDTO.providerId,
-            providerType: userResponseDTO.providerId
-        )
-    }
 }

@@ -7,18 +7,14 @@
 
 import Foundation
 import CoreData
-import UIKit
 
 struct UserRepository: UserRepositoryProtocol {
     private let apiClient = APIClient.shared
-    private var context: NSManagedObjectContext {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            fatalError("AppDelegate를 가져올 수 없습니다!")
-        }
-        return appDelegate.persistentContainer.viewContext
+    private var context: NSManagedObjectContext
+
+    init(context: NSManagedObjectContext) {
+        self.context = context
     }
-
-
     
     private var userCoreData: UserCoreData {
         UserCoreData(viewContext: context)
@@ -33,10 +29,8 @@ struct UserRepository: UserRepositoryProtocol {
                 
         switch result {
         case .success:
-            print("user created success")
             return .success(())
         case .failure(let error):
-            print("user created failed: \(error.description)")
             return .failure(error)
         }
     }
@@ -50,15 +44,13 @@ struct UserRepository: UserRepositoryProtocol {
         
         switch result {
         case .success:
-            print("user updated success")
             return .success(())
         case .failure(let error):
-            print("user updated failed: \(error.description)")
             return .failure(error)
         }
     }
     
-    func getUser(uuid: String) async -> Result<UserResponseDTO, NetworkError> {
+    func getUser(uuid: String) async -> Result<UserData, NetworkError> {
         let endpoint = UserEndPoints.getUser(uuid: uuid)
         let result = await apiClient.request(
             endpoint: endpoint,
@@ -67,10 +59,8 @@ struct UserRepository: UserRepositoryProtocol {
         
         switch result {
         case .success(let response):
-            print("get user success \(response)")
-            return .success(response.data)
+            return .success(response.data.toDomain())
         case .failure(let error):
-            print("get user failed: \(error.description)")
             return .failure(error)
         }
     }

@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  BanlanceEat
+//  BalanceEat
 //
 //  Created by 김견 on 7/9/25.
 //
@@ -14,10 +14,13 @@ import FirebaseMessaging
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let gcmMessageIDKey = "gcm.message_id"
-    let notificationRepository = NotificationRepository()
-    lazy var notificationUseCase = NotificationUseCase(repository: notificationRepository)
-    let userRepository = UserRepository()
-    lazy var userUseCase = UserUseCase(repository: userRepository)
+
+    private var notificationUseCase: NotificationUseCaseProtocol {
+        AppDIContainer.shared.container.resolveOrFatal(NotificationUseCaseProtocol.self)
+    }
+    private var userUseCase: UserUseCaseProtocol {
+        AppDIContainer.shared.container.resolveOrFatal(UserUseCaseProtocol.self)
+    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -37,11 +40,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 
                 let userDefaultsManager = UserDefaultsManager.shared
                 
+                #if DEBUG
                 print("didfinishLaunchingWithOptions: fcm토큰: \(userDefaultsManager.getString(forKey: .agentId))")
+                #endif
                 
                 userDefaultsManager.set(granted, forKey: .pushNotificationEnabled)
                 if let error {
+                    #if DEBUG
                     print("permission error: \(error)")
+                    #endif
                 } else if !userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess) {
                     let token = userDefaultsManager.getString(forKey: .agentId)
                     if token == "" { return }
@@ -57,13 +64,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         
                         switch createNotificationResult {
                         case .success(let notificationResponseDTO):
+                            #if DEBUG
                             print("create noti success: \(notificationResponseDTO)")
+                            #endif
                             userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
                         case .failure(let error):
                             if error.description.contains("NOTIFICATION_DEVICE_ALREADY_EXISTS") {
                                 userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
                             }
+                            #if DEBUG
                             print("create noti failed : \(error.description)")
+                            #endif
                         }
                     }
                     
@@ -82,7 +93,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        #if DEBUG
         print("deviceToken: \(deviceToken)")
+        #endif
         Messaging.messaging().apnsToken = deviceToken
     }
 
@@ -120,8 +133,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             do {
                 try context.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nserror = error as NSError
                 fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
             }
@@ -142,8 +153,9 @@ extension AppDelegate: MessagingDelegate {
     
     // fcm 등록 토큰을 받았을 때
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        #if DEBUG
         print("didReceiveRegistrationToken fcm토큰: \(fcmToken ?? "")")
-//        let dataDict: [String: String] = ["token": fcmToken ?? ""]
+        #endif
         let userDefaultsManager = UserDefaultsManager.shared
         
         if userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess) && userDefaultsManager.getString(forKey: .agentId) == fcmToken {
@@ -165,9 +177,9 @@ extension AppDelegate: MessagingDelegate {
                 
                 switch createNotificationResult {
                 case .success(_):
-                    print("")
+                    break
                 case .failure(_):
-                    print("")
+                    break
                 }
             }
         }
@@ -177,7 +189,9 @@ extension AppDelegate: MessagingDelegate {
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
+        #if DEBUG
         print("FCM registration failed with error: \(error.localizedDescription)")
+        #endif
     }
 }
 
@@ -190,12 +204,11 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         let userInfo = notification.request.content.userInfo
         
         if let messageID = userInfo[gcmMessageIDKey] {
+            #if DEBUG
             print("messageID: \(messageID)")
-//            Logger.shared.log("AppDelegate", #function, "messageID: \(messageID)")
+            #endif
         }
-        
-//        Logger.shared.log("AppDelegate", #function, "userInfo: \(userInfo)")
-        
+
         completionHandler([[.banner, .badge, .sound]])
     }
     
@@ -204,12 +217,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
         let userInfo = response.notification.request.content.userInfo
         
         if let messageID = userInfo[gcmMessageIDKey] {
-//            Logger.shared.log("AppDelegate", #function, "messageID: \(messageID)")
+            #if DEBUG
             print("messageID: \(messageID)")
+            #endif
         }
         NotificationCenter.default.post(name: .pushNotificationReceived, object: nil, userInfo: userInfo)
-//        Logger.shared.log("AppDelegate", #function, "userInfo: \(userInfo)")
-        
+
         completionHandler()
     }
 }

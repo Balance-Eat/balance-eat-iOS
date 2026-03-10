@@ -10,7 +10,7 @@ import SnapKit
 import RxSwift
 import RxCocoa
 
-class BasicInfoViewController: UIViewController {
+final class BasicInfoViewController: UIViewController {
     private let mainStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -126,15 +126,15 @@ class BasicInfoViewController: UIViewController {
         genderStackView.spacing = 8
         
         let genderInputView = TitledInputInfoView(title: "성별", inputView: genderStackView)
-        let ageInputField = InputFieldWithIcon(icon: UIImage(systemName: "calendar.and.person")!, placeholder: "나이를 입력해주세요.", unit: "세", isAge: true)
+        let ageInputField = InputFieldWithIcon(icon: UIImage(systemName: "calendar.and.person"), placeholder: "나이를 입력해주세요.", unit: "세", isAge: true)
         let ageInputView = TitledInputInfoView(title: "나이", inputView: ageInputField)
         self.ageText = ageInputField.textObservable
         
-        let heightInputField = InputFieldWithIcon(icon: UIImage(systemName: "ruler")!, placeholder: "신장을 입력해주세요.", unit: "cm")
+        let heightInputField = InputFieldWithIcon(icon: UIImage(systemName: "ruler"), placeholder: "신장을 입력해주세요.", unit: "cm")
         let heightInputView = TitledInputInfoView(title: "신장", inputView: heightInputField)
         self.heightText = heightInputField.textObservable
         
-        let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass")!, placeholder: "체중을 입력해주세요.", unit: "kg")
+        let weightInputField = InputFieldWithIcon(icon: UIImage(systemName: "scalemass"), placeholder: "체중을 입력해주세요.", unit: "kg")
         let weightInputView = TitledInputInfoView(title: "체중", inputView: weightInputField)
         self.weightText = weightInputField.textObservable
         
@@ -186,7 +186,7 @@ class BasicInfoViewController: UIViewController {
 
 final class InputFieldWithIcon: UIView {
     private let icon: UIImage?
-    private let placeholder: String = ""
+    private let placeholder: String
     private let unit: String?
     private var isAge: Bool = false
     private var isFat: Bool = false
@@ -212,14 +212,14 @@ final class InputFieldWithIcon: UIView {
         return label
     }()
     
-    let disposeBag = DisposeBag()
+    private let disposeBag = DisposeBag()
     var textObservable: Observable<String?> {
         textField.rx.text.asObservable()
     }
     
     init(icon: UIImage? = nil, placeholder: String, unit: String? = nil, isAge: Bool = false, isFat: Bool = false, isNumber: Bool = true) {
         self.icon = icon
-//        self.placeholder = placeholder
+        self.placeholder = placeholder
         self.unit = unit
         self.isAge = isAge
         self.isFat = isFat

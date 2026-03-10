@@ -12,7 +12,7 @@ import RxCocoa
 import FlexLayout
 import PinLayout
 
-class ActivityLevelViewController: UIViewController {
+final class ActivityLevelViewController: UIViewController {
     private let mainStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -132,10 +132,6 @@ class ActivityLevelViewController: UIViewController {
                 TutorialPageViewModel.shared.dataRelay.accept(data)
                 
                 self.estimatedDailyCalorieView.isHidden = false
-                
-                TutorialPageViewModel.shared.targetCaloriesObservable
-                    .bind(to: self.estimatedDailyCalorieView.calorieRelay)
-                    .disposed(by: self.disposeBag)
             })
             .disposed(by: disposeBag)
         

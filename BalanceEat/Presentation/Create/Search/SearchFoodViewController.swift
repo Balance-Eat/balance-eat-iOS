@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 import Toast
 
-class SearchFoodViewController: UIViewController {
+final class SearchFoodViewController: UIViewController {
     private let viewModel: SearchFoodViewModel
     let selectedFoodDataRelay: BehaviorRelay<FoodData?> = BehaviorRelay(value: nil)
     
@@ -57,38 +57,12 @@ class SearchFoodViewController: UIViewController {
     }()
     private let doneButton = UIBarButtonItem(title: "완료", style: .done, target: nil, action: nil)
     
-    private let searchHistory = BehaviorRelay<[FoodDTO]>(
-        value: [
-//            FoodDTO(
-//                id: 1,
-//                uuid: "213",
-//                name: "바나나",
-//                perCapitaIntake: 12,
-//                unit: "g",
-//                carbohydrates: 30,
-//                protein: 40,
-//                fat: 40,
-//                createdAt: "2025-09-08T12:34:56Z"
-//            ),
-//            FoodDTO(
-//                id: 2,
-//                uuid: "1234",
-//                name: "닭가슴살",
-//                perCapitaIntake: 14,
-//                unit: "g",
-//                carbohydrates: 40,
-//                protein: 40,
-//                fat: 40,
-//                createdAt: "2025-09-08T12:34:56Z"
-//            )
-        ]
-    )
+    var makeCreateFoodViewController: (() -> CreateFoodViewController)?
+
     private let disposeBag = DisposeBag()
-    
-    init() {
-        let foodRepository = FoodRepository()
-        let foodUseCase = FoodUseCase(repository: foodRepository)
-        self.viewModel = SearchFoodViewModel(foodUseCase: foodUseCase)
+
+    init(viewModel: SearchFoodViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         
         setUpView()
@@ -202,11 +176,10 @@ class SearchFoodViewController: UIViewController {
             }
             .disposed(by: disposeBag)
         
-        tableView.rx.modelSelected(FoodDTOForSearch.self)
-            .subscribe(onNext: { [weak self] food in
+        tableView.rx.modelSelected(FoodData.self)
+            .subscribe(onNext: { [weak self] foodData in
                 guard let self else { return }
                 
-                let foodData = food.toFoodData()
                 selectedFoodDataRelay.accept(foodData)
                 navigationController?.popViewController(animated: true)
             })
@@ -247,9 +220,8 @@ class SearchFoodViewController: UIViewController {
         createFoodButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                
-                let createFoodViewController = CreateFoodViewController()
-                
+                guard let createFoodViewController = makeCreateFoodViewController?() else { return }
+
                 createFoodViewController.createdFoodRelay
                     .subscribe(onNext: { [weak self] food in
                         guard let self else { return }

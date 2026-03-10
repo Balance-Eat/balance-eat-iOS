@@ -296,7 +296,6 @@ final class AddedFoodCell: UITableViewCell {
         selectionStyle = .none
         setupView()
         setupConstraints()
-//        setBinding()
     }
     
     required init?(coder: NSCoder) {

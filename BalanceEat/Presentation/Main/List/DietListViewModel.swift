@@ -60,20 +60,16 @@ final class DietListViewModel: BaseViewModel {
         let month = month == 0 ? calendar.component(.month, from: selectedDate.value) : month
         let userId = getUserId()
         
-//        if monthDataCache.value.keys.contains("\(year)-\(month)") {
-//            return
-//        }
-        
         loadingRelay.accept(true)
         let response = await dietUseCase.getMonthlyDiet(year: year, month: month, userId: userId)
         switch response {
-        case .success(let dietDTOs):
+        case .success(let dietDataList):
             var currentCache = monthDataCache.value
             let yearMonthKey = "\(year)-\(month)"
             var dailyDict: [String: [DietData]] = [:]
             
-            for diet in dietDTOs {
-                dailyDict[diet.consumeDate, default: []].append(diet.toDietData())
+            for diet in dietDataList {
+                dailyDict[diet.consumeDate, default: []].append(diet)
                 
                 var current = ateDateRelay.value
                 current.insert(convertToDate(diet.consumeDate) ?? Date())

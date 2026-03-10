@@ -14,7 +14,7 @@ final class SearchFoodViewModel {
     
     let toastMessageRelay = BehaviorRelay<String?>(value: nil)
     let searchQueryRelay = BehaviorRelay<String>(value: "")
-    let searchFoodResultRelay = BehaviorRelay<[FoodDTOForSearch]>(value: [])
+    let searchFoodResultRelay = BehaviorRelay<[FoodData]>(value: [])
     let isLoadingNextPageRelay: BehaviorRelay<Bool> = .init(value: false)
     let errorMessageRelay = PublishRelay<String>()
     
@@ -34,9 +34,9 @@ final class SearchFoodViewModel {
         let searchFoodResponse = await foodUseCase.searchFood(foodName: foodName, page: currentPage, size: pageSize)
         
         switch searchFoodResponse {
-        case .success(let searchResponseDTO):
-            searchFoodResultRelay.accept(searchResponseDTO.items)
-            totalPage = searchResponseDTO.totalPages
+        case .success(let result):
+            searchFoodResultRelay.accept(result.items)
+            totalPage = result.totalPages
         case .failure(let failure):
             errorMessageRelay.accept(failure.description)
         }
