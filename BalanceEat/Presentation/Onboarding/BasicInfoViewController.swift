@@ -274,7 +274,7 @@ final class InputFieldWithIcon: UIView {
     private func setBinding() {
         textField.rx.text.orEmpty
             .map { [weak self] text in
-                guard let self = self else { return "" }
+                guard let self else { return "" }
                 if self.isNumber {
                     var dotCount = 0
                     let filtered = text.filter {

@@ -144,7 +144,7 @@ final class TargetGuideViewController: UIViewController {
         
         tapGesture.rx.event
             .bind(onNext: { [weak self] gesture in
-                guard let self = self else { return }
+                guard let self else { return }
                 let location = gesture.location(in: self.view)
                 
                 if self.contentView.frame.contains(location) { return }

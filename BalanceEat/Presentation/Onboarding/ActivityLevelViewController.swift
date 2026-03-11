@@ -79,7 +79,7 @@ final class ActivityLevelViewController: UIViewController {
         let activityLevelPickerView = ActivityLevelPickerView()
         activityLevelPickerView.selectedActivityLevelRelay
             .subscribe(onNext: { [weak self] level in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.selectedActivityLevel.accept(level)
                 self.estimatedDailyCalorieView.isHidden = false
             })
@@ -126,7 +126,7 @@ final class ActivityLevelViewController: UIViewController {
         
         selectedActivityLevel
             .subscribe(onNext: { [weak self] level in
-                guard let self = self else { return }
+                guard let self else { return }
                 var data = TutorialPageViewModel.shared.dataRelay.value
                 data.activityLevel = level
                 TutorialPageViewModel.shared.dataRelay.accept(data)

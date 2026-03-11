@@ -136,21 +136,21 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
     private func setBinding() {
         goalPickerView.selectedGoalRelay
             .subscribe(onNext: { [weak self] goal in
-                guard let self = self else { return }
+                guard let self else { return }
                 viewModel.selectedGoalRelay.accept(goal)
             })
             .disposed(by: disposeBag)
         
         activityLevelPickerView.selectedActivityLevelRelay
             .subscribe(onNext: { [weak self] level in
-                guard let self = self else { return }
+                guard let self else { return }
                 viewModel.selectedActivityLevel.accept(level)
                 estimatedDailyCalorieView.isHidden = false
             })
             .disposed(by: disposeBag)
         
         viewModel.targetCaloriesObservable
-            .bind(to: self.estimatedDailyCalorieView.calorieRelay)
+            .bind(to: estimatedDailyCalorieView.calorieRelay)
             .disposed(by: disposeBag)
         
         Observable.combineLatest(viewModel.selectedGoalRelay, viewModel.selectedActivityLevel, viewModel.userRelay)

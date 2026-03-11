@@ -91,7 +91,7 @@ final class EstimatedDailyCalorieView: UIView {
     
     private func setUpBinding() {
         calorieRelay.subscribe(onNext: { [weak self] calorie in
-            guard let self = self else { return }
+            guard let self else { return }
             self.setCalorieLabelText(String(format: "%.0f", calorie))
         })
         .disposed(by: disposeBag)

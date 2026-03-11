@@ -82,7 +82,7 @@ final class BottomNavigationBarTabButton: UIView {
         
         tapGesture.rx.event
             .do(onNext: { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 let newValue = !self.isSelected.value
                 self.isSelected.accept(newValue)
                 

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SnapKit
 
 struct TitledButtonStyle {
     let backgroundColor: UIColor?

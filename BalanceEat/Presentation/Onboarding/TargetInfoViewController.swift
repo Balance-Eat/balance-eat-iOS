@@ -94,7 +94,7 @@ final class TargetInfoViewController: UIViewController {
         let goalPickerView = GoalPickerView()
         goalPickerView.selectedGoalRelay
             .subscribe(onNext: { [weak self] goal in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.selectedGoal.accept(goal)
             })
             .disposed(by: disposeBag)
@@ -115,7 +115,7 @@ final class TargetInfoViewController: UIViewController {
         }()
         optionalTargetOpenButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 var optionalIsOpenValue = self.optionalIsOpen.value
                 optionalIsOpenValue.toggle()
                 self.optionalIsOpen.accept(optionalIsOpenValue)
@@ -221,7 +221,7 @@ final class TargetInfoViewController: UIViewController {
                                                      currentFatPercentageText,
                                                      targetFatPercentageText))
             .subscribe(onNext: { [weak self] currentSMI, targetSMI, currentFat, targetFat in
-                guard let self = self else { return }
+                guard let self else { return }
 
                 let currentSMIEntered = !(currentSMI?.isEmpty ?? true)
                 let targetSMIEntered = !(targetSMI?.isEmpty ?? true)

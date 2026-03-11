@@ -15,6 +15,8 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     private var bottomConstraint: Constraint?
     private let tableView = UITableView()
     private let refreshControl = UIRefreshControl()
+    private var editPresentationBag = DisposeBag()
+    private var addPresentationBag = DisposeBag()
     private let dataEmptyLabel: UILabel = {
         let label = UILabel()
         label.text = "아직 설정된 알림이 없습니다."
@@ -30,7 +32,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         setBinding()
     }
     
-    @MainActor required init?(coder: NSCoder) {
+    required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
@@ -134,39 +136,41 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                 cell.remindView.editButtonTapRelay
                     .subscribe(onNext: { [weak self] in
                         guard let self else { return }
-                        
+
+                        editPresentationBag = DisposeBag()
+
                         let editNotiViewController = EditNotiViewController(editNotiCase: .edit)
                         editNotiViewController.modalPresentationStyle = .overCurrentContext
                         editNotiViewController.modalTransitionStyle = .crossDissolve
                         editNotiViewController.setDatas(reminderData: model)
-                        
+
                         viewModel.successToSaveReminderRelay
                             .bind(to: editNotiViewController.successToSaveRelay)
-                            .disposed(by: disposeBag)
-                        
+                            .disposed(by: editPresentationBag)
+
                         editNotiViewController.saveButtonTapRelay
                             .observe(on: MainScheduler.instance)
                             .subscribe(
                                 onNext: { [weak self] in
                                     guard let self else { return }
-                                    
+
                                     let content = editNotiViewController.memoRelay.value
                                     let sendTime = timeStringHHmm00(from: editNotiViewController.timeRelay.value)
                                     let dayOfWeeks = editNotiViewController.selectedDaysRelay.value.map { $0.rawValue }
-                                    
+
                                     let reminderDataForCreate = ReminderDataForCreate(
                                         content: content,
                                         sendTime: sendTime,
                                         isActive: true,
                                         dayOfWeeks: dayOfWeeks
                                     )
-                                
-                                Task {
-                                    await self.viewModel.updateReminder(reminderDataForCreate: reminderDataForCreate, reminderId: model.id)
-                                }
-                            })
-                            .disposed(by: disposeBag)
-                        
+
+                                    Task {
+                                        await self.viewModel.updateReminder(reminderDataForCreate: reminderDataForCreate, reminderId: model.id)
+                                    }
+                                })
+                            .disposed(by: editPresentationBag)
+
                         present(editNotiViewController, animated: true, completion: nil)
                     })
                     .disposed(by: cell.disposeBag)
@@ -211,7 +215,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         tableView.rx.contentOffset
             .throttle(.milliseconds(300), scheduler: MainScheduler.instance)
             .subscribe(onNext: { [weak self] offset in
-                guard let self = self else { return }
+                guard let self else { return }
                 let threshold = self.tableView.contentSize.height - self.tableView.frame.size.height
                 if offset.y > threshold && !self.viewModel.isLastPage && self.viewModel.isLoadingNextPageRelay.value == false {
                     Task {
@@ -224,9 +228,17 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         refreshControl.rx.controlEvent(.valueChanged)
             .bind { [weak self] in
                 guard let self else { return }
-                
+
                 getDatas(page: 0, size: 100)
             }
+            .disposed(by: disposeBag)
+
+        viewModel.successToSaveReminderRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] _ in
+                guard let self else { return }
+                getDatas(page: 0, size: 100)
+            })
             .disposed(by: disposeBag)
     }
     
@@ -246,45 +258,39 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     }
     
     @objc private func didTapPlus() {
+        addPresentationBag = DisposeBag()
+
         let editNotiViewController = EditNotiViewController(editNotiCase: .add)
         editNotiViewController.modalPresentationStyle = .overCurrentContext
         editNotiViewController.modalTransitionStyle = .crossDissolve
-        
+
         viewModel.successToSaveReminderRelay
             .bind(to: editNotiViewController.successToSaveRelay)
-            .disposed(by: disposeBag)
-        
-        viewModel.successToSaveReminderRelay
-            .subscribe(onNext: { [weak self] _ in
-                guard let self else { return }
-                                
-                getDatas(page: 0, size: 100)
-            })
-            .disposed(by: disposeBag)
-        
+            .disposed(by: addPresentationBag)
+
         editNotiViewController.saveButtonTapRelay
             .observe(on: MainScheduler.instance)
             .subscribe(
                 onNext: { [weak self] in
                     guard let self else { return }
-                    
+
                     let content = editNotiViewController.memoRelay.value
                     let sendTime = timeStringHHmm00(from: editNotiViewController.timeRelay.value)
                     let dayOfWeeks = editNotiViewController.selectedDaysRelay.value.map { $0.rawValue }
-                    
+
                     let reminderDataForCreate = ReminderDataForCreate(
                         content: content,
                         sendTime: sendTime,
                         isActive: true,
                         dayOfWeeks: dayOfWeeks
                     )
-                
-                Task {
-                    await self.viewModel.createReminder(reminderDataForCreate: reminderDataForCreate)
-                }
-            })
-            .disposed(by: disposeBag)
-        
+
+                    Task { [weak self] in
+                        await self?.viewModel.createReminder(reminderDataForCreate: reminderDataForCreate)
+                    }
+                })
+            .disposed(by: addPresentationBag)
+
         present(editNotiViewController, animated: true, completion: nil)
     }
     
@@ -499,7 +505,6 @@ final class RemindNotificationView: UIView {
         }
         
         addSubview(mainVerticalStackView)
-//        addSubview(overlayView)
         
         mainVerticalStackView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(16)

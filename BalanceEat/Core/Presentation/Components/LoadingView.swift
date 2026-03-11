@@ -86,7 +86,7 @@ final class LoadingView: UIView {
         isLoading
             .asDriver()
             .drive(onNext: { [weak self] show in
-                guard let self = self else { return }
+                guard let self else { return }
                 UIView.animate(withDuration: 0.25) {
                     self.blurEffectView.alpha = show ? 1 : 0
                     self.cardView.alpha = show ? 1 : 0

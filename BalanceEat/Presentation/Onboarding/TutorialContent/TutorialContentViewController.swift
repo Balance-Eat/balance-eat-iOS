@@ -114,7 +114,7 @@ final class TutorialContentViewController: UIViewController {
         
         tutorialPageViewController.currentPageRelay
             .map { [weak self] pageInfo -> String in
-                guard let self = self else { return "" }
+                guard let self else { return "" }
                 let index = pageInfo.currentIndex
                 return index < self.pageTitle.count ? self.pageTitle[index] : ""
             }
@@ -126,7 +126,7 @@ final class TutorialContentViewController: UIViewController {
             .map { $0.currentIndex }
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] currentIndex in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.backButton.isHidden = (currentIndex == 0)
             })
             .disposed(by: disposeBag)
@@ -176,7 +176,7 @@ final class TutorialContentViewController: UIViewController {
     private func bindBackButton() {
         backButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 if self.tutorialPageViewController.currentIndex > 0 {
                     self.tutorialPageViewController.goToPreviousPage()
@@ -303,7 +303,7 @@ final class TutorialPageIndicatorView: UIView {
             .distinctUntilChanged()
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] currentPage in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.updateLabels(currentPage: currentPage)
                 self.updateProgressBar(currentPage: currentPage)
             })

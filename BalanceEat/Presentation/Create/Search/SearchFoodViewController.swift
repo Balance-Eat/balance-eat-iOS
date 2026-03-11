@@ -160,7 +160,7 @@ final class SearchFoodViewController: UIViewController {
         
         viewModel.searchFoodResultRelay
             .bind(to: tableView.rx.items(cellIdentifier: SearchResultFoodCell.identifier)) { row, element, cell in
-                let calory = Int(element.carbohydrates * 4 + element.protein * 4 + element.fat * 9)
+                let calory = element.perServingCalories
                 
                 if let cell = cell as? SearchResultFoodCell {
                     cell.configure(
@@ -198,9 +198,10 @@ final class SearchFoodViewController: UIViewController {
                    !self.viewModel.isLastPage,
                    !self.viewModel.isLoadingNextPageRelay.value {
 
-                    Task {
-                        await self.viewModel.fetchSearchFood(
-                            foodName: self.viewModel.searchQueryRelay.value
+                    Task { [weak self] in
+                        guard let self else { return }
+                        await viewModel.fetchSearchFood(
+                            foodName: viewModel.searchQueryRelay.value
                         )
                     }
                 }
@@ -223,13 +224,12 @@ final class SearchFoodViewController: UIViewController {
                 guard let createFoodViewController = makeCreateFoodViewController?() else { return }
 
                 createFoodViewController.createdFoodRelay
+                    .compactMap { $0 }
+                    .take(1)
                     .subscribe(onNext: { [weak self] food in
                         guard let self else { return }
                         selectedFoodDataRelay.accept(food)
-                        
-                        if food != nil {
-                            navigationController?.popViewController(animated: true)
-                        }
+                        navigationController?.popViewController(animated: true)
                     })
                     .disposed(by: disposeBag)
                 

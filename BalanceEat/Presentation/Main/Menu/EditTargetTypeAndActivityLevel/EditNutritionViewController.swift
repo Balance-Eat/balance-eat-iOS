@@ -99,7 +99,7 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
     private func setBinding() {
         Observable.combineLatest(viewModel.targetCaloriesRelay, viewModel.selectedGoalRelay, viewModel.userRelay)
             .subscribe(onNext: { [weak self] calories, goal, data in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 var carbon: Double = 0
                 var protein: Double = 0

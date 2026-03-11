@@ -121,7 +121,7 @@ final class MacroSettingViewController: UIViewController {
         
         resetButton.rx.tap
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 editNutritionInfoView.setCarbonText(text: String(format: "%.0f", initialCarbon))
                 editNutritionInfoView.setProteinText(text: String(format: "%.0f", initialProtein))
                 editNutritionInfoView.setFatText(text: String(format: "%.0f", initialFat))
@@ -130,7 +130,7 @@ final class MacroSettingViewController: UIViewController {
         
         Observable.combineLatest(viewModel.targetCaloriesRelay, viewModel.goalTypeRelay, viewModel.dataRelay)
             .subscribe(onNext: { [weak self] calories, goal, data in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 var carbon: Double = 0
                 var protein: Double = 0
@@ -166,7 +166,7 @@ final class MacroSettingViewController: UIViewController {
         
         viewModel.targetCaloriesRelay
             .map { "일일 \(String(format: "%.0f", $0))kcal 기준으로\n 탄수화물, 단백질, 지방 비율을 결정합니다." }
-            .bind(to: self.subtitleLabel.rx.text)
+            .bind(to: subtitleLabel.rx.text)
             .disposed(by: disposeBag)
         
         editNutritionInfoView.carbonRelay

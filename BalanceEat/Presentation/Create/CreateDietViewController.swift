@@ -153,11 +153,12 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 
                 searchFoodViewController.selectedFoodDataRelay
                     .observe(on: MainScheduler.instance)
+                    .compactMap { $0 }
+                    .take(1)
                     .subscribe(
                         onNext: { [weak self] foodData in
                             guard let self else { return }
-                            guard let foodData else { return }
-                            
+
                             let mealTime = viewModel.mealTimeRelay.value
                             var current = viewModel.dietFoodsRelay.value
                             
@@ -200,7 +201,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         
         addedFoodListView.deletedFoodItem
             .subscribe(onNext: { [weak self] item in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 viewModel.deleteFood(food: item)
             })
@@ -230,8 +231,8 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                         let userId = viewModel.getUserId()
                                                 
                         if viewModel.currentFoodsRelay.value?.id == -1 {
-                            Task {
-                                await self.viewModel.createDiet(
+                            Task { [weak self] in
+                                await self?.viewModel.createDiet(
                                     mealType: mealType,
                                     consumedAt: consumedAt,
                                     dietFoods: dietFoods,
@@ -239,8 +240,8 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                                 )
                             }
                         } else {
-                            Task {
-                                await self.viewModel.updateDiet(
+                            Task { [weak self] in
+                                await self?.viewModel.updateDiet(
                                     dietId: diet.id,
                                     mealType: mealType,
                                     consumedAt: consumedAt,
@@ -267,9 +268,9 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     )
                     
                     let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
-                    let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { _ in
-                        Task {
-                            await self.viewModel.deleteDiet(dietId: diet.id, userId: userId)
+                    let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                        Task { [weak self] in
+                            await self?.viewModel.deleteDiet(dietId: diet.id, userId: userId)
                         }
                     }
                     
@@ -324,11 +325,15 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         Calendar.current.isDateInToday(date)
     }
     
-    private func formattedMealDate(_ date: Date) -> String {
+    private static let mealDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "yyyy년 MM월 dd일 '식단'"
-        return formatter.string(from: date)
+        return formatter
+    }()
+
+    private func formattedMealDate(_ date: Date) -> String {
+        return Self.mealDateFormatter.string(from: date)
     }
     
     private func goToBack() {

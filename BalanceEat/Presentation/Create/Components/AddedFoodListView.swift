@@ -378,6 +378,7 @@ final class AddedFoodCell: UITableViewCell {
         stepperView.intake = intake
         stepperView.servingSize = foodData.servingSize
         
+        nutritionalInfoView.calorieRelay.accept(foodData.calories)
         nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates)
         nutritionalInfoView.proteinRelay.accept(foodData.protein)
         nutritionalInfoView.fatRelay.accept(foodData.fat)
@@ -409,27 +410,17 @@ final class AddedFoodCell: UITableViewCell {
             .subscribe(onNext: { [weak self] amount in
                 guard let self else { return }
                 guard let foodData = self.foodData else { return }
-                
+
                 let ratio = amount / intake
-                                
+
+                nutritionalInfoView.calorieRelay.accept(foodData.calories * ratio)
                 nutritionalInfoView.carbonRelay.accept(foodData.carbohydrates * ratio)
                 nutritionalInfoView.proteinRelay.accept(foodData.protein * ratio)
                 nutritionalInfoView.fatRelay.accept(foodData.fat * ratio)
-                
+
                 intakeRelay.accept(amount)
             })
             .disposed(by: disposeBag)
-        
-        Observable.combineLatest(
-            nutritionalInfoView.carbonRelay,
-            nutritionalInfoView.proteinRelay,
-            nutritionalInfoView.fatRelay
-        ).subscribe(onNext: { [weak self] (carbon, protein, fat) in
-            guard let self else { return }
-            let calorieRelayValue = 4 * carbon + 4 * protein + 9 * fat
-            nutritionalInfoView.calorieRelay.accept(calorieRelayValue)
-        })
-        .disposed(by: disposeBag)
         
         Observable.combineLatest(
             nutritionalInfoView.calorieRelay,

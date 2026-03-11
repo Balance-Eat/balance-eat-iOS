@@ -364,7 +364,7 @@ final class DietListHeaderView: UIView, UICalendarSelectionSingleDateDelegate, U
         markedDatesRelay
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] _ in
-                guard let self = self else { return }
+                guard let self else { return }
                 
                 let dateComponentsArray = self.markedDatesRelay.value.map { date in
                     Calendar.current.dateComponents([.year, .month, .day], from: date)

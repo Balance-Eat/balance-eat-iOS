@@ -29,7 +29,7 @@ final class BackButton: UIButton {
         self.configuration = config
 
         self.configurationUpdateHandler = { [weak self] button in
-            guard let self = self else { return }
+            guard let self else { return }
             if button.isHighlighted {
                 self.configuration?.baseForegroundColor = .gray
             } else {

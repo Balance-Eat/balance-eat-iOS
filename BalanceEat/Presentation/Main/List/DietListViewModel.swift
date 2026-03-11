@@ -12,6 +12,18 @@ final class DietListViewModel: BaseViewModel {
     private let userUseCase: UserUseCaseProtocol
     private let dietUseCase: DietUseCaseProtocol
     
+    private static let dailyFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
+
+    private static let monthlyFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-M"
+        return formatter
+    }()
+
     let userDataRelay = BehaviorRelay<UserData?>(value: nil)
     let monthDataCache = BehaviorRelay<[String: [String: [DietData]] ]>(value: [:])
     let selectedDate = BehaviorRelay<Date>(value: Date())
@@ -68,13 +80,15 @@ final class DietListViewModel: BaseViewModel {
             let yearMonthKey = "\(year)-\(month)"
             var dailyDict: [String: [DietData]] = [:]
             
+            var ateDates = ateDateRelay.value
             for diet in dietDataList {
                 dailyDict[diet.consumeDate, default: []].append(diet)
-                
-                var current = ateDateRelay.value
-                current.insert(convertToDate(diet.consumeDate) ?? Date())
-                ateDateRelay.accept(current)
+
+                if let parsedDate = convertToDate(diet.consumeDate) {
+                    ateDates.insert(parsedDate)
+                }
             }
+            ateDateRelay.accept(ateDates)
             
             currentCache[yearMonthKey] = dailyDict
             monthDataCache.accept(currentCache)
@@ -94,22 +108,18 @@ final class DietListViewModel: BaseViewModel {
         selectedDate
             .subscribe(onNext: { [weak self] date in
                 guard let self else { return }
-                
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd"
-                let dateKey = dateFormatter.string(from: date)
-                
-                let monthFormatter = DateFormatter()
-                monthFormatter.dateFormat = "yyyy-M"
-                let monthKey = monthFormatter.string(from: date)
+
+                let dateKey = DietListViewModel.dailyFormatter.string(from: date)
+                let monthKey = DietListViewModel.monthlyFormatter.string(from: date)
                 
                 if let monthDict = self.monthDataCache.value[monthKey] {
                     self.selectedDayDataCache.accept(monthDict[dateKey] ?? [])
                 } else {
-                    Task {
-                        await self.getMonthlyDiets()
-                        let updatedMonthDict = self.monthDataCache.value[monthKey]
-                        self.selectedDayDataCache.accept(updatedMonthDict?[dateKey] ?? [])
+                    Task { [weak self] in
+                        guard let self else { return }
+                        await getMonthlyDiets()
+                        let updatedMonthDict = monthDataCache.value[monthKey]
+                        selectedDayDataCache.accept(updatedMonthDict?[dateKey] ?? [])
                     }
                 }
             })

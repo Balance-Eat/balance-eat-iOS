@@ -43,7 +43,7 @@ final class TutorialPageViewController: UIViewController {
         
         basicInfoViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.goToNextPage()
             })
             .disposed(by: disposeBag)
@@ -52,7 +52,7 @@ final class TutorialPageViewController: UIViewController {
         
         targetInfoViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.goToNextPage()
             })
             .disposed(by: disposeBag)
@@ -61,7 +61,7 @@ final class TutorialPageViewController: UIViewController {
         
         activityLevelViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.goToNextPage()
             })
             .disposed(by: disposeBag)
@@ -70,7 +70,7 @@ final class TutorialPageViewController: UIViewController {
         
         macroSettingViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
-                guard let self = self else { return }
+                guard let self else { return }
                 let data = self.viewModel.dataRelay.value
                 let goalType = self.viewModel.goalTypeRelay.value
                 let createUserDTO = UserDTO(

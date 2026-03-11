@@ -199,7 +199,7 @@ final class MealLogFoodView: UIView {
     private func setUpView() {
         titleLabel.text = dietFoodData.name
         amountLabel.text = "\(dietFoodData.intake) \(dietFoodData.unit)"
-        calorieLabel.text = String(format: "%.1f kcal", makeCalorie(carbon: dietFoodData.carbohydrates, protein: dietFoodData.protein, fat: dietFoodData.fat))
+        calorieLabel.text = String(format: "%.1f kcal", dietFoodData.calories)
         
         let rightStackSubviews: [UIView] = {
             if showNutrientInfo {

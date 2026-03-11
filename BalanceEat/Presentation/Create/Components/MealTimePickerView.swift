@@ -81,7 +81,7 @@ final class MealTimePickerView: UIView {
             
             item.tapObservable
                 .subscribe(onNext: { [weak self] in
-                    guard let self = self else { return }
+                    guard let self else { return }
                     if self.selectedMealTimeRelay.value != mealType {
                         self.selectedMealTimeRelay.accept(mealType)
                     } else {
