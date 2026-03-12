@@ -25,6 +25,7 @@
 		49BF00BA2E1E323B00876EC3 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B92E1E323B00876EC3 /* RealmSwift */; };
 		49BF011C2E1F4CE500876EC3 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 49BF011B2E1F4CE500876EC3 /* SnapKit */; };
 		49BF020F2E20E42800876EC3 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 49BF00B92E1E323B00876EC3 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		A1TEST0012E1E309400876EC3 /* RxSwift in Frameworks */ = {isa = PBXBuildFile; productRef = A1TEST0022E1E309400876EC3 /* RxSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -124,6 +125,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1TEST0012E1E309400876EC3 /* RxSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -218,6 +220,7 @@
 			);
 			name = BalanceEatTests;
 			packageProductDependencies = (
+				A1TEST0022E1E309400876EC3 /* RxSwift */,
 			);
 			productName = BanlanceEatTests;
 			productReference = 49BF008B2E1E2FCA00876EC3 /* BalanceEatTests.xctest */;
@@ -832,6 +835,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 49BF011A2E1F4CE500876EC3 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		A1TEST0022E1E309400876EC3 /* RxSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 49BF00AF2E1E309400876EC3 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 
