@@ -42,15 +42,6 @@ final class CreateDietViewModelTests: XCTestCase {
         )
     }
 
-    /// BehaviorRelay의 방출 흐름을 기록하는 헬퍼
-    private func record<T>(_ relay: BehaviorRelay<T>) -> [T] {
-        var values: [T] = []
-        relay
-            .subscribe(onNext: { values.append($0) })
-            .disposed(by: disposeBag)
-        return values
-    }
-
     // MARK: - createDiet: 결과 검증
 
     func test_createDiet_성공시_saveDietSuccessRelay_발행() async {
