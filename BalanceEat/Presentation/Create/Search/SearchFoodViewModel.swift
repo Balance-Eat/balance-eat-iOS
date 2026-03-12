@@ -25,6 +25,7 @@ final class SearchFoodViewModel: BaseViewModel {
         self.foodUseCase = foodUseCase
     }
     
+    @MainActor
     func searchFood(foodName: String) async {
         
         currentPage = 0
@@ -40,6 +41,7 @@ final class SearchFoodViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func fetchSearchFood(foodName: String) async {
         guard !isLastPage else { return }
         

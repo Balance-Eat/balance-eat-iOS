@@ -128,11 +128,8 @@ final class ChartViewController: BaseViewController<ChartViewModel> {
     private func getStats() {
         let period = headerView.periodRelay.value
         Task {
-            await self.viewModel.getStats(period: period)
-            
-            DispatchQueue.main.async { [weak self] in
-                self?.refreshControl.endRefreshing()
-            }
+            await viewModel.getStats(period: period)
+            refreshControl.endRefreshing()
         }
     }
 }

@@ -72,6 +72,7 @@ final class EditTargetTypeAndActivityLevelViewModel: BaseViewModel {
             .disposed(by: disposeBag)
     }
     
+    @MainActor
     func updateUser(userDTO: UserDTO) async {
         loadingRelay.accept(true)
         

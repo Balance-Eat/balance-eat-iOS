@@ -20,6 +20,7 @@ final class EditBasicInfoViewModel: BaseViewModel {
         self.userUseCase = userUseCase
     }
     
+    @MainActor
     func updateUser(userDTO: UserDTO) async {
         loadingRelay.accept(true)
         

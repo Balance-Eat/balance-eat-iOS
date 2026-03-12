@@ -49,6 +49,7 @@ final class HomeViewModel: BaseViewModel {
             .disposed(by: disposeBag)
     }
     
+    @MainActor
     func getUser() async {
         let uuid = getUserUUID()
         
@@ -85,6 +86,7 @@ final class HomeViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func getDailyDiet() async {
         guard let userId = userResponseRelay.value?.id else {
             return

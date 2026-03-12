@@ -56,6 +56,7 @@ final class DietListViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func getUser() async {
         loadingRelay.accept(true)
         let response = await userUseCase.getUser(uuid: getUserUUID())
@@ -66,6 +67,7 @@ final class DietListViewModel: BaseViewModel {
         loadingRelay.accept(false)
     }
     
+    @MainActor
     func getMonthlyDiets(year: Int = 0, month: Int = 0) async {
         let calendar = Calendar.current
         let year = year == 0 ? calendar.component(.year, from: selectedDate.value) : year
@@ -115,7 +117,7 @@ final class DietListViewModel: BaseViewModel {
                 if let monthDict = self.monthDataCache.value[monthKey] {
                     self.selectedDayDataCache.accept(monthDict[dateKey] ?? [])
                 } else {
-                    Task { [weak self] in
+                    Task { @MainActor [weak self] in
                         guard let self else { return }
                         await getMonthlyDiets()
                         let updatedMonthDict = monthDataCache.value[monthKey]

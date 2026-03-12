@@ -136,6 +136,7 @@ final class CreateDietViewModel: BaseViewModel {
             .disposed(by: disposeBag)
     }
     
+    @MainActor
     func createDiet(mealType: MealType, consumedAt: String, dietFoods: [DietFoodRequest], userId: String) async {
         loadingRelay.accept(true)
         
@@ -152,6 +153,7 @@ final class CreateDietViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func updateDiet(dietId: Int, mealType: MealType, consumedAt: String, dietFoods: [DietFoodRequest], userId: String) async {
         loadingRelay.accept(true)
         
@@ -168,6 +170,7 @@ final class CreateDietViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func deleteDiet(dietId: Int, userId: String) async {
         loadingRelay.accept(true)
         

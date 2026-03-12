@@ -144,9 +144,7 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
         Task {
             await viewModel.getUser()
             await viewModel.getDailyDiet()
-            DispatchQueue.main.async { [weak self] in
-                self?.refreshControl.endRefreshing()
-            }
+            refreshControl.endRefreshing()
         }
     }
     

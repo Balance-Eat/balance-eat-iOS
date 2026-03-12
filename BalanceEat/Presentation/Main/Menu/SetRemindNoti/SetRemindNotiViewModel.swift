@@ -31,6 +31,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         super.init()
     }
     
+    @MainActor
     func getReminderList(page: Int = -1, size: Int = -1) async {
         loadingRelay.accept(true)
         currentPage = page == -1 ? 0 : page
@@ -50,6 +51,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func fetchReminderList() async {
         guard !isLastPage else { return }
         
@@ -73,6 +75,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
     }
 
     
+    @MainActor
     func createReminder(reminderDataForCreate: ReminderDataForCreate) async {
         loadingRelay.accept(true)
         
@@ -91,6 +94,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         }
     }
 
+    @MainActor
     func getReminderDetail(reminderId: Int) async {
         loadingRelay.accept(true)
         
@@ -109,6 +113,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func updateReminder(reminderDataForCreate: ReminderDataForCreate, reminderId: Int) async {
         loadingRelay.accept(true)
         
@@ -128,6 +133,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func deleteReminder(reminderId: Int) async {
         loadingRelay.accept(true)
         
@@ -148,6 +154,7 @@ final class SetRemindNotiViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func updateReminderActivation(isActive: Bool, reminderId: Int) async {
         loadingRelay.accept(true)
         

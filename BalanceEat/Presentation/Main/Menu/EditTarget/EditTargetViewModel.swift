@@ -18,6 +18,7 @@ final class EditTargetViewModel: BaseViewModel {
         self.userUseCase = userUseCase
     }
     
+    @MainActor
     func updateUser(userDTO: UserDTO) async {
         loadingRelay.accept(true)
         

@@ -24,6 +24,7 @@ final class MenuViewModel: BaseViewModel {
         self.notificationUseCase = notificationUseCase
     }
     
+    @MainActor
     func getUser() async {
         let uuid = getUserUUID()
         
@@ -65,6 +66,7 @@ final class MenuViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func getNotificationCurrentDevice(userId: String, agentId: String) async {
         loadingRelay.accept(true)
         
@@ -80,6 +82,7 @@ final class MenuViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func updateNotificationActivation(isActive: Bool, deviceId: Int, userId: String) async {
         let updateNotificationActivation = await notificationUseCase.updateActivation(isActive: isActive, deviceId: deviceId, userId: userId)
         

@@ -18,6 +18,7 @@ final class CreateFoodViewModel: BaseViewModel {
         self.foodUseCase = foodUseCase
     }
     
+    @MainActor
     func createFood(createFoodDTO: CreateFoodDTO) async {
         loadingRelay.accept(true)
         

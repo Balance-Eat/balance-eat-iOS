@@ -32,6 +32,7 @@ final class ChartViewModel: BaseViewModel {
         }
     }
     
+    @MainActor
     func getUser() async {
         let uuid = getUserUUID()
         
@@ -61,6 +62,7 @@ final class ChartViewModel: BaseViewModel {
         
     }
     
+    @MainActor
     func getStats(period: Period) async {
         loadingRelay.accept(true)
         let response = await statsUseCase.getStats(period: period, userId: getUserId())

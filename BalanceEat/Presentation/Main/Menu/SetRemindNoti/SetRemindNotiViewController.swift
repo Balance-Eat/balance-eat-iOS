@@ -245,10 +245,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     private func getDatas(page: Int, size: Int) {
         Task {
             await viewModel.getReminderList(page: page, size: size)
-            
-            DispatchQueue.main.async { [weak self] in
-                self?.refreshControl.endRefreshing()
-            }
+            refreshControl.endRefreshing()
         }
     }
     
