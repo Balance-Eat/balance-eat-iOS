@@ -331,12 +331,16 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         }
     }
     
-    private func timeStringHHmm00(from date: Date) -> String {
+    private static let hhMmFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.timeZone = TimeZone.current
         formatter.dateFormat = "HH:mm:00"
-        return formatter.string(from: date)
+        return formatter
+    }()
+
+    private func timeStringHHmm00(from date: Date) -> String {
+        SetRemindNotiViewController.hhMmFormatter.string(from: date)
     }
 }
 

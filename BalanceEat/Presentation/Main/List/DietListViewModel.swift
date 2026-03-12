@@ -130,11 +130,15 @@ final class DietListViewModel: BaseViewModel {
         
     }
     
-    private func convertToDate(_ string: String) -> Date? {
+    private static let consumeDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.timeZone = TimeZone(identifier: "UTC")
         formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.date(from: string)
+        return formatter
+    }()
+
+    private func convertToDate(_ string: String) -> Date? {
+        DietListViewModel.consumeDateFormatter.date(from: string)
     }
 }

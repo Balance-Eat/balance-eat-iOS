@@ -11,9 +11,16 @@ import Foundation
 final class APIClient {
     static let shared = APIClient()
     private init() {}
-    
+
+    private let session: Session = {
+        let configuration = URLSessionConfiguration.af.default
+        configuration.timeoutIntervalForRequest = 30
+        configuration.timeoutIntervalForResource = 60
+        return Session(configuration: configuration)
+    }()
+
     private let baseURL = "https://api.balance-eat.com"
-    
+
     func request<T: Decodable>(
         endpoint: Endpoint,
         responseType: T.Type
@@ -26,7 +33,7 @@ final class APIClient {
         #endif
 
         return await withCheckedContinuation { continuation in
-            AF.request(url,
+            session.request(url,
                        method: endpoint.method,
                        parameters: endpoint.method == .get ? endpoint.queryParameters : endpoint.parameters,
                        encoding: (endpoint.method == .get ? URLEncoding.default : JSONEncoding.default),
@@ -92,7 +99,7 @@ final class APIClient {
         let url = baseURL + endpoint.path
 
         return await withCheckedContinuation { continuation in
-            AF.request(
+            session.request(
                 url,
                 method: endpoint.method,
                 parameters: endpoint.method == .get ? endpoint.queryParameters : endpoint.parameters,
