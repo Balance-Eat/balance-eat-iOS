@@ -17,6 +17,8 @@ extension UserData {
         height: Double = 175.0,
         goalType: GoalType = .maintain,
         activityLevel: ActivityLevel = .moderate,
+        smi: Double? = nil,
+        fatPercentage: Double? = nil,
         targetWeight: Double = 68.0,
         targetCalorie: Double = 2000.0
     ) -> UserData {
@@ -31,8 +33,8 @@ extension UserData {
             height: height,
             goalType: goalType,
             activityLevel: activityLevel,
-            smi: nil,
-            fatPercentage: nil,
+            smi: smi,
+            fatPercentage: fatPercentage,
             targetWeight: targetWeight,
             targetCalorie: targetCalorie,
             targetSmi: nil,
