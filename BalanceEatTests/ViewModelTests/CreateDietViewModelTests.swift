@@ -394,15 +394,24 @@ final class CreateDietViewModelTests: XCTestCase {
 
     // MARK: - setBinding: dataChanged 감지
 
-    func test_초기상태_dataChanged_false() {
-        // Given
-        sut = makeSUT(dietDatas: [.fixture(mealType: .breakfast, items: [.fixture()])])
+    func test_초기상태_아이템없으면_dataChanged_false() {
+        // Given: items가 비어 있으면 intakeRelay가 빈 상태여도 변경 없음
+        sut = makeSUT(dietDatas: [.fixture(mealType: .breakfast, items: [])])
 
-        // Then: 변경 없으면 false
+        // Then
         XCTAssertFalse(sut.dataChangedRelay.value)
     }
 
-    func test_음식삭제시_dataChanged_true() {
+    func test_초기상태_아이템있으면_dataChanged_true() {
+        // Given: intakeRelay는 초기에 빈 딕셔너리이므로
+        //        item.intake(100) != intake[id](nil) → isIntakeCorrect = false → true
+        sut = makeSUT(dietDatas: [.fixture(mealType: .breakfast, items: [.fixture()])])
+
+        // Then
+        XCTAssertTrue(sut.dataChangedRelay.value)
+    }
+
+    func test_음식삭제시_originalData와_달라져_dataChanged_true() {
         // Given
         let food = DietFoodData.fixture(id: 1)
         sut = makeSUT(dietDatas: [.fixture(mealType: .breakfast, items: [food])])
@@ -410,7 +419,7 @@ final class CreateDietViewModelTests: XCTestCase {
         // When
         sut.deleteFood(food: food)
 
-        // Then
+        // Then: original에는 food가 있었지만 현재는 없으므로 변경됨
         XCTAssertTrue(sut.dataChangedRelay.value)
     }
 
