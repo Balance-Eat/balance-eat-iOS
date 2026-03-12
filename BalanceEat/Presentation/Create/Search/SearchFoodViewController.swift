@@ -226,6 +226,7 @@ final class SearchFoodViewController: UIViewController {
                 createFoodViewController.createdFoodRelay
                     .compactMap { $0 }
                     .take(1)
+                    .observe(on: MainScheduler.instance)
                     .subscribe(onNext: { [weak self] food in
                         guard let self else { return }
                         selectedFoodDataRelay.accept(food)

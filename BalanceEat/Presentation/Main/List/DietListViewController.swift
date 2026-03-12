@@ -11,6 +11,19 @@ import RxCocoa
 import SnapKit
 
 final class DietListViewController: BaseViewController<DietListViewModel> {
+
+    private static let hourMinuteInputFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        f.timeZone = TimeZone(identifier: "Asia/Seoul")
+        return f
+    }()
+
+    private static let hourMinuteOutputFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f
+    }()
     
     private let headerView = DietListHeaderView()
     private lazy var sumOfNutritionValueView = SumOfNutritionValueView(
@@ -166,16 +179,10 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
     }
     
     private func extractHourMinute(from dateString: String) -> String? {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        
-        guard let date = formatter.date(from: dateString) else {
+        guard let date = Self.hourMinuteInputFormatter.date(from: dateString) else {
             return nil
         }
-        
-        formatter.dateFormat = "HH:mm"
-        return formatter.string(from: date)
+        return Self.hourMinuteOutputFormatter.string(from: date)
     }
 
     private func goToDiet() {

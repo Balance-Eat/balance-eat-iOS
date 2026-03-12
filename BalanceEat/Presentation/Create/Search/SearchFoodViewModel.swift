@@ -1,5 +1,5 @@
 //
-//  SearchFoodVIewModel.swift
+//  SearchFoodViewModel.swift
 //  BalanceEat
 //
 //  Created by 김견 on 9/22/25.
@@ -9,14 +9,12 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class SearchFoodViewModel {
+final class SearchFoodViewModel: BaseViewModel {
     private let foodUseCase: FoodUseCaseProtocol
-    
-    let toastMessageRelay = BehaviorRelay<String?>(value: nil)
+
     let searchQueryRelay = BehaviorRelay<String>(value: "")
     let searchFoodResultRelay = BehaviorRelay<[FoodData]>(value: [])
     let isLoadingNextPageRelay: BehaviorRelay<Bool> = .init(value: false)
-    let errorMessageRelay = PublishRelay<String>()
     
     var currentPage: Int = 0
     var totalPage: Int = 0
@@ -38,7 +36,7 @@ final class SearchFoodViewModel {
             searchFoodResultRelay.accept(result.items)
             totalPage = result.totalPages
         case .failure(let failure):
-            errorMessageRelay.accept(failure.description)
+            toastMessageRelay.accept(failure.description)
         }
     }
     

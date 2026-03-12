@@ -514,10 +514,6 @@ final class RemindNotificationView: UIView {
             make.width.height.equalTo(48)
         }
         
-//        overlayView.snp.makeConstraints { make in
-//            make.edges.equalToSuperview()
-//        }
-        
         imageContainerView.layer.cornerRadius = 24
         imageContainerView.clipsToBounds = true
     }
