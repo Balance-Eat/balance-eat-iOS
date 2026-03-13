@@ -37,6 +37,9 @@ final class SearchFoodViewModel: BaseViewModel {
             searchFoodResultRelay.accept(result.items)
             totalPage = result.totalPages
         case .failure(let failure):
+            #if DEBUG
+            print("SearchFoodViewModel.searchFood failed: \(failure)")
+            #endif
             toastMessageRelay.accept(failure.description)
         }
     }
@@ -56,6 +59,9 @@ final class SearchFoodViewModel: BaseViewModel {
             searchFoodResultRelay.accept(searchFoodResultRelay.value + searchResponseDTO.items)
             isLoadingNextPageRelay.accept(false)
         case .failure(let error):
+            #if DEBUG
+            print("SearchFoodViewModel.fetchSearchFood failed: \(error)")
+            #endif
             toastMessageRelay.accept(error.description)
             isLoadingNextPageRelay.accept(false)
         }

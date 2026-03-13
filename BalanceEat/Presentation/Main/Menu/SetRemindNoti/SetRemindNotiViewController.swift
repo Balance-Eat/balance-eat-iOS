@@ -550,48 +550,20 @@ final class RemindNotificationView: UIView {
     }
     
     private func getDayString(dayOfWeeks: [String]) -> String {
-        let inputSet = Set(dayOfWeeks)
+        let inputSet = Set(dayOfWeeks.compactMap { DayOfWeek(rawValue: $0) })
 
-        let allDays: Set<String> = [
-            DayOfWeek.monday.rawValue,
-            DayOfWeek.tuesday.rawValue,
-            DayOfWeek.wednesday.rawValue,
-            DayOfWeek.thursday.rawValue,
-            DayOfWeek.friday.rawValue,
-            DayOfWeek.saturday.rawValue,
-            DayOfWeek.sunday.rawValue
-        ]
+        let allDays: Set<DayOfWeek> = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
+        let weekdays: Set<DayOfWeek> = [.monday, .tuesday, .wednesday, .thursday, .friday]
+        let weekend: Set<DayOfWeek> = [.saturday, .sunday]
 
-        let weekdays: Set<String> = [
-            DayOfWeek.monday.rawValue,
-            DayOfWeek.tuesday.rawValue,
-            DayOfWeek.wednesday.rawValue,
-            DayOfWeek.thursday.rawValue,
-            DayOfWeek.friday.rawValue
-        ]
+        if inputSet == allDays { return "매일" }
+        if inputSet == weekdays { return "평일" }
+        if inputSet == weekend { return "주말" }
 
-        let weekend: Set<String> = [
-            DayOfWeek.saturday.rawValue,
-            DayOfWeek.sunday.rawValue
-        ]
-
-        let order: [DayOfWeek] = [
-            .monday, .tuesday, .wednesday,
-            .thursday, .friday, .saturday, .sunday
-        ]
-
-        if inputSet == allDays {
-            return "매일"
-        } else if inputSet == weekdays {
-            return "평일"
-        } else if inputSet == weekend {
-            return "주말"
-        } else {
-            return order
-                .filter { inputSet.contains($0.rawValue) }
-                .map { $0.koreanValue }
-                .joined(separator: ", ")
-        }
+        return [DayOfWeek.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
+            .filter { inputSet.contains($0) }
+            .map { $0.koreanValue }
+            .joined(separator: ", ")
     }
 
     private func setUIBySwitchState(isOn: Bool) {

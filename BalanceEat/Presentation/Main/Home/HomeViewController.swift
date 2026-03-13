@@ -145,8 +145,9 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
     private func getDatas() {
         dataFetchTask?.cancel()
         dataFetchTask = Task {
-            await viewModel.getUser()
-            await viewModel.getDailyDiet()
+            async let user: Void = viewModel.getUser()
+            async let diet: Void = viewModel.getDailyDiet()
+            _ = await (user, diet)
             refreshControl.endRefreshing()
         }
     }

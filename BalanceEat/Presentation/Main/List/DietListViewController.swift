@@ -59,8 +59,9 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
 
         fetchTask?.cancel()
         fetchTask = Task {
-            await viewModel.getUser()
-            await viewModel.getMonthlyDiets()
+            async let user: Void = viewModel.getUser()
+            async let diets: Void = viewModel.getMonthlyDiets()
+            _ = await (user, diets)
         }
     }
 
