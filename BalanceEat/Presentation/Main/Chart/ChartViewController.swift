@@ -19,6 +19,9 @@ final class ChartViewController: BaseViewController<ChartViewModel> {
     private let statsGraphView = StatsGraphView()
     private let achievementRateListView = AchievementRateListView()
     private let analysisInsightView = AnalysisInsightView()
+
+    private var getUserTask: Task<Void, Never>?
+    private var getStatsTask: Task<Void, Never>?
     
     override init(viewModel: ChartViewModel) {
         super.init(viewModel: viewModel)
@@ -68,11 +71,12 @@ final class ChartViewController: BaseViewController<ChartViewModel> {
         headerView.periodRelay
             .subscribe(onNext: { [weak self] period in
                 guard let self else { return }
-                
+
                 if let stats = viewModel.cachedStats[period.rawValue] {
                     viewModel.currentStatsRelay.accept(stats)
                 } else {
-                    Task {
+                    getStatsTask?.cancel()
+                    getStatsTask = Task {
                         await self.viewModel.getStats(period: period)
                     }
                 }
@@ -120,17 +124,24 @@ final class ChartViewController: BaseViewController<ChartViewModel> {
     }
     
     private func getUser() {
-        Task {
+        getUserTask?.cancel()
+        getUserTask = Task {
             await viewModel.getUser()
         }
     }
-    
+
     private func getStats() {
         let period = headerView.periodRelay.value
-        Task {
+        getStatsTask?.cancel()
+        getStatsTask = Task {
             await viewModel.getStats(period: period)
             refreshControl.endRefreshing()
         }
+    }
+
+    deinit {
+        getUserTask?.cancel()
+        getStatsTask?.cancel()
     }
 }
 

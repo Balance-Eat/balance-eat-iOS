@@ -135,8 +135,7 @@ final class MainCoordinator {
         let vc = SearchFoodViewController(viewModel: vm)
 
         vc.makeCreateFoodViewController = { [weak self] in
-            guard let self else { fatalError("MainCoordinator was deallocated") }
-            return self.buildCreateFoodViewController()
+            self?.buildCreateFoodViewController()
         }
 
         return vc

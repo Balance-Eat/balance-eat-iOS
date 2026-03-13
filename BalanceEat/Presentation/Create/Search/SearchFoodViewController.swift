@@ -57,9 +57,10 @@ final class SearchFoodViewController: UIViewController {
     }()
     private let doneButton = UIBarButtonItem(title: "완료", style: .done, target: nil, action: nil)
     
-    var makeCreateFoodViewController: (() -> CreateFoodViewController)?
+    var makeCreateFoodViewController: (() -> CreateFoodViewController?)?
 
     private let disposeBag = DisposeBag()
+    private var presentationBag = DisposeBag()
 
     init(viewModel: SearchFoodViewModel) {
         self.viewModel = viewModel
@@ -159,20 +160,20 @@ final class SearchFoodViewController: UIViewController {
             .disposed(by: disposeBag)
         
         viewModel.searchFoodResultRelay
-            .bind(to: tableView.rx.items(cellIdentifier: SearchResultFoodCell.identifier)) { row, element, cell in
-                let calory = element.perServingCalories
-                
-                if let cell = cell as? SearchResultFoodCell {
-                    cell.configure(
-                        title: element.name,
-                        brand: element.brand == "없음" ? "(제조사 정보 없음)" : element.brand,
-                        calory: String(calory),
-                        carbon: String(element.carbohydrates),
-                        protein: String(element.protein),
-                        fat: String(element.fat),
-                        info: "\(element.servingSize)\(element.unit) 기준"
-                    )
-                }
+            .bind(to: tableView.rx.items(
+                cellIdentifier: SearchResultFoodCell.identifier,
+                cellType: SearchResultFoodCell.self
+            )) { (_: Int, element: FoodData, cell: SearchResultFoodCell) in
+                let brand = element.brand == "없음" ? "(제조사 정보 없음)" : element.brand
+                cell.configure(
+                    title: element.name,
+                    brand: brand,
+                    calory: String(element.perServingCalories),
+                    carbon: String(element.carbohydrates),
+                    protein: String(element.protein),
+                    fat: String(element.fat),
+                    info: "\(element.servingSize)\(element.unit) 기준"
+                )
             }
             .disposed(by: disposeBag)
         
@@ -221,8 +222,10 @@ final class SearchFoodViewController: UIViewController {
         createFoodButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                guard let createFoodViewController = makeCreateFoodViewController?() else { return }
+                guard let factory = makeCreateFoodViewController,
+                      let createFoodViewController = factory() else { return }
 
+                presentationBag = DisposeBag()
                 createFoodViewController.createdFoodRelay
                     .compactMap { $0 }
                     .take(1)
@@ -232,8 +235,8 @@ final class SearchFoodViewController: UIViewController {
                         selectedFoodDataRelay.accept(food)
                         navigationController?.popViewController(animated: true)
                     })
-                    .disposed(by: disposeBag)
-                
+                    .disposed(by: presentationBag)
+
                 if let sheet = createFoodViewController.sheetPresentationController {
                     sheet.detents = [.medium(), .large()]
                     sheet.prefersGrabberVisible = true

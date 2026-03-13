@@ -57,6 +57,8 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
     var onAddDiet: (() -> Void)?
     var onEditTarget: ((UserData) -> Void)?
 
+    private var dataFetchTask: Task<Void, Never>?
+
     private let todayCalorieView: TodayCalorieView = TodayCalorieView(
         currentCalorie: 0,
         targetCalorie: 0,
@@ -141,11 +143,16 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
     }
     
     private func getDatas() {
-        Task {
+        dataFetchTask?.cancel()
+        dataFetchTask = Task {
             await viewModel.getUser()
             await viewModel.getDailyDiet()
             refreshControl.endRefreshing()
         }
+    }
+
+    deinit {
+        dataFetchTask?.cancel()
     }
     
     private func setBinding() {

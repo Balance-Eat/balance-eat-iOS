@@ -35,6 +35,8 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
     
     var onGoToDiet: (([DietData], Date) -> Void)?
 
+    private var fetchTask: Task<Void, Never>?
+
     override init(viewModel: DietListViewModel) {
         super.init(viewModel: viewModel)
     }
@@ -54,11 +56,16 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        Task {
+
+        fetchTask?.cancel()
+        fetchTask = Task {
             await viewModel.getUser()
             await viewModel.getMonthlyDiets()
         }
+    }
+
+    deinit {
+        fetchTask?.cancel()
     }
     
     private func setupHeaderView() {

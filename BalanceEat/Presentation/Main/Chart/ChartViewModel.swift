@@ -20,6 +20,7 @@ final class ChartViewModel: BaseViewModel {
     init(userUseCase: UserUseCaseProtocol, statsUseCase: StatsUseCaseProtocol) {
         self.userUseCase = userUseCase
         self.statsUseCase = statsUseCase
+        super.init()
     }
     
     private func getUserId() -> String {
