@@ -192,6 +192,20 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
 
 
 final class DietListHeaderView: UIView, UICalendarSelectionSingleDateDelegate, UICalendarViewDelegate {
+
+    private static let yyyyMMddFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f
+    }()
+
+    private static let koreanDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy년 M월 d일 EEEE"
+        f.locale = Locale(identifier: "ko_KR")
+        return f
+    }()
+
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 18, weight: .bold)
@@ -264,11 +278,8 @@ final class DietListHeaderView: UIView, UICalendarSelectionSingleDateDelegate, U
     
     private func setUpView() {
         self.backgroundColor = .white
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        if let formattedDate = formatKoreanDate(formatter.string(from: selectedDate.value)) {
-            dateLabel.text = formattedDate
-        }
+        let dateString = DietListHeaderView.yyyyMMddFormatter.string(from: selectedDate.value)
+        dateLabel.text = formatKoreanDate(dateString)
         
         let mainStackview: UIStackView = {
             let stackView = UIStackView()
@@ -349,9 +360,8 @@ final class DietListHeaderView: UIView, UICalendarSelectionSingleDateDelegate, U
         selectedDate
             .compactMap { [weak self] date -> String? in
                 guard let self else { return nil }
-                let formatter = DateFormatter()
-                formatter.dateFormat = "yyyy-MM-dd"
-                return formatKoreanDate(formatter.string(from: date))
+                let dateString = DietListHeaderView.yyyyMMddFormatter.string(from: date)
+                return formatKoreanDate(dateString)
             }
             .bind(to: dateLabel.rx.text)
             .disposed(by: disposeBag)
@@ -383,17 +393,8 @@ final class DietListHeaderView: UIView, UICalendarSelectionSingleDateDelegate, U
     }
     
     private func formatKoreanDate(_ dateString: String) -> String? {
-        let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyy-MM-dd"
-        inputFormatter.locale = Locale(identifier: "ko_KR")
-        
-        guard let date = inputFormatter.date(from: dateString) else { return nil }
-        
-        let outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "yyyy년 M월 d일 EEEE"
-        outputFormatter.locale = Locale(identifier: "ko_KR")
-        
-        return outputFormatter.string(from: date)
+        guard let date = DietListHeaderView.yyyyMMddFormatter.date(from: dateString) else { return nil }
+        return DietListHeaderView.koreanDateFormatter.string(from: date)
     }
     
     func dateSelection(_ selection: UICalendarSelectionSingleDate,

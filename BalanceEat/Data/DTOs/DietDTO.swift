@@ -26,16 +26,15 @@ struct FoodItemForDietDTO: Codable {
     let fat: Double
 }
 
-struct FoodItemForCreateDietDTO: Codable {
+struct FoodItemForCreateDietDTO: Encodable {
     let foodId: Int
     let intake: Double
-    
-    func toDictionary() -> [String: Any] {
-        return [
-            "foodId": foodId,
-            "intake": intake
-        ]
-    }
+}
+
+struct CreateDietRequestBody: Encodable {
+    let mealType: String
+    let consumedAt: String
+    let dietFoods: [FoodItemForCreateDietDTO]
 }
 
 extension DietDTO {

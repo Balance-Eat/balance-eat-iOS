@@ -7,8 +7,16 @@
 
 import UIKit
 
-struct UserDTO: Codable {
-    let id: Int?
+struct UserDTO: Encodable {
+    let id: Int?  // URL 경로 생성에만 사용, request body에는 포함하지 않음
+
+    private enum CodingKeys: String, CodingKey {
+        case uuid, name, gender, age, height, weight, goalType, email, activityLevel
+        case smi, fatPercentage, targetWeight, targetCalorie, targetSmi
+        case targetFatPercentage, targetCarbohydrates, targetProtein, targetFat
+        case providerId, providerType
+    }
+
     let uuid: String
     let name: String
     let gender: Gender

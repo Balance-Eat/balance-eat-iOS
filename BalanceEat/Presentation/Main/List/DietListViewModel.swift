@@ -95,9 +95,7 @@ final class DietListViewModel: BaseViewModel {
             currentCache[yearMonthKey] = dailyDict
             monthDataCache.accept(currentCache)
             
-            let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy-MM-dd"
-            let todayKey = formatter.string(from: selectedDate.value)
+            let todayKey = DietListViewModel.dailyFormatter.string(from: selectedDate.value)
             selectedDayDataCache.accept(dailyDict[todayKey] ?? [])
             
         case .failure(let failure):

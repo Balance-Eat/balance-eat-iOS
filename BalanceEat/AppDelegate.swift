@@ -176,10 +176,12 @@ extension AppDelegate: MessagingDelegate {
                 let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: self.getUserId())
                 
                 switch createNotificationResult {
-                case .success(_):
+                case .success:
                     break
-                case .failure(_):
-                    break
+                case .failure(let error):
+                    #if DEBUG
+                    print("알림 기기 등록 실패: \(error.description)")
+                    #endif
                 }
             }
         }

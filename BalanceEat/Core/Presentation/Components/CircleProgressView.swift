@@ -8,7 +8,13 @@
 import UIKit
 
 final class CircleProgressView: UIView {
-    
+
+    private static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        return formatter
+    }()
+
     private let progressLayer = CAShapeLayer()
     private let trackLayer = CAShapeLayer()
     
@@ -133,10 +139,8 @@ final class CircleProgressView: UIView {
             progressLayer.strokeColor = cgNewColor
         }
         
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = .decimal
-        let currentString = numberFormatter.string(from: NSNumber(value: Float(currentValue))) ?? "\(Int(currentValue))"
-        let maxString = numberFormatter.string(from: NSNumber(value: Float(maxValue))) ?? "\(Int(maxValue))"
+        let currentString = Self.numberFormatter.string(from: NSNumber(value: Float(currentValue))) ?? "\(Int(currentValue))"
+        let maxString = Self.numberFormatter.string(from: NSNumber(value: Float(maxValue))) ?? "\(Int(maxValue))"
         
         let fullText = "\(currentString)\n/ \(maxString)"
         let attributedText = NSMutableAttributedString(string: fullText)

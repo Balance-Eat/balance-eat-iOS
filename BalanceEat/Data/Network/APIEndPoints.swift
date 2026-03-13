@@ -11,10 +11,23 @@ import Alamofire
 protocol Endpoint {
     var path: String { get }
     var method: HTTPMethod { get }
-    var parameters: [String: Any?]? { get }
+    var body: AnyEncodable? { get }
     var queryParameters: [String: Any]? { get }
     var headers: HTTPHeaders? { get }
 }
+
+extension Endpoint {
+    var body: AnyEncodable? { nil }
+    var queryParameters: [String: Any]? { nil }
+}
+
+// MARK: - 공용 request body
+
+private struct IsActiveRequestBody: Encodable {
+    let isActive: Bool
+}
+
+// MARK: - ReminderEndPoints
 
 enum ReminderEndPoints: Endpoint {
     case getReminderList(page: Int, size: Int, userId: String)
@@ -23,7 +36,7 @@ enum ReminderEndPoints: Endpoint {
     case updateReminder(reminderRequestDTO: ReminderRequestDTO, reminderId: Int, userId: String)
     case deleteReminder(reminderId: Int, userId: String)
     case updateReminderActivation(isActive: Bool, reminderId: Int, userId: String)
-    
+
     var path: String {
         switch self {
         case .getReminderList:
@@ -40,8 +53,8 @@ enum ReminderEndPoints: Endpoint {
             return "/v1/reminders/\(reminderId)/activation"
         }
     }
-    
-    var method: Alamofire.HTTPMethod {
+
+    var method: HTTPMethod {
         switch self {
         case .getReminderList, .getReminderDetail:
             return .get
@@ -55,26 +68,19 @@ enum ReminderEndPoints: Endpoint {
             return .patch
         }
     }
-    
-    var parameters: [String : Any?]? {
+
+    var body: AnyEncodable? {
         switch self {
-        case .createReminder(let reminderRequestDTO, _), .updateReminder(let reminderRequestDTO, _, _):
-            return [
-                "content": reminderRequestDTO.content,
-                "sendTime": reminderRequestDTO.sendTime,
-                "isActive": reminderRequestDTO.isActive,
-                "dayOfWeeks": reminderRequestDTO.dayOfWeeks
-            ]
+        case .createReminder(let dto, _), .updateReminder(let dto, _, _):
+            return AnyEncodable(dto)
         case .updateReminderActivation(let isActive, _, _):
-            return [
-                "isActive": isActive
-            ]
+            return AnyEncodable(IsActiveRequestBody(isActive: isActive))
         default:
             return nil
         }
     }
-    
-    var queryParameters: [String : Any]? {
+
+    var queryParameters: [String: Any]? {
         switch self {
         case .getReminderList(let page, let size, _):
             return ["page": page, "size": size]
@@ -82,23 +88,27 @@ enum ReminderEndPoints: Endpoint {
             return nil
         }
     }
-    
-    var headers: Alamofire.HTTPHeaders? {
+
+    var headers: HTTPHeaders? {
         switch self {
-        case .getReminderList(_, _, let userId), .createReminder(_, let userId), .getReminderDetail(_, let userId), .updateReminder(_, _, let userId), .deleteReminder(_, let userId), .updateReminderActivation(_, _, let userId):
+        case .getReminderList(_, _, let userId),
+             .createReminder(_, let userId),
+             .getReminderDetail(_, let userId),
+             .updateReminder(_, _, let userId),
+             .deleteReminder(_, let userId),
+             .updateReminderActivation(_, _, let userId):
             return ["X-USER-ID": userId]
         }
     }
-    
-    
 }
 
-enum UserEndPoints: Endpoint {
+// MARK: - UserEndPoints
 
+enum UserEndPoints: Endpoint {
     case createUser(userDTO: UserDTO)
     case updateUser(userDTO: UserDTO)
     case getUser(uuid: String)
-    
+
     var path: String {
         switch self {
         case .createUser:
@@ -109,68 +119,24 @@ enum UserEndPoints: Endpoint {
             return "/v1/users/me"
         }
     }
-    
+
     var method: HTTPMethod {
         switch self {
-        case .createUser:
-                .post
-        case .updateUser:
-                .put
-        case .getUser:
-                .get
+        case .createUser: .post
+        case .updateUser: .put
+        case .getUser:    .get
         }
     }
-    
-    var parameters: [String: Any?]? {
+
+    var body: AnyEncodable? {
         switch self {
-        case .createUser(let userDTO):
-            return [
-                "uuid": userDTO.uuid,
-                "name": userDTO.name,
-                "gender": userDTO.gender.rawValue,
-                "age": userDTO.age,
-                "height": userDTO.height,
-                "weight": userDTO.weight,
-                "goalType": userDTO.goalType.title,
-                "email": userDTO.email,
-                "activityLevel": userDTO.activityLevel?.rawValue,
-                "smi": userDTO.smi,
-                "fatPercentage": userDTO.fatPercentage,
-                "targetWeight": userDTO.targetWeight,
-                "targetCalorie": userDTO.targetCalorie,
-                "targetSmi": userDTO.targetSmi,
-                "targetFatPercentage": userDTO.targetFatPercentage,
-                "targetCarbohydrates": userDTO.targetCarbohydrates,
-                "targetProtein": userDTO.targetProtein,
-                "targetFat": userDTO.targetFat,
-                "providerId": userDTO.providerId,
-                "providerType": userDTO.providerType
-            ]
-        case .updateUser(let userDTO):
-            return [
-                "name": userDTO.name,
-                "email": userDTO.email,
-                "gender": userDTO.gender.rawValue,
-                "age": userDTO.age,
-                "height": userDTO.height,
-                "weight": userDTO.weight,
-                "goalType": userDTO.goalType.rawValue,
-                "activityLevel": userDTO.activityLevel?.rawValue,
-                "smi": userDTO.smi,
-                "fatPercentage": userDTO.fatPercentage,
-                "targetWeight": userDTO.targetWeight,
-                "targetCalorie": userDTO.targetCalorie,
-                "targetSmi": userDTO.targetSmi,
-                "targetFatPercentage": userDTO.targetFatPercentage,
-                "targetCarbohydrates": userDTO.targetCarbohydrates,
-                "targetProtein": userDTO.targetProtein,
-                "targetFat": userDTO.targetFat
-            ]
+        case .createUser(let userDTO), .updateUser(let userDTO):
+            return AnyEncodable(userDTO)
         default:
             return nil
         }
     }
-    
+
     var queryParameters: [String: Any]? {
         switch self {
         case .getUser(let uuid):
@@ -179,9 +145,11 @@ enum UserEndPoints: Endpoint {
             return nil
         }
     }
-    
+
     var headers: HTTPHeaders? { nil }
 }
+
+// MARK: - DietEndPoints
 
 enum DietEndPoints: Endpoint {
     case createDiet(mealType: MealType, consumedAt: String, dietFoods: [FoodItemForCreateDietDTO], userId: String)
@@ -189,7 +157,7 @@ enum DietEndPoints: Endpoint {
     case deleteDiet(dietId: Int, userId: String)
     case daily(date: String, userId: String)
     case monthly(yearMonth: String, userId: String)
-    
+
     var path: String {
         switch self {
         case .createDiet:
@@ -202,42 +170,32 @@ enum DietEndPoints: Endpoint {
             return "/v1/diets/monthly"
         }
     }
-    
-    var method: Alamofire.HTTPMethod {
+
+    var method: HTTPMethod {
         switch self {
-        case .createDiet:
-            return .post
-        case .updateDiet:
-            return .put
-        case .deleteDiet:
-            return .delete
-        case .daily:
-            return .get
-        case .monthly:
-            return .get
+        case .createDiet:  return .post
+        case .updateDiet:  return .put
+        case .deleteDiet:  return .delete
+        case .daily:       return .get
+        case .monthly:     return .get
         }
     }
-    
-    var parameters: [String : Any?]? {
+
+    var body: AnyEncodable? {
         switch self {
-        case .createDiet(let mealType, let consumedAt, let dietFoods, _):
-            return [
-                "mealType": mealType.rawValue,
-                "consumedAt": consumedAt,
-                "dietFoods": dietFoods.map { $0.toDictionary() }
-            ]
-        case .updateDiet(_, let mealType, let consumedAt, let dietFoods, _):
-            return [
-                "mealType": mealType.rawValue,
-                "consumedAt": consumedAt,
-                "dietFoods": dietFoods.map { $0.toDictionary() }
-            ]
+        case .createDiet(let mealType, let consumedAt, let dietFoods, _),
+             .updateDiet(_, let mealType, let consumedAt, let dietFoods, _):
+            return AnyEncodable(CreateDietRequestBody(
+                mealType: mealType.rawValue,
+                consumedAt: consumedAt,
+                dietFoods: dietFoods
+            ))
         default:
             return nil
         }
     }
-    
-    var queryParameters: [String : Any]? {
+
+    var queryParameters: [String: Any]? {
         switch self {
         case .daily(let date, _):
             return ["date": date]
@@ -247,20 +205,26 @@ enum DietEndPoints: Endpoint {
             return nil
         }
     }
-    
+
     var headers: HTTPHeaders? {
         switch self {
-        case .createDiet(_, _, _, let userId), .updateDiet(_, _, _, _, let userId), .deleteDiet(_, let userId), .daily(_, let userId), .monthly(_, let userId):
+        case .createDiet(_, _, _, let userId),
+             .updateDiet(_, _, _, _, let userId),
+             .deleteDiet(_, let userId),
+             .daily(_, let userId),
+             .monthly(_, let userId):
             return ["X-USER-ID": userId]
         }
     }
 }
 
+// MARK: - NotificationEndpoints
+
 enum NotificationEndpoints: Endpoint {
     case create(notificationRequestDTO: NotificationRequestDTO, userId: String)
     case updateActivation(isActive: Bool, deviceId: Int, userId: String)
     case getCurrentDevice(userId: String, agentId: String)
-    
+
     var path: String {
         switch self {
         case .create:
@@ -271,39 +235,27 @@ enum NotificationEndpoints: Endpoint {
             return "/v1/notification-devices/current"
         }
     }
-    
-    var method: Alamofire.HTTPMethod {
+
+    var method: HTTPMethod {
         switch self {
-        case .create:
-            return .post
-        case .updateActivation:
-            return .patch
-        case .getCurrentDevice:
-            return .get
+        case .create:           return .post
+        case .updateActivation: return .patch
+        case .getCurrentDevice: return .get
         }
     }
-    
-    var parameters: [String : Any?]? {
+
+    var body: AnyEncodable? {
         switch self {
-        case .create(let notificationRequestDTO, _):
-            return [
-                "agentId": notificationRequestDTO.agentId,
-                "osType": notificationRequestDTO.osType,
-                "deviceName": notificationRequestDTO.deviceName,
-                "isActive": notificationRequestDTO.isActive
-            ]
+        case .create(let dto, _):
+            return AnyEncodable(dto)
         case .updateActivation(let isActive, _, _):
-            return [
-                "isActive": isActive
-            ]
+            return AnyEncodable(IsActiveRequestBody(isActive: isActive))
         default:
             return nil
         }
     }
-    
-    var queryParameters: [String : Any]? { nil }
 
-    var headers: Alamofire.HTTPHeaders? {
+    var headers: HTTPHeaders? {
         switch self {
         case .create(_, let userId), .updateActivation(_, _, let userId):
             return ["X-USER-ID": userId]
@@ -316,89 +268,72 @@ enum NotificationEndpoints: Endpoint {
     }
 }
 
+// MARK: - FoodEndPoints
+
 enum FoodEndPoints: Endpoint {
     case create(createFoodDTO: CreateFoodDTO)
     case search(foodName: String, page: Int, size: Int)
-    
+
     var path: String {
         switch self {
-        case .create:
-            return "/v1/foods"
-        case .search:
-            return "/v1/foods/search"
+        case .create:  return "/v1/foods"
+        case .search:  return "/v1/foods/search"
         }
     }
-    
-    var method: Alamofire.HTTPMethod {
+
+    var method: HTTPMethod {
         switch self {
-        case .create:
-            return .post
-        case .search:
-            return .get
+        case .create: return .post
+        case .search: return .get
         }
     }
-    
-    var parameters: [String : Any?]? {
+
+    var body: AnyEncodable? {
         switch self {
-        case .create(let foodDTO):
-            return [
-                "uuid": foodDTO.uuid,
-                "name": foodDTO.name,
-                "servingSize": foodDTO.servingSize,
-                "unit": foodDTO.unit,
-                "carbohydrates": foodDTO.carbohydrates,
-                "protein": foodDTO.protein,
-                "fat": foodDTO.fat,
-                "brand": foodDTO.brand
-            ]
+        case .create(let dto):
+            return AnyEncodable(dto)
         default:
             return nil
         }
     }
-    
-    var queryParameters: [String : Any]? {
+
+    var queryParameters: [String: Any]? {
         switch self {
         case .search(let foodName, let page, let size):
-            return [
-                "foodName": foodName,
-                "page": page,
-                "size": size
-            ]
+            return ["foodName": foodName, "page": page, "size": size]
         default:
             return nil
         }
     }
-    
+
     var headers: HTTPHeaders? { nil }
 }
 
+// MARK: - StatsEndPoints
+
 enum StatsEndPoints: Endpoint {
     case getStats(period: Period, userId: String)
-    
+
     var path: String {
         switch self {
-        case .getStats:
-            "/v1/stats"
+        case .getStats: "/v1/stats"
         }
     }
-    
-    var method: Alamofire.HTTPMethod {
-        switch self {
-        case .getStats:
-            .get
-        }
-    }
-    
-    var parameters: [String : Any?]? { nil }
 
-    var queryParameters: [String : Any]? {
+    var method: HTTPMethod {
+        switch self {
+        case .getStats: .get
+        }
+    }
+
+    var queryParameters: [String: Any]? {
         switch self {
         case .getStats(let period, _):
             return ["type": period.rawValue]
         }
     }
-    
-    var headers: Alamofire.HTTPHeaders? {
+
+    var headers: HTTPHeaders? {
         switch self {
         case .getStats(_, let userId):
             return ["X-USER-ID": userId]
