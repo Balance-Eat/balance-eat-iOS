@@ -9,24 +9,22 @@ import Foundation
 import RxSwift
 import RxCocoa
 
-final class TutorialContentViewModel {
+final class TutorialContentViewModel: BaseViewModel {
     private let userUseCase: UserUseCaseProtocol
 
     let onCreateUserSuccessRelay: PublishRelay<Void> = .init()
 
-    let loadingRelay = BehaviorRelay<Bool>(value: false)
-
-    let toastMessageRelay = BehaviorRelay<String?>(value: nil)
-
     init(userUseCase: UserUseCaseProtocol) {
         self.userUseCase = userUseCase
+        super.init()
     }
-    
+
+    @MainActor
     func createUser(createUserDTO: UserDTO) async {
         loadingRelay.accept(true)
-        
+
         let createUserResponse = await userUseCase.createUser(userDTO: createUserDTO)
-        
+
         switch createUserResponse {
         case .success():
             saveUserUUID(createUserDTO.uuid)
@@ -37,24 +35,20 @@ final class TutorialContentViewModel {
             toastMessageRelay.accept("유저 생성에 실패했습니다. \(failure.description)")
         }
     }
-    
+
     private func saveUserUUID(_ userUUID: String) {
         if case .failure(let error) = userUseCase.saveUserUUID(userUUID) {
             toastMessageRelay.accept("UUID 저장 실패: \(error.description)")
         }
     }
 
-    
-    func getUserUUID() -> String {
-        let getUserUUIDResponse = userUseCase.getUserUUID()
-        
-        switch getUserUUIDResponse {
+    func getUserUUID() -> String? {
+        switch userUseCase.getUserUUID() {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
             toastMessageRelay.accept("UUID 불러오기 실패: \(failure.description)")
-            return ""
+            return nil
         }
-        
     }
 }

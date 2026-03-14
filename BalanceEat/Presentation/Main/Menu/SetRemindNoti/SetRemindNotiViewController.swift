@@ -29,7 +29,6 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     
     override init(viewModel: SetRemindNotiViewModel) {
         super.init(viewModel: viewModel)
-        setBinding()
     }
     
     required init?(coder: NSCoder) {
@@ -38,9 +37,10 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setUpView()
         setupTableView()
+        setBinding()
         getDatas(page: 0, size: 10)
         setUpKeyboardDismissGesture()
         observeKeyboard()

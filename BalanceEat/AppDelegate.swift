@@ -15,12 +15,8 @@ import FirebaseMessaging
 class AppDelegate: UIResponder, UIApplicationDelegate {
     let gcmMessageIDKey = "gcm.message_id"
 
-    private var notificationUseCase: NotificationUseCaseProtocol {
-        AppDIContainer.shared.container.resolveOrFatal(NotificationUseCaseProtocol.self)
-    }
-    private var userUseCase: UserUseCaseProtocol {
-        AppDIContainer.shared.container.resolveOrFatal(UserUseCaseProtocol.self)
-    }
+    private lazy var notificationUseCase: NotificationUseCaseProtocol = AppDIContainer.shared.container.resolveOrFatal(NotificationUseCaseProtocol.self)
+    private lazy var userUseCase: UserUseCaseProtocol = AppDIContainer.shared.container.resolveOrFatal(UserUseCaseProtocol.self)
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
@@ -60,7 +56,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     )
                     
                     Task {
-                        let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: self.getUserId())
+                        guard let userId = self.getUserId() else { return }
+                        let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: userId)
                         
                         switch createNotificationResult {
                         case .success(let notificationResponseDTO):
@@ -139,11 +136,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
-    private func getUserId() -> String {
+    private func getUserId() -> String? {
         switch userUseCase.getUserId() {
         case .success(let userId): return String(userId)
-        case .failure(_):
-            return ""
+        case .failure: return nil
         }
     }
 }
@@ -173,8 +169,9 @@ extension AppDelegate: MessagingDelegate {
             )
             
             Task {
-                let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: self.getUserId())
-                
+                guard let userId = self.getUserId() else { return }
+                let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: userId)
+
                 switch createNotificationResult {
                 case .success:
                     break

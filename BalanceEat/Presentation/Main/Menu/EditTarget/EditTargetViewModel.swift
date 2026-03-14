@@ -16,6 +16,7 @@ final class EditTargetViewModel: BaseViewModel {
     
     init(userUseCase: UserUseCaseProtocol) {
         self.userUseCase = userUseCase
+        super.init()
     }
     
     @MainActor
