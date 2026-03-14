@@ -433,12 +433,12 @@ final class CreateDietViewModelTests: XCTestCase {
         XCTAssertEqual(sut.getUserId(), "42")
     }
 
-    func test_getUserId_실패시_빈문자열_반환() {
+    func test_getUserId_실패시_nil_반환() {
         // Given
         mockUserUseCase.getUserIdResult = .failure(.readError("userId 없음"))
 
         // Then
-        XCTAssertEqual(sut.getUserId(), "")
+        XCTAssertNil(sut.getUserId())
     }
 
     func test_getUserId_실패시_에러메시지_저장() {
