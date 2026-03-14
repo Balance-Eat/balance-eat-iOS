@@ -22,14 +22,15 @@ final class MenuViewModel: BaseViewModel {
     init(userUseCase: UserUseCaseProtocol, notificationUseCase: NotificationUseCaseProtocol) {
         self.userUseCase = userUseCase
         self.notificationUseCase = notificationUseCase
+        super.init()
     }
     
     @MainActor
     func getUser() async {
-        let uuid = getUserUUID()
-        
+        guard let uuid = getUserUUID() else { return }
+
         loadingRelay.accept(true)
-        
+
         let getUserResponse = await userUseCase.getUser(uuid: uuid)
         
         switch getUserResponse {
@@ -42,27 +43,13 @@ final class MenuViewModel: BaseViewModel {
         }
     }
     
-    private func getUserUUID() -> String {
-        let getUserUUIDResponse = userUseCase.getUserUUID()
-        
-        switch getUserUUIDResponse {
+    private func getUserUUID() -> String? {
+        switch userUseCase.getUserUUID() {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
             toastMessageRelay.accept("UUID 불러오기 실패: \(failure.description)")
-            return ""
-        }
-    }
-    
-    func getUserId() -> String {
-        let userIdResponse = userUseCase.getUserId()
-        
-        switch userIdResponse {
-        case .success(let userId):
-            return String(userId)
-        case .failure(let failure):
-            toastMessageRelay.accept(failure.description)
-            return ""
+            return nil
         }
     }
     

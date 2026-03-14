@@ -17,7 +17,4 @@ struct DietFoodData: Equatable {
     let protein: Double
     let fat: Double
     
-    static func == (lhs: DietFoodData, rhs: DietFoodData) -> Bool {
-        return lhs.id == rhs.id && lhs.intake == rhs.intake
-    }
 }

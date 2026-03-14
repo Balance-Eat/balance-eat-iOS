@@ -51,8 +51,8 @@ final class HomeViewModel: BaseViewModel {
     
     @MainActor
     func getUser() async {
-        let uuid = getUserUUID()
-        
+        guard let uuid = getUserUUID() else { return }
+
         loadingRelay.accept(true)
         let getUserResponse = await userUseCase.getUser(uuid: uuid)
         
@@ -67,17 +67,14 @@ final class HomeViewModel: BaseViewModel {
         }
     }
     
-    private func getUserUUID() -> String {
-        let getUserUUIDResponse = userUseCase.getUserUUID()
-        
-        switch getUserUUIDResponse {
+    private func getUserUUID() -> String? {
+        switch userUseCase.getUserUUID() {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
             toastMessageRelay.accept("UUID 불러오기 실패: \(failure.description)")
-            return ""
+            return nil
         }
-        
     }
     
     private func saveUserId(_ userId: Int) {

@@ -23,20 +23,20 @@ final class ChartViewModel: BaseViewModel {
         super.init()
     }
     
-    private func getUserId() -> String {
+    private func getUserId() -> String? {
         switch userUseCase.getUserId() {
         case .success(let userId):
             return String(userId)
         case .failure(let failure):
-            handleError(failure, prefix: "유저 아이디 불러오기 실패: ")
-            return ""
+            toastMessageRelay.accept("유저 아이디 불러오기 실패: \(failure.description)")
+            return nil
         }
     }
-    
+
     @MainActor
     func getUser() async {
-        let uuid = getUserUUID()
-        
+        guard let uuid = getUserUUID() else { return }
+
         loadingRelay.accept(true)
         let getUserResponse = await userUseCase.getUser(uuid: uuid)
         
@@ -50,33 +50,31 @@ final class ChartViewModel: BaseViewModel {
         }
     }
     
-    private func getUserUUID() -> String {
-        let getUserUUIDResponse = userUseCase.getUserUUID()
-        
-        switch getUserUUIDResponse {
+    private func getUserUUID() -> String? {
+        switch userUseCase.getUserUUID() {
         case .success(let uuid):
             return uuid
         case .failure(let failure):
             toastMessageRelay.accept("UUID 불러오기 실패: \(failure.description)")
-            return ""
+            return nil
         }
-        
     }
     
     @MainActor
     func getStats(period: Period) async {
+        guard let userId = getUserId() else { return }
+
         loadingRelay.accept(true)
-        let response = await statsUseCase.getStats(period: period, userId: getUserId())
-        
+        let response = await statsUseCase.getStats(period: period, userId: userId)
+
         switch response {
         case .success(let statsDatas):
             cachedStats[period.rawValue, default: []] = statsDatas
             currentStatsRelay.accept(statsDatas)
-            
             loadingRelay.accept(false)
         case .failure(let failure):
             loadingRelay.accept(false)
-            handleError(failure, prefix: "통계 정보 불러오기 실패: ")
+            toastMessageRelay.accept("통계 정보 불러오기 실패: \(failure.description)")
         }
     }
 }

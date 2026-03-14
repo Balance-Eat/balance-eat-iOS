@@ -140,7 +140,7 @@ final class APIClient {
                     let statusCode = response.response?.statusCode ?? 0
 
                     var statusMessage = "Unknown Error"
-                    var serverMessage = response.error?.localizedDescription
+                    var serverMessage = response.error?.localizedDescription ?? "알 수 없는 오류"
 
                     if let data = response.data {
                         if let apiError = try? Self.decoder.decode(BaseResponse<EmptyData>.self, from: data) {
@@ -160,7 +160,7 @@ final class APIClient {
                         #endif
                         continuation.resume(returning: .success(()))
                     } else {
-                        continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage ?? "")))
+                        continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage)))
                     }
                 }
         }

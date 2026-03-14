@@ -16,8 +16,9 @@ final class EditBasicInfoViewModel: BaseViewModel {
     let updateUserResultRelay = PublishRelay<Bool>()
     
     init(userData: UserData, userUseCase: UserUseCaseProtocol) {
-        self.userRelay.accept(userData)
         self.userUseCase = userUseCase
+        super.init()
+        self.userRelay.accept(userData)
     }
     
     @MainActor

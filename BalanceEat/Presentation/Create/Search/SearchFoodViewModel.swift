@@ -23,6 +23,7 @@ final class SearchFoodViewModel: BaseViewModel {
     
     init(foodUseCase: FoodUseCaseProtocol) {
         self.foodUseCase = foodUseCase
+        super.init()
     }
     
     @MainActor
