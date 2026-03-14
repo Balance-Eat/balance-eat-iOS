@@ -227,9 +227,8 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                             return DietFoodRequest(foodId: food.id, intake: servingSize)
                         }
                         guard !dietFoods.isEmpty else { return }
-                        
-                        let userId = viewModel.getUserId()
-                                                
+                        guard let userId = viewModel.getUserId() else { return }
+
                         if viewModel.currentFoodsRelay.value?.id == -1 {
                             Task { [weak self] in
                                 await self?.viewModel.createDiet(
@@ -259,7 +258,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 guard let self else { return }
                 
                 let mealTypeString = viewModel.mealTimeRelay.value.rawValue
-                let userId = viewModel.getUserId()
+                guard let userId = viewModel.getUserId() else { return }
                 if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
                     let alert = UIAlertController(
                         title: "식단 삭제",

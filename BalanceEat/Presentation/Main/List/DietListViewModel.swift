@@ -38,42 +38,43 @@ final class DietListViewModel: BaseViewModel {
         setBinding()
     }
     
-    private func getUserId() -> String {
+    private func getUserId() -> String? {
         switch userUseCase.getUserId() {
         case .success(let userId): return String(userId)
         case .failure(let failure):
-            handleError(failure, prefix: "유저 아이디 불러오기 실패: ")
-            return ""
+            toastMessageRelay.accept("유저 아이디 불러오기 실패: \(failure.description)")
+            return nil
         }
     }
-    
-    private func getUserUUID() -> String {
+
+    private func getUserUUID() -> String? {
         switch userUseCase.getUserUUID() {
-        case .success(let uuid): return String(uuid)
+        case .success(let uuid): return uuid
         case .failure(let failure):
-            handleError(failure, prefix: "유저 UUID 불러오기 실패: ")
-            return ""
+            toastMessageRelay.accept("유저 UUID 불러오기 실패: \(failure.description)")
+            return nil
         }
     }
-    
+
     @MainActor
     func getUser() async {
+        guard let uuid = getUserUUID() else { return }
         loadingRelay.accept(true)
-        let response = await userUseCase.getUser(uuid: getUserUUID())
+        let response = await userUseCase.getUser(uuid: uuid)
         switch response {
         case .success(let userData): userDataRelay.accept(userData)
-        case .failure(let failure): handleError(failure, prefix: "유저 데이터 불러오기 실패: ")
+        case .failure(let failure): toastMessageRelay.accept("유저 데이터 불러오기 실패: \(failure.description)")
         }
         loadingRelay.accept(false)
     }
-    
+
     @MainActor
     func getMonthlyDiets(year: Int = 0, month: Int = 0) async {
+        guard let userId = getUserId() else { return }
         let calendar = Calendar.current
         let year = year == 0 ? calendar.component(.year, from: selectedDate.value) : year
         let month = month == 0 ? calendar.component(.month, from: selectedDate.value) : month
-        let userId = getUserId()
-        
+
         loadingRelay.accept(true)
         let response = await dietUseCase.getMonthlyDiet(year: year, month: month, userId: userId)
         switch response {
@@ -81,25 +82,24 @@ final class DietListViewModel: BaseViewModel {
             var currentCache = monthDataCache.value
             let yearMonthKey = "\(year)-\(month)"
             var dailyDict: [String: [DietData]] = [:]
-            
+
             var ateDates = ateDateRelay.value
             for diet in dietDataList {
                 dailyDict[diet.consumeDate, default: []].append(diet)
-
                 if let parsedDate = convertToDate(diet.consumeDate) {
                     ateDates.insert(parsedDate)
                 }
             }
             ateDateRelay.accept(ateDates)
-            
+
             currentCache[yearMonthKey] = dailyDict
             monthDataCache.accept(currentCache)
-            
+
             let todayKey = DietListViewModel.dailyFormatter.string(from: selectedDate.value)
             selectedDayDataCache.accept(dailyDict[todayKey] ?? [])
-            
+
         case .failure(let failure):
-            handleError(failure, prefix: "식단 정보 불러오기 실패: ")
+            toastMessageRelay.accept("식단 정보 불러오기 실패: \(failure.description)")
         }
         loadingRelay.accept(false)
     }

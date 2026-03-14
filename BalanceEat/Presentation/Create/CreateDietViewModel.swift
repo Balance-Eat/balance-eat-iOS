@@ -200,15 +200,12 @@ final class CreateDietViewModel: BaseViewModel {
         }
     }
     
-    func getUserId() -> String {
-        let userIdResponse = userUseCase.getUserId()
-        
-        switch userIdResponse {
-        case .success(let userId):
-            return String(userId)
+    func getUserId() -> String? {
+        switch userUseCase.getUserId() {
+        case .success(let userId): return String(userId)
         case .failure(let failure):
             toastMessageRelay.accept(failure.description)
-            return ""
+            return nil
         }
     }
     

@@ -56,6 +56,8 @@ final class MenuViewController: BaseViewController<MenuViewModel> {
     var onEditTargetTypeAndActivityLevel: ((UserData) -> Void)?
     var onSetRemindNoti: (() -> Void)?
 
+    private var dataFetchTask: Task<Void, Never>?
+
     override init(viewModel: MenuViewModel) {
         super.init(viewModel: viewModel)
     }
@@ -174,9 +176,14 @@ final class MenuViewController: BaseViewController<MenuViewModel> {
     }
     
     private func getDatas() {
-        Task {
+        dataFetchTask?.cancel()
+        dataFetchTask = Task {
             await viewModel.getUser()
         }
+    }
+
+    deinit {
+        dataFetchTask?.cancel()
     }
     
     private func updateUIForUserData(user: UserData) {

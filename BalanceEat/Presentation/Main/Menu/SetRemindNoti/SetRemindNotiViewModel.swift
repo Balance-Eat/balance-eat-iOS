@@ -13,32 +13,42 @@ final class SetRemindNotiViewModel: BaseViewModel {
     private let notificationUseCase: NotificationUseCaseProtocol
     private let reminderUseCase: ReminderUseCaseProtocol
     private let userUseCase: UserUseCaseProtocol
-    
+
     var currentPage: Int = 0
     var totalPage: Int = 0
     var isLastPage: Bool { currentPage == totalPage }
     let pageSize: Int = 10
-    
+
     let isLoadingNextPageRelay: BehaviorRelay<Bool> = .init(value: false)
     let successToSaveReminderRelay: PublishRelay<Void> = .init()
     let reminderListRelay: BehaviorRelay<[ReminderData]> = .init(value: [])
     let reminderDetailRelay: BehaviorRelay<ReminderDetailData?> = .init(value: nil)
-    
+
     init(notificationUseCase: NotificationUseCaseProtocol, reminderUseCase: ReminderUseCaseProtocol, userUseCase: UserUseCaseProtocol) {
         self.notificationUseCase = notificationUseCase
         self.reminderUseCase = reminderUseCase
         self.userUseCase = userUseCase
         super.init()
     }
-    
+
+    private func getUserId() -> String? {
+        switch userUseCase.getUserId() {
+        case .success(let userId): return String(userId)
+        case .failure(let failure):
+            toastMessageRelay.accept(failure.description)
+            return nil
+        }
+    }
+
     @MainActor
     func getReminderList(page: Int = -1, size: Int = -1) async {
+        guard let userId = getUserId() else { return }
         loadingRelay.accept(true)
         currentPage = page == -1 ? 0 : page
         let size = size == -1 ? self.pageSize : size
-        
-        let getReminderListResponse = await reminderUseCase.getReminderList(page: currentPage, size: size, userId: getUserId())
-        
+
+        let getReminderListResponse = await reminderUseCase.getReminderList(page: currentPage, size: size, userId: userId)
+
         switch getReminderListResponse {
         case .success(let reminderListData):
             loadingRelay.accept(false)
@@ -50,19 +60,19 @@ final class SetRemindNotiViewModel: BaseViewModel {
             toastMessageRelay.accept(error.description)
         }
     }
-    
+
     @MainActor
     func fetchReminderList() async {
         guard !isLastPage else { return }
-        
+        guard let userId = getUserId() else { return }
         isLoadingNextPageRelay.accept(true)
-        
+
         let getReminderListResponse = await reminderUseCase.getReminderList(
             page: currentPage,
             size: pageSize,
-            userId: getUserId()
+            userId: userId
         )
-        
+
         switch getReminderListResponse {
         case .success(let reminderListData):
             reminderListRelay.accept(reminderListRelay.value + reminderListData.items)
@@ -70,17 +80,17 @@ final class SetRemindNotiViewModel: BaseViewModel {
         case .failure(let error):
             toastMessageRelay.accept(error.description)
         }
-        
+
         isLoadingNextPageRelay.accept(false)
     }
 
-    
     @MainActor
     func createReminder(reminderDataForCreate: ReminderDataForCreate) async {
+        guard let userId = getUserId() else { return }
         loadingRelay.accept(true)
-        
-        let createReminderResponse = await reminderUseCase.createReminder(reminderDataForCreate: reminderDataForCreate, userId: getUserId())
-        
+
+        let createReminderResponse = await reminderUseCase.createReminder(reminderDataForCreate: reminderDataForCreate, userId: userId)
+
         switch createReminderResponse {
         case .success:
             #if DEBUG
@@ -96,10 +106,11 @@ final class SetRemindNotiViewModel: BaseViewModel {
 
     @MainActor
     func getReminderDetail(reminderId: Int) async {
+        guard let userId = getUserId() else { return }
         loadingRelay.accept(true)
-        
-        let reminderDetailResponse = await reminderUseCase.getReminderDetail(reminderId: reminderId, userId: getUserId())
-        
+
+        let reminderDetailResponse = await reminderUseCase.getReminderDetail(reminderId: reminderId, userId: userId)
+
         switch reminderDetailResponse {
         case .success(let reminderDetailData):
             #if DEBUG
@@ -112,13 +123,14 @@ final class SetRemindNotiViewModel: BaseViewModel {
             toastMessageRelay.accept(error.description)
         }
     }
-    
+
     @MainActor
     func updateReminder(reminderDataForCreate: ReminderDataForCreate, reminderId: Int) async {
+        guard let userId = getUserId() else { return }
         loadingRelay.accept(true)
-        
-        let reminderUpdateResponse = await reminderUseCase.updateReminder(reminderDataForCreate: reminderDataForCreate, reminderId: reminderId, userId: getUserId())
-        
+
+        let reminderUpdateResponse = await reminderUseCase.updateReminder(reminderDataForCreate: reminderDataForCreate, reminderId: reminderId, userId: userId)
+
         switch reminderUpdateResponse {
         case .success:
             #if DEBUG
@@ -132,13 +144,14 @@ final class SetRemindNotiViewModel: BaseViewModel {
             toastMessageRelay.accept(error.description)
         }
     }
-    
+
     @MainActor
     func deleteReminder(reminderId: Int) async {
+        guard let userId = getUserId() else { return }
         loadingRelay.accept(true)
-        
-        let reminderDeleteResponse = await reminderUseCase.deleteReminder(reminderId: reminderId, userId: getUserId())
-        
+
+        let reminderDeleteResponse = await reminderUseCase.deleteReminder(reminderId: reminderId, userId: userId)
+
         switch reminderDeleteResponse {
         case .success(()):
             loadingRelay.accept(false)
@@ -153,31 +166,20 @@ final class SetRemindNotiViewModel: BaseViewModel {
             toastMessageRelay.accept(error.description)
         }
     }
-    
+
     @MainActor
     func updateReminderActivation(isActive: Bool, reminderId: Int) async {
+        guard let userId = getUserId() else { return }
         loadingRelay.accept(true)
-        
-        let reminderUpdateActivationResponse = await reminderUseCase.updateReminderActivation(isActive: isActive, reminderId: reminderId, userId: getUserId())
-        
+
+        let reminderUpdateActivationResponse = await reminderUseCase.updateReminderActivation(isActive: isActive, reminderId: reminderId, userId: userId)
+
         switch reminderUpdateActivationResponse {
         case .success:
             loadingRelay.accept(false)
         case .failure(let error):
             loadingRelay.accept(false)
             toastMessageRelay.accept(error.description)
-        }
-    }
-    
-    func getUserId() -> String {
-        let userIdResponse = userUseCase.getUserId()
-        
-        switch userIdResponse {
-        case .success(let userId):
-            return String(userId)
-        case .failure(let failure):
-            toastMessageRelay.accept(failure.description)
-            return ""
         }
     }
 }
