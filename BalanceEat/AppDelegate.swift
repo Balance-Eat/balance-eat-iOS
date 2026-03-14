@@ -24,62 +24,52 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         Messaging.messaging().delegate = self
         
-        if #available(iOS 10.0, *) {
-            UNUserNotificationCenter.current().delegate = self
-            
-            let authOption: UNAuthorizationOptions = [.alert, .badge, .sound]
-            UNUserNotificationCenter.current().requestAuthorization(
-                options: authOption
-            ) {
-                granted,
-                error in
-                
-                let userDefaultsManager = UserDefaultsManager.shared
-                
+        UNUserNotificationCenter.current().delegate = self
+
+        let deviceName = UIDevice.current.name  // 메인 스레드에서 미리 캡처
+        let authOption: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(options: authOption) { granted, error in
+            let userDefaultsManager = UserDefaultsManager.shared
+
+            #if DEBUG
+            print("didfinishLaunchingWithOptions: fcm토큰: \(userDefaultsManager.getString(forKey: .agentId))")
+            #endif
+
+            userDefaultsManager.set(granted, forKey: .pushNotificationEnabled)
+            if let error {
                 #if DEBUG
-                print("didfinishLaunchingWithOptions: fcm토큰: \(userDefaultsManager.getString(forKey: .agentId))")
+                print("permission error: \(error)")
                 #endif
-                
-                userDefaultsManager.set(granted, forKey: .pushNotificationEnabled)
-                if let error {
-                    #if DEBUG
-                    print("permission error: \(error)")
-                    #endif
-                } else if !userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess) {
-                    let token = userDefaultsManager.getString(forKey: .agentId)
-                    if token == "" { return }
-                    let notificationRequestDTO = NotificationRequestDTO(
-                        agentId: token,
-                        osType: "IOS",
-                        deviceName: UIDevice.current.name,
-                        isActive: granted
-                    )
-                    
-                    Task {
-                        guard let userId = self.getUserId() else { return }
-                        let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: userId)
-                        
-                        switch createNotificationResult {
-                        case .success(let notificationResponseDTO):
-                            #if DEBUG
-                            print("create noti success: \(notificationResponseDTO)")
-                            #endif
+            } else if !userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess) {
+                let token = userDefaultsManager.getString(forKey: .agentId)
+                guard !token.isEmpty else { return }
+                let notificationRequestDTO = NotificationRequestDTO(
+                    agentId: token,
+                    osType: "IOS",
+                    deviceName: deviceName,
+                    isActive: granted
+                )
+
+                Task {
+                    guard let userId = self.getUserId() else { return }
+                    let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: userId)
+
+                    switch createNotificationResult {
+                    case .success(let notificationResponseDTO):
+                        #if DEBUG
+                        print("create noti success: \(notificationResponseDTO)")
+                        #endif
+                        userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
+                    case .failure(let error):
+                        if error.description.contains("NOTIFICATION_DEVICE_ALREADY_EXISTS") {
                             userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
-                        case .failure(let error):
-                            if error.description.contains("NOTIFICATION_DEVICE_ALREADY_EXISTS") {
-                                userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
-                            }
-                            #if DEBUG
-                            print("create noti failed : \(error.description)")
-                            #endif
                         }
+                        #if DEBUG
+                        print("create noti failed : \(error.description)")
+                        #endif
                     }
-                    
                 }
             }
-        } else {
-            let settings: UIUserNotificationSettings = UIUserNotificationSettings(types: [.alert, .badge, .sound], categories: nil)
-            application.registerUserNotificationSettings(settings)
         }
         
         application.registerForRemoteNotifications()
@@ -159,22 +149,24 @@ extension AppDelegate: MessagingDelegate {
         }
         
         let permissionForNotification = userDefaultsManager.getBool(forKey: .pushNotificationEnabled)
-        
+
+        guard let fcmToken else { return }
         if userDefaultsManager.getString(forKey: .agentId) != fcmToken {
+            let deviceName = UIDevice.current.name
             let notificationRequestDTO = NotificationRequestDTO(
-                agentId: fcmToken ?? "",
+                agentId: fcmToken,
                 osType: "IOS",
-                deviceName: UIDevice.current.name,
+                deviceName: deviceName,
                 isActive: permissionForNotification
             )
-            
+
             Task {
                 guard let userId = self.getUserId() else { return }
                 let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: userId)
 
                 switch createNotificationResult {
                 case .success:
-                    break
+                    userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
                 case .failure(let error):
                     #if DEBUG
                     print("알림 기기 등록 실패: \(error.description)")
@@ -182,9 +174,7 @@ extension AppDelegate: MessagingDelegate {
                 }
             }
         }
-        if let fcmToken {
-            userDefaultsManager.set(fcmToken, forKey: .agentId)
-        }
+        userDefaultsManager.set(fcmToken, forKey: .agentId)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
