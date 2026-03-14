@@ -464,17 +464,17 @@ final class ChartStatStackView: UIView {
         
         Observable.combineLatest(statsRelay, nutritionStatTypeRelay)
             .subscribe(onNext: { [weak self] stats, nutritionStatType in
-                guard let self else { return }
+                guard let self, !stats.isEmpty else { return }
                 var sum: Double = 0
                 var max: Double = 0
                 var min: Double = 0
-                
+
                 switch nutritionStatType {
                 case .calorie:
                     sum = stats.reduce(0) { $0 + $1.totalCalories }
                     max = stats.map(\.totalCalories).max() ?? 0
                     min = stats.map(\.totalCalories).min() ?? 0
-                    
+
                     averageAmountRelay.accept(sum / Double(stats.count))
                     maxAmountRelay.accept(max)
                     minAmountRelay.accept(min)
@@ -482,7 +482,7 @@ final class ChartStatStackView: UIView {
                     sum = stats.reduce(0) { $0 + $1.totalCarbohydrates }
                     max = stats.map(\.totalCarbohydrates).max() ?? 0
                     min = stats.map(\.totalCarbohydrates).min() ?? 0
-                    
+
                     averageAmountRelay.accept(sum / Double(stats.count))
                     maxAmountRelay.accept(max)
                     minAmountRelay.accept(min)
@@ -490,7 +490,7 @@ final class ChartStatStackView: UIView {
                     sum = stats.reduce(0) { $0 + $1.totalProtein }
                     max = stats.map(\.totalProtein).max() ?? 0
                     min = stats.map(\.totalProtein).min() ?? 0
-                    
+
                     averageAmountRelay.accept(sum / Double(stats.count))
                     maxAmountRelay.accept(max)
                     minAmountRelay.accept(min)
@@ -498,7 +498,7 @@ final class ChartStatStackView: UIView {
                     sum = stats.reduce(0) { $0 + $1.totalFat }
                     max = stats.map(\.totalFat).max() ?? 0
                     min = stats.map(\.totalFat).min() ?? 0
-                    
+
                     averageAmountRelay.accept(sum / Double(stats.count))
                     maxAmountRelay.accept(max)
                     minAmountRelay.accept(min)
@@ -1099,12 +1099,12 @@ final class AnalysisInsightView: UIView {
     private func setBinding() {
         Observable.combineLatest(statsRelay, nutritionStatTypeRelay, userDataRelay)
             .subscribe(onNext: { [weak self] stats, nutritionStatType, userData in
-                guard let self else { return }
-                
+                guard let self, !stats.isEmpty else { return }
+
                 var average: Double = 0
                 var target: Double = 0
                 var isInTargetCount: Int = 0
-                
+
                 switch nutritionStatType {
                 case .calorie:
                     average = stats.map(\.totalCalories).reduce(0, +) / Double(stats.count)

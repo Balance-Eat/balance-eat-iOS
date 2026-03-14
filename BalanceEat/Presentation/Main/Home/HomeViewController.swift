@@ -72,10 +72,7 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
     
     private let proteinRemindCardView = ProteinReminderCardView(proteinTime: Calendar.current.date(byAdding: .minute, value: 90, to: Date()) ?? Date())
     
-    private lazy var todayAteMealLogListView: MealLogListView = {
-        let mealLogs: [MealLogView] = []
-        return MealLogListView()
-    }()
+    private let todayAteMealLogListView = MealLogListView()
     
     
     override init(viewModel: HomeViewModel) {
@@ -145,9 +142,8 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
     private func getDatas() {
         dataFetchTask?.cancel()
         dataFetchTask = Task {
-            async let user: Void = viewModel.getUser()
-            async let diet: Void = viewModel.getDailyDiet()
-            _ = await (user, diet)
+            await viewModel.getUser()
+            await viewModel.getDailyDiet()
             refreshControl.endRefreshing()
         }
     }

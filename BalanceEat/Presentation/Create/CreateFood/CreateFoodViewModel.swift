@@ -16,6 +16,7 @@ final class CreateFoodViewModel: BaseViewModel {
     
     init(foodUseCase: FoodUseCaseProtocol) {
         self.foodUseCase = foodUseCase
+        super.init()
     }
     
     @MainActor
