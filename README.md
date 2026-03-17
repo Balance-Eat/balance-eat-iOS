@@ -2,6 +2,8 @@
 
 > 체중, 골격근량, 체지방률 기반 식단 기록 및 영양 목표 관리 iOS 앱
 
+![Swift](https://img.shields.io/badge/Swift-5.0-orange) ![iOS](https://img.shields.io/badge/iOS-18.0+-blue) ![Xcode](https://img.shields.io/badge/Xcode-16.0+-lightgrey)
+
 <br>
 
 ## 스크린샷
