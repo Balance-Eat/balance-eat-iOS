@@ -48,7 +48,6 @@
 | 의존성 주입 | Swinject |
 | 푸시 알림 | Firebase Cloud Messaging (FCM) |
 | 차트 | DGCharts |
-| 배포 자동화 | Fastlane (TestFlight) |
 | 테스트 | XCTest |
 
 <br>
