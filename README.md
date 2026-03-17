@@ -85,13 +85,13 @@ Data
 
 ## 기술적 의사결정
 
-**Q. RxSwift와 async/await를 왜 혼용했나요?**
+**RxSwift + async/await 혼용**
 
-두 기술이 잘하는 역할이 다릅니다. RxSwift는 버튼 탭, 텍스트 변경처럼 지속적인 이벤트 스트림 처리에 적합하고, async/await는 네트워크 호출처럼 한 번 실행하고 끝나는 비동기 작업에 더 명확합니다. ViewModel이 두 레이어의 브릿지 역할을 하며, `@MainActor async` 함수에서 네트워크 결과를 받아 Relay에 저장하면 ViewController가 구독해 UI를 업데이트합니다.
+RxSwift는 버튼 탭, 텍스트 변경처럼 지속적인 이벤트 스트림에, async/await는 네트워크 호출처럼 일회성 비동기 작업에 적합합니다. 역할이 다르기 때문에 두 기술을 병행했습니다. ViewModel의 `@MainActor async` 함수가 네트워크 결과를 Relay에 저장하고, ViewController는 Relay를 구독해 UI를 업데이트하는 방식으로 레이어를 분리했습니다.
 
-**Q. Clean Architecture를 적용한 이유는?**
+**Clean Architecture + Swinject DI**
 
-단위 테스트 작성이 직접적인 이유였습니다. UseCase와 Repository를 프로토콜로 분리하면 Mock 객체를 주입할 수 있어 네트워크 없이 ViewModel 로직을 검증할 수 있습니다. 실제로 `MockUserUseCase`, `MockDietUseCase`를 작성해 성공/실패 케이스를 독립적으로 테스트했습니다.
+UseCase와 Repository를 프로토콜로 분리하면 Mock 객체로 교체가 가능해 단위 테스트를 작성할 수 있습니다. 실제로 `MockUserUseCase`, `MockDietUseCase`를 작성해 네트워크 없이 ViewModel 로직을 검증했습니다. Swinject는 의존성 등록과 주입을 한 곳(`AppDIContainer`)에서 관리해 ViewController가 직접 의존성을 생성하지 않도록 했습니다.
 
 <br>
 
