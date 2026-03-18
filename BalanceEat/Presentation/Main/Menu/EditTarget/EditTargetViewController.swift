@@ -37,12 +37,7 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
     private let targetSMIRelay = BehaviorRelay<Double?>(value: 0)
     private let currentFatPercentageRelay = BehaviorRelay<Double?>(value: 0)
     private let targetFatPercentageRelay = BehaviorRelay<Double?>(value: 0)
-    private let carbonRelay = BehaviorRelay<Double>(value: 0)
-    private let proteinRelay = BehaviorRelay<Double>(value: 0)
-    private let fatRelay = BehaviorRelay<Double>(value: 0)
-
     private let valueOfAllChangedRelay = BehaviorRelay<Bool>(value: false)
-    private let nutritionValueChangedRelay = BehaviorRelay<Bool>(value: false)
 
     init(userData: UserData, viewModel: EditTargetViewModel) {
         self.userData = userData
@@ -258,9 +253,9 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
                     targetCalorie: currentUser.targetCalorie,
                     targetSmi: targetSMIRelay.value,
                     targetFatPercentage: targetFatPercentageRelay.value,
-                    targetCarbohydrates: carbonRelay.value,
-                    targetProtein: proteinRelay.value,
-                    targetFat: fatRelay.value,
+                    targetCarbohydrates: currentUser.targetCarbohydrates,
+                    targetProtein: currentUser.targetProtein,
+                    targetFat: currentUser.targetFat,
                     providerId: currentUser.providerId,
                     providerType: currentUser.providerType
                 )
@@ -294,18 +289,6 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
                 present(targetGuideViewController, animated: true, completion: nil)
             })
             .disposed(by: disposeBag)
-
-        Observable.combineLatest(carbonRelay, proteinRelay, fatRelay) { [weak self] carbon, protein, fat -> Bool in
-            guard let self else { return false }
-
-            let isCarbonMaintained = carbon == round(userData.targetCarbohydrates ?? 0)
-            let isProteinMaintained = protein == round(userData.targetProtein ?? 0)
-            let isFatMaintained = fat == round(userData.targetFat ?? 0)
-
-            return isCarbonMaintained && isProteinMaintained && isFatMaintained
-        }
-        .bind(to: nutritionValueChangedRelay)
-        .disposed(by: disposeBag)
 
         Observable.combineLatest(
             currentWeightRelay, targetWeightRelay,
