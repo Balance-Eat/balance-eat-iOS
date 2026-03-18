@@ -85,30 +85,6 @@ Data
 
 <br>
 
-## 기술적 의사결정
-
-**RxSwift + async/await 혼용**
-
-RxSwift는 버튼 탭, 텍스트 변경처럼 지속적인 이벤트 스트림에, async/await는 네트워크 호출처럼 일회성 비동기 작업에 적합합니다. 역할이 다르기 때문에 두 기술을 병행했습니다. ViewModel의 `@MainActor async` 함수가 네트워크 결과를 Relay에 저장하고, ViewController는 Relay를 구독해 UI를 업데이트하는 방식으로 레이어를 분리했습니다.
-
-**Clean Architecture + Swinject DI**
-
-UseCase와 Repository를 프로토콜로 분리하면 Mock 객체로 교체가 가능해 단위 테스트를 작성할 수 있습니다. 실제로 `MockUserUseCase`, `MockDietUseCase`를 작성해 네트워크 없이 ViewModel 로직을 검증했습니다. Swinject는 의존성 등록과 주입을 한 곳(`AppDIContainer`)에서 관리해 ViewController가 직접 의존성을 생성하지 않도록 했습니다.
-
-<br>
-
-## 트러블슈팅
-
-**RxSwift 구독 누적으로 인한 메모리 누수**
-
-`viewWillAppear`에서 바인딩을 설정하면 화면이 나타날 때마다 구독이 쌓이는 문제가 있었습니다. 별도의 `presentationBag = DisposeBag()`을 도입해 화면이 나타날 때마다 이전 구독을 해제하도록 수정했습니다.
-
-**FCM 토큰 갱신 시 기기 중복 등록 문제**
-
-앱 재설치나 토큰 갱신 시 서버에 동일 기기가 중복 등록될 수 있었습니다. `UserDefaults`에 저장된 이전 토큰과 비교해 변경된 경우에만 서버에 등록 요청을 보내고, `saveToNotificationServerSuccess` 플래그로 중복 호출을 방지했습니다.
-
-<br>
-
 ## 프로젝트 구조
 
 ```
