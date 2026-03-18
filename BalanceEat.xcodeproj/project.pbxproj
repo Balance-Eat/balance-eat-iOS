@@ -34,14 +34,14 @@
 			containerPortal = 49BF006A2E1E2FC900876EC3 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 49BF00712E1E2FC900876EC3;
-			remoteInfo = BanlanceEat;
+			remoteInfo = BalanceEat;
 		};
 		49BF00962E1E2FCA00876EC3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 49BF006A2E1E2FC900876EC3 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 49BF00712E1E2FC900876EC3;
-			remoteInfo = BanlanceEat;
+			remoteInfo = BalanceEat;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -198,7 +198,7 @@
 				497CB8AD2ECFFCB600F0E8FC /* FirebaseAnalytics */,
 				498744962F501EBF003F39BA /* Swinject */,
 			);
-			productName = BanlanceEat;
+			productName = BalanceEat;
 			productReference = 49BF00722E1E2FC900876EC3 /* BalanceEat.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -222,7 +222,7 @@
 			packageProductDependencies = (
 				A1TEST0022E1E309400876EC3 /* RxSwift */,
 			);
-			productName = BanlanceEatTests;
+			productName = BalanceEatTests;
 			productReference = 49BF008B2E1E2FCA00876EC3 /* BalanceEatTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -245,7 +245,7 @@
 			name = BalanceEatUITests;
 			packageProductDependencies = (
 			);
-			productName = BanlanceEatUITests;
+			productName = BalanceEatUITests;
 			productReference = 49BF00952E1E2FCA00876EC3 /* BalanceEatUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
@@ -562,7 +562,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BanlanceEatTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BalanceEatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -581,7 +581,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BanlanceEatTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BalanceEatTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -598,12 +598,12 @@
 				DEVELOPMENT_TEAM = 697ACQDW6C;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BanlanceEatUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BalanceEatUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = BanlanceEat;
+				TEST_TARGET_NAME = BalanceEat;
 			};
 			name = Debug;
 		};
@@ -615,12 +615,12 @@
 				DEVELOPMENT_TEAM = 697ACQDW6C;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BanlanceEatUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.kihyeon.BalanceEatUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = BanlanceEat;
+				TEST_TARGET_NAME = BalanceEat;
 			};
 			name = Release;
 		};

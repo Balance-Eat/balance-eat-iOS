@@ -1,13 +1,13 @@
 //
-//  BanlanceEatUITests.swift
-//  BanlanceEatUITests
+//  BalanceEatUITests.swift
+//  BalanceEatUITests
 //
 //  Created by 김견 on 7/9/25.
 //
 
 import XCTest
 
-final class BanlanceEatUITests: XCTestCase {
+final class BalanceEatUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

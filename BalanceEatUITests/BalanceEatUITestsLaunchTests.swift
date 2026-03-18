@@ -1,13 +1,13 @@
 //
-//  BanlanceEatUITestsLaunchTests.swift
-//  BanlanceEatUITests
+//  BalanceEatUITestsLaunchTests.swift
+//  BalanceEatUITests
 //
 //  Created by 김견 on 7/9/25.
 //
 
 import XCTest
 
-final class BanlanceEatUITestsLaunchTests: XCTestCase {
+final class BalanceEatUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
