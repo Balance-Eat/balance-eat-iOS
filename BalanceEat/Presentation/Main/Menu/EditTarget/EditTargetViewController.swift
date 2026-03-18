@@ -270,12 +270,38 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
 
-                weightEditTargetItemView.setCurrentText(String(userData.weight))
-                weightEditTargetItemView.setTargetText(String(userData.targetWeight))
-                smiEditTargetItemView.setCurrentText(String(userData.smi ?? 0))
-                smiEditTargetItemView.setTargetText(String(userData.targetSmi ?? 0))
-                fatPercentageEditTargetItemView.setCurrentText(String(userData.fatPercentage ?? 0))
-                fatPercentageEditTargetItemView.setTargetText(String(userData.targetFatPercentage ?? 0))
+                let weightText = userData.weight.truncatingRemainder(dividingBy: 1) == 0
+                    ? String(Int(userData.weight)) : String(userData.weight)
+                weightEditTargetItemView.setCurrentText(weightText)
+
+                let targetWeightText = userData.targetWeight.truncatingRemainder(dividingBy: 1) == 0
+                    ? String(Int(userData.targetWeight)) : String(userData.targetWeight)
+                weightEditTargetItemView.setTargetText(targetWeightText)
+
+                if let smi = userData.smi {
+                    let text = smi.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(smi)) : String(smi)
+                    smiEditTargetItemView.setCurrentText(text)
+                } else {
+                    smiEditTargetItemView.setCurrentText("")
+                }
+                if let targetSmi = userData.targetSmi {
+                    let text = targetSmi.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(targetSmi)) : String(targetSmi)
+                    smiEditTargetItemView.setTargetText(text)
+                } else {
+                    smiEditTargetItemView.setTargetText("")
+                }
+                if let fat = userData.fatPercentage {
+                    let text = fat.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(fat)) : String(fat)
+                    fatPercentageEditTargetItemView.setCurrentText(text)
+                } else {
+                    fatPercentageEditTargetItemView.setCurrentText("")
+                }
+                if let targetFat = userData.targetFatPercentage {
+                    let text = targetFat.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(targetFat)) : String(targetFat)
+                    fatPercentageEditTargetItemView.setTargetText(text)
+                } else {
+                    fatPercentageEditTargetItemView.setTargetText("")
+                }
             })
             .disposed(by: disposeBag)
 
