@@ -67,6 +67,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     )
     
     var makeSearchFoodViewController: (() -> SearchFoodViewController?)?
+    private var searchPresentationBag = DisposeBag()
 
     override init(viewModel: CreateDietViewModel) {
         super.init(viewModel: viewModel)
@@ -150,7 +151,9 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             .bind { [weak self] in
                 guard let self else { return }
                 guard let searchFoodViewController = makeSearchFoodViewController?() else { return }
-                
+
+                searchPresentationBag = DisposeBag()
+
                 searchFoodViewController.selectedFoodDataRelay
                     .observe(on: MainScheduler.instance)
                     .compactMap { $0 }
@@ -161,7 +164,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
 
                             let mealTime = viewModel.mealTimeRelay.value
                             var current = viewModel.dietFoodsRelay.value
-                            
+
                             if current[mealTime.rawValue]?.items.contains(where: { $0.id == foodData.id }) == true {
                                 viewModel.toastMessageRelay.accept("이미 선택된 음식입니다.")
                                 return
@@ -176,12 +179,12 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                                     items: []
                                 )
                             ].items.append(foodData.modelToDietFoodData(intake: foodData.servingSize))
-                                                
+
                         viewModel.dietFoodsRelay.accept(current)
                         viewModel.mealTimeRelay.accept(mealTime)
                     })
-                    .disposed(by: disposeBag)
-                
+                    .disposed(by: searchPresentationBag)
+
                 self.navigationController?.pushViewController(searchFoodViewController, animated: true)
             }
             .disposed(by: disposeBag)
@@ -220,13 +223,10 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
                     let mealTypeString = mealType.rawValue
                     if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
-                        let dietFoods: [DietFoodRequest] = diet.items.compactMap { food in
-                            guard let servingSize = self.addedFoodListView.cellIntakeRelay.value[food.id] else {
-                                return nil
-                            }
-                            return DietFoodRequest(foodId: food.id, intake: servingSize)
+                        let dietFoods: [DietFoodRequest] = diet.items.map { food in
+                            let intake = self.addedFoodListView.cellIntakeRelay.value[food.id] ?? food.intake
+                            return DietFoodRequest(foodId: food.id, intake: intake)
                         }
-                        guard !dietFoods.isEmpty else { return }
                         guard let userId = viewModel.getUserId() else { return }
 
                         if viewModel.currentFoodsRelay.value?.id == -1 {

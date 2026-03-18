@@ -112,13 +112,6 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
             })
             .disposed(by: disposeBag)
         
-        viewModel.userDataRelay
-            .subscribe(onNext: { [weak self] userData in
-                guard let self, let targetCalorie = userData?.targetCalorie else { return }
-                sumOfNutritionValueView.subTitleRelay.accept("목표: \(targetCalorie)kcal")
-            })
-            .disposed(by: disposeBag)
-        
         viewModel.selectedDayDataCache
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] dietDatas in

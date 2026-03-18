@@ -142,7 +142,7 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
 
         if viewModel.userRelay.value?.gender == .male {
             maleButton.isSelectedRelay.accept(true)
-        } else {
+        } else if viewModel.userRelay.value?.gender == .female {
             femaleButton.isSelectedRelay.accept(true)
         }
 
