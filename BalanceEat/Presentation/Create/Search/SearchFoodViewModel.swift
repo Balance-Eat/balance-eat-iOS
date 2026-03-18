@@ -28,15 +28,16 @@ final class SearchFoodViewModel: BaseViewModel {
     
     @MainActor
     func searchFood(foodName: String) async {
-        
+
         currentPage = 0
-  
+
         let searchFoodResponse = await foodUseCase.searchFood(foodName: foodName, page: currentPage, size: pageSize)
-        
+
         switch searchFoodResponse {
         case .success(let result):
             searchFoodResultRelay.accept(result.items)
             totalPage = result.totalPages
+            currentPage = 1
         case .failure(let failure):
             #if DEBUG
             print("SearchFoodViewModel.searchFood failed: \(failure)")
@@ -48,16 +49,15 @@ final class SearchFoodViewModel: BaseViewModel {
     @MainActor
     func fetchSearchFood(foodName: String) async {
         guard !isLastPage else { return }
-        
+
         isLoadingNextPageRelay.accept(true)
-        
-        currentPage += 1
-        
+
         let searchFoodResponse = await foodUseCase.searchFood(foodName: foodName, page: currentPage, size: pageSize)
-        
+
         switch searchFoodResponse {
         case .success(let searchResponseDTO):
             searchFoodResultRelay.accept(searchFoodResultRelay.value + searchResponseDTO.items)
+            currentPage += 1
             isLoadingNextPageRelay.accept(false)
         case .failure(let error):
             #if DEBUG

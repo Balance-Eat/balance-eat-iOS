@@ -116,7 +116,7 @@ final class CreateDietViewModel: BaseViewModel {
                 let currentIntake = intakeRelay.value
                 let updatedItems = currentFoodsRelay.value?.items.map { item in
                     var newItem = item
-                    newItem.intake = currentIntake[item.id] ?? 0
+                    newItem.intake = currentIntake[item.id] ?? item.intake
                     return newItem
                 }
                 

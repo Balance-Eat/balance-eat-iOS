@@ -136,18 +136,22 @@ final class StepperView: UIView {
             .disposed(by: disposeBag)
         
         textField.rx.text.orEmpty
-            .map { [weak self] text in
+            .map { [weak self] text -> Double in
                 guard let self else { return 0 }
-                
-                if Double(text) ?? 0 > 1000 {
+
+                let rawValue = Double(text) ?? 0
+
+                if rawValue > 1000 {
                     textField.text = "1000"
                 }
-                
+
+                let clampedValue = min(rawValue, 1000)
+
                 switch self.stepperModeRelay.value {
                 case .servingSize:
-                    return (Double(text) ?? 0) * servingSize
+                    return clampedValue * servingSize
                 case .amountSize:
-                    return Double(text) ?? 0
+                    return clampedValue
                 }
             }
             .bind(to: intakeRelay)
