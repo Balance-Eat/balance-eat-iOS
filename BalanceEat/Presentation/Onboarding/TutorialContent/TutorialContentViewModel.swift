@@ -23,7 +23,7 @@ final class TutorialContentViewModel: BaseViewModel {
     func createUser(_ request: UserCreateRequest) async {
         loadingRelay.accept(true)
 
-        let createUserResponse = await userUseCase.createUser(request)
+        let createUserResponse = await userUseCase.createUser(request: request)
 
         switch createUserResponse {
         case .success():

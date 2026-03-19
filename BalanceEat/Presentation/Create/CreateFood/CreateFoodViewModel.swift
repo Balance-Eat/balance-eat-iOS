@@ -23,7 +23,7 @@ final class CreateFoodViewModel: BaseViewModel {
     func createFood(_ request: FoodCreateRequest) async {
         loadingRelay.accept(true)
 
-        let createFoodResponse = await foodUseCase.createFood(request)
+        let createFoodResponse = await foodUseCase.createFood(request: request)
 
         switch createFoodResponse {
         case .success(let foodData):

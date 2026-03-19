@@ -20,7 +20,7 @@ struct UserRepository: UserRepositoryProtocol {
         UserCoreData(viewContext: context)
     }
     
-    func createUser(_ request: UserCreateRequest) async -> Result<Void, NetworkError> {
+    func createUser(request: UserCreateRequest) async -> Result<Void, NetworkError> {
         let userDTO = UserDTO(
             uuid: request.uuid,
             name: request.name,
@@ -51,7 +51,7 @@ struct UserRepository: UserRepositoryProtocol {
         }
     }
 
-    func updateUser(_ userData: UserData) async -> Result<Void, NetworkError> {
+    func updateUser(userData: UserData) async -> Result<Void, NetworkError> {
         let userDTO = UserDTO(
             id: userData.id,
             uuid: userData.uuid,

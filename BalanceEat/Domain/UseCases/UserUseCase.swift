@@ -8,8 +8,8 @@
 import Foundation
 
 protocol UserUseCaseProtocol {
-    func createUser(_ request: UserCreateRequest) async -> Result<Void, NetworkError>
-    func updateUser(_ userData: UserData) async -> Result<Void, NetworkError>
+    func createUser(request: UserCreateRequest) async -> Result<Void, NetworkError>
+    func updateUser(userData: UserData) async -> Result<Void, NetworkError>
     func getUser(uuid: String) async -> Result<UserData, NetworkError>
     func getUserUUID() -> Result<String, CoreDataError>
     func saveUserUUID(_ uuid: String) -> Result<Void, CoreDataError>
@@ -26,12 +26,12 @@ struct UserUseCase: UserUseCaseProtocol {
         self.repository = repository
     }
     
-    func createUser(_ request: UserCreateRequest) async -> Result<Void, NetworkError> {
-        await repository.createUser(request)
+    func createUser(request: UserCreateRequest) async -> Result<Void, NetworkError> {
+        await repository.createUser(request: request)
     }
 
-    func updateUser(_ userData: UserData) async -> Result<Void, NetworkError> {
-        await repository.updateUser(userData)
+    func updateUser(userData: UserData) async -> Result<Void, NetworkError> {
+        await repository.updateUser(userData: userData)
     }
     
     func getUser(uuid: String) async -> Result<UserData, NetworkError> {

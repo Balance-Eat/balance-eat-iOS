@@ -10,7 +10,7 @@ import Foundation
 struct FoodRepository: FoodRepositoryProtocol {
     private let apiClient = APIClient.shared
     
-    func createFood(_ request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {
+    func createFood(request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {
         let createFoodDTO = CreateFoodDTO(
             uuid: request.uuid,
             name: request.name,

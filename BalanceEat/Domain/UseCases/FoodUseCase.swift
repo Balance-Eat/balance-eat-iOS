@@ -8,7 +8,7 @@
 import Foundation
 
 protocol FoodUseCaseProtocol {
-    func createFood(_ request: FoodCreateRequest) async -> Result<FoodData, NetworkError>
+    func createFood(request: FoodCreateRequest) async -> Result<FoodData, NetworkError>
     func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult, NetworkError>
 }
 
@@ -19,8 +19,8 @@ struct FoodUseCase: FoodUseCaseProtocol {
         self.repository = repository
     }
 
-    func createFood(_ request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {
-        await repository.createFood(request)
+    func createFood(request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {
+        await repository.createFood(request: request)
     }
 
     func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult, NetworkError> {
