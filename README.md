@@ -56,21 +56,43 @@
 
 ## 아키텍처
 
-```
-Presentation
-├── ViewController (BaseViewController<VM> 상속)
-├── ViewModel (BaseViewModel 상속, RxSwift Relay + async/await)
-└── Coordinator (화면 전환 및 의존성 주입 담당)
+```mermaid
+graph TB
+    subgraph Presentation["📱 Presentation Layer"]
+        Coordinator["Coordinator\n(AppCoordinator · MainCoordinator)"]
+        VC["ViewControllers\n(Home · DietList · Chart\nMenu · Onboarding · Create)"]
+        VM["ViewModels\n(HomeVM · DietListVM · ChartVM\nSearchFoodVM · SetRemindNotiVM...)"]
+        DI["DI Container\n(AppDIContainer / Swinject)"]
+        Coordinator --> VC
+        VC --> VM
+        DI -.->|의존성 주입| Coordinator
+    end
 
-Domain
-├── Entities
-├── UseCases (Protocol + 구현체)
-└── Repository Protocols
+    subgraph Domain["🏛️ Domain Layer (순수 Swift)"]
+        UseCase["UseCases\n(User · Diet · Food\nStats · Reminder · Notification)"]
+        RepoProtocol["Repository Protocols\n(UserRepositoryProtocol\nDietRepositoryProtocol 등)"]
+        Entity["Entities\n(UserData · DietData · FoodData\nStatsData · ReminderData 등)"]
+        UseCase --> RepoProtocol
+        UseCase --> Entity
+    end
 
-Data
-├── Repositories (구현체)
-├── DTOs
-└── Network (APIClient, APIEndPoints)
+    subgraph Data["🗄️ Data Layer"]
+        Repo["Repositories\n(UserRepository · DietRepository\nFoodRepository 등)"]
+        DTO["DTOs\n(UserDTO · DietDTO · FoodDTO 등)"]
+        Network["Network\n(APIClient · APIEndPoints)"]
+        CoreData["CoreData\n(UserCoreData)"]
+        Repo --> DTO
+        Repo --> Network
+        Repo --> CoreData
+    end
+
+    VM -->|"UseCase Protocol 호출"| UseCase
+    Repo -->|"Protocol 구현"| RepoProtocol
+    Repo -->|"Domain 타입 반환"| Entity
+
+    style Presentation fill:#E8F4FD,stroke:#2196F3
+    style Domain fill:#E8F5E9,stroke:#4CAF50
+    style Data fill:#FFF3E0,stroke:#FF9800
 ```
 
 **Coordinator Pattern**
