@@ -15,7 +15,7 @@ final class TutorialPageViewController: UIViewController {
     private let viewModel: TutorialPageViewModel
     
     let currentPageRelay = PublishRelay<(currentIndex: Int, totalPages: Int)>()
-    let goToNextPageRelay = PublishRelay<UserDTO>()
+    let goToNextPageRelay = PublishRelay<UserCreateRequest>()
     
     private var pages: [UIViewController] = []
     private(set) var currentIndex: Int = 0
@@ -73,7 +73,7 @@ final class TutorialPageViewController: UIViewController {
                 guard let self else { return }
                 let data = self.viewModel.dataRelay.value
                 let goalType = self.viewModel.goalTypeRelay.value
-                let createUserDTO = UserDTO(
+                let createUserRequest = UserCreateRequest(
                     uuid: UUID.uuidV7String(),
                     name: viewModel.generateRandomNickname(),
                     gender: data.gender,
@@ -89,13 +89,13 @@ final class TutorialPageViewController: UIViewController {
                     targetCalorie: viewModel.targetCaloriesRelay.value,
                     targetSmi: data.targetSmi,
                     targetFatPercentage: data.targetFatPercentage,
-                    targetCarbohydrates: (Double(viewModel.userCarbonRelay.value)),
-                    targetProtein: (Double(viewModel.userProteinRelay.value)),
-                    targetFat: (Double(viewModel.userFatRelay.value)),
+                    targetCarbohydrates: Double(viewModel.userCarbonRelay.value),
+                    targetProtein: Double(viewModel.userProteinRelay.value),
+                    targetFat: Double(viewModel.userFatRelay.value),
                     providerId: nil,
                     providerType: nil
                 )
-                self.goToNextPageRelay.accept(createUserDTO)
+                self.goToNextPageRelay.accept(createUserRequest)
             })
             .disposed(by: disposeBag)
         

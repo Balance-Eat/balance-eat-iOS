@@ -169,16 +169,16 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
                 let targetFatCal = viewModel.userFatRelay.value * 9
                 let targetCalorie = targetCarbonCal + targetProteinCal + targetFatCal
                 
-                let userDTO = UserDTO(
-                    id: userData.id ,
+                let updatedUserData = UserData(
+                    id: userData.id,
                     uuid: userData.uuid,
                     name: userData.name,
+                    email: userData.email,
                     gender: userData.gender,
                     age: userData.age,
-                    height: userData.height,
                     weight: userData.weight,
+                    height: userData.height,
                     goalType: goal,
-                    email: userData.email,
                     activityLevel: activityLevel,
                     smi: userData.smi,
                     fatPercentage: userData.fatPercentage,
@@ -192,9 +192,9 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
                     providerId: userData.providerId,
                     providerType: userData.providerType
                 )
-                
+
                 Task {
-                    await self.viewModel.updateUser(userDTO: userDTO)
+                    await self.viewModel.updateUser(updatedUserData)
                 }
             })
             .disposed(by: disposeBag)

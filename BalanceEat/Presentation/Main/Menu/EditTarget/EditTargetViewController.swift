@@ -236,16 +236,16 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
 
                 let currentUser = userData
 
-                let userDTO = UserDTO(
+                let updatedUserData = UserData(
                     id: currentUser.id,
                     uuid: currentUser.uuid,
                     name: currentUser.name,
+                    email: currentUser.email,
                     gender: currentUser.gender,
                     age: currentUser.age,
-                    height: currentUser.height,
                     weight: currentWeightRelay.value ?? 0,
+                    height: currentUser.height,
                     goalType: currentUser.goalType,
-                    email: currentUser.email,
                     activityLevel: currentUser.activityLevel,
                     smi: currentSMIRelay.value,
                     fatPercentage: currentFatPercentageRelay.value,
@@ -261,7 +261,7 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
                 )
 
                 Task {
-                    await self.viewModel.updateUser(userDTO: userDTO)
+                    await self.viewModel.updateUser(updatedUserData)
                 }
             })
             .disposed(by: disposeBag)

@@ -20,33 +20,66 @@ struct UserRepository: UserRepositoryProtocol {
         UserCoreData(viewContext: context)
     }
     
-    func createUser(userDTO: UserDTO) async -> Result<Void, NetworkError> {
-        let endpoint = UserEndPoints.createUser(userDTO: userDTO)
-        let result = await apiClient.request(
-            endpoint: endpoint,
-            responseType: EmptyResponse.self
+    func createUser(_ request: UserCreateRequest) async -> Result<Void, NetworkError> {
+        let userDTO = UserDTO(
+            uuid: request.uuid,
+            name: request.name,
+            gender: request.gender,
+            age: request.age,
+            height: request.height,
+            weight: request.weight,
+            goalType: request.goalType,
+            email: request.email,
+            activityLevel: request.activityLevel,
+            smi: request.smi,
+            fatPercentage: request.fatPercentage,
+            targetWeight: request.targetWeight,
+            targetCalorie: request.targetCalorie,
+            targetSmi: request.targetSmi,
+            targetFatPercentage: request.targetFatPercentage,
+            targetCarbohydrates: request.targetCarbohydrates,
+            targetProtein: request.targetProtein,
+            targetFat: request.targetFat,
+            providerId: request.providerId,
+            providerType: request.providerType
         )
-                
+        let endpoint = UserEndPoints.createUser(userDTO: userDTO)
+        let result = await apiClient.request(endpoint: endpoint, responseType: EmptyResponse.self)
         switch result {
-        case .success:
-            return .success(())
-        case .failure(let error):
-            return .failure(error)
+        case .success: return .success(())
+        case .failure(let error): return .failure(error)
         }
     }
-    
-    func updateUser(userDTO: UserDTO) async -> Result<Void, NetworkError> {
-        let endpoint = UserEndPoints.updateUser(userDTO: userDTO)
-        let result = await apiClient.request(
-            endpoint: endpoint,
-            responseType: EmptyResponse.self
+
+    func updateUser(_ userData: UserData) async -> Result<Void, NetworkError> {
+        let userDTO = UserDTO(
+            id: userData.id,
+            uuid: userData.uuid,
+            name: userData.name,
+            gender: userData.gender,
+            age: userData.age,
+            height: userData.height,
+            weight: userData.weight,
+            goalType: userData.goalType,
+            email: userData.email,
+            activityLevel: userData.activityLevel,
+            smi: userData.smi,
+            fatPercentage: userData.fatPercentage,
+            targetWeight: userData.targetWeight,
+            targetCalorie: userData.targetCalorie,
+            targetSmi: userData.targetSmi,
+            targetFatPercentage: userData.targetFatPercentage,
+            targetCarbohydrates: userData.targetCarbohydrates,
+            targetProtein: userData.targetProtein,
+            targetFat: userData.targetFat,
+            providerId: userData.providerId,
+            providerType: userData.providerType
         )
-        
+        let endpoint = UserEndPoints.updateUser(userDTO: userDTO)
+        let result = await apiClient.request(endpoint: endpoint, responseType: EmptyResponse.self)
         switch result {
-        case .success:
-            return .success(())
-        case .failure(let error):
-            return .failure(error)
+        case .success: return .success(())
+        case .failure(let error): return .failure(error)
         }
     }
     

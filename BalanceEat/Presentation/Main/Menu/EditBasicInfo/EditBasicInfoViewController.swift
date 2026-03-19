@@ -238,16 +238,16 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
 
                 guard let userData = viewModel.userRelay.value else { return }
 
-                let userDTO = UserDTO(
+                let updatedUserData = UserData(
                     id: userData.id,
                     uuid: userData.uuid,
                     name: nameRelay.value,
+                    email: userData.email,
                     gender: genderRelay.value,
                     age: ageRelay.value,
-                    height: heightRelay.value,
                     weight: userData.weight,
+                    height: heightRelay.value,
                     goalType: userData.goalType,
-                    email: userData.email,
                     activityLevel: userData.activityLevel,
                     smi: userData.smi,
                     fatPercentage: userData.fatPercentage,
@@ -263,7 +263,7 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
                 )
 
                 Task {
-                    await self.viewModel.updateUser(userDTO: userDTO)
+                    await self.viewModel.updateUser(updatedUserData)
                 }
             })
             .disposed(by: disposeBag)

@@ -20,14 +20,14 @@ final class TutorialContentViewModel: BaseViewModel {
     }
 
     @MainActor
-    func createUser(createUserDTO: UserDTO) async {
+    func createUser(_ request: UserCreateRequest) async {
         loadingRelay.accept(true)
 
-        let createUserResponse = await userUseCase.createUser(userDTO: createUserDTO)
+        let createUserResponse = await userUseCase.createUser(request)
 
         switch createUserResponse {
         case .success():
-            saveUserUUID(createUserDTO.uuid)
+            saveUserUUID(request.uuid)
             onCreateUserSuccessRelay.accept(())
             loadingRelay.accept(false)
         case .failure(let failure):

@@ -73,11 +73,11 @@ final class EditTargetTypeAndActivityLevelViewModel: BaseViewModel {
     }
     
     @MainActor
-    func updateUser(userDTO: UserDTO) async {
+    func updateUser(_ userData: UserData) async {
         loadingRelay.accept(true)
-        
-        let updateUserResponse = await userUseCase.updateUser(userDTO: userDTO)
-        
+
+        let updateUserResponse = await userUseCase.updateUser(userData)
+
         switch updateUserResponse {
         case .success(()):
             updateUserResultRelay.accept(true)

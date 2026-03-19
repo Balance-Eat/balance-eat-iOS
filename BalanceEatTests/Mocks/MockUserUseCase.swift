@@ -17,8 +17,8 @@ final class MockUserUseCase: UserUseCaseProtocol {
     var saveUserIdResult: Result<Void, CoreDataError> = .success(())
     var deleteUserIdResult: Result<Void, CoreDataError> = .success(())
 
-    func createUser(userDTO: UserDTO) async -> Result<Void, NetworkError> { createUserResult }
-    func updateUser(userDTO: UserDTO) async -> Result<Void, NetworkError> { updateUserResult }
+    func createUser(_ request: UserCreateRequest) async -> Result<Void, NetworkError> { createUserResult }
+    func updateUser(_ userData: UserData) async -> Result<Void, NetworkError> { updateUserResult }
     func getUser(uuid: String) async -> Result<UserData, NetworkError> { getUserResult }
     func getUserUUID() -> Result<String, CoreDataError> { getUserUUIDResult }
     func saveUserUUID(_ uuid: String) -> Result<Void, CoreDataError> { saveUserUUIDResult }
