@@ -9,19 +9,17 @@ import Foundation
 
 struct StatsRepository: StatsRepositoryProtocol {
     private let apiClient = APIClient.shared
-    
-    func getStats(period: Period, userId: String) async -> Result<[StatsResponseDTO], NetworkError> {
+
+    func getStats(period: Period, userId: String) async -> Result<[StatsData], NetworkError> {
         let endPoint = StatsEndPoints.getStats(period: period, userId: userId)
         let result = await apiClient.request(
             endpoint: endPoint,
             responseType: BaseResponse<[StatsResponseDTO]>.self
         )
-        
+
         switch result {
-        case .success(let response):
-            return .success(response.data)
-        case .failure(let error):
-            return .failure(error)
+        case .success(let response): return .success(response.data.map { $0.DTOToModel() })
+        case .failure(let error): return .failure(error)
         }
     }
 }

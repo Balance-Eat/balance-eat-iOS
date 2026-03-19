@@ -12,13 +12,4 @@ struct ReminderDataForCreate {
     let sendTime: String
     let isActive: Bool
     let dayOfWeeks: [String]
-    
-    func modelToDTO() -> ReminderRequestDTO {
-        return ReminderRequestDTO(
-            content: self.content,
-            sendTime: self.sendTime,
-            isActive: self.isActive,
-            dayOfWeeks: self.dayOfWeeks
-        )
-    }
 }

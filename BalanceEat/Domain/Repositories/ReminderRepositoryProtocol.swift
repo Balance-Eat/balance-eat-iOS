@@ -8,10 +8,10 @@
 import Foundation
 
 protocol ReminderRepositoryProtocol {
-    func getReminderList(page: Int, size: Int, userId: String) async -> Result<ReminderListResponseDTO, NetworkError>
-    func createReminder(reminderRequestDTO: ReminderRequestDTO, userId: String) async -> Result<ReminderDetailDTO, NetworkError>
-    func getReminderDetail(reminderId: Int, userId: String) async -> Result<ReminderDetailDTO, NetworkError>
-    func updateReminder(reminderRequestDTO: ReminderRequestDTO, reminderId: Int, userId: String) async -> Result<ReminderDetailDTO, NetworkError>
+    func getReminderList(page: Int, size: Int, userId: String) async -> Result<ReminderListData, NetworkError>
+    func createReminder(reminderData: ReminderDataForCreate, userId: String) async -> Result<ReminderDetailData, NetworkError>
+    func getReminderDetail(reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError>
+    func updateReminder(reminderData: ReminderDataForCreate, reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError>
     func deleteReminder(reminderId: Int, userId: String) async -> Result<Void, NetworkError>
-    func updateReminderActivation(isActive: Bool, reminderId: Int, userId: String) async -> Result<ReminderDetailDTO, NetworkError>
+    func updateReminderActivation(isActive: Bool, reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError>
 }

@@ -12,7 +12,7 @@ final class MockNotificationUseCase: NotificationUseCaseProtocol {
     var updateActivationResult: Result<NotificationData, NetworkError> = .success(.fixture())
     var getCurrentDeviceResult: Result<NotificationData, NetworkError> = .success(.fixture())
 
-    func createNotification(notificationRequestDTO: NotificationRequestDTO, userId: String) async -> Result<NotificationData, NetworkError> {
+    func createNotification(request: NotificationCreateRequest, userId: String) async -> Result<NotificationData, NetworkError> {
         createNotificationResult
     }
 

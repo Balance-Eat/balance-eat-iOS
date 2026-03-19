@@ -8,5 +8,5 @@
 import Foundation
 
 protocol StatsRepositoryProtocol {
-    func getStats(period: Period, userId: String) async -> Result<[StatsResponseDTO], NetworkError>
+    func getStats(period: Period, userId: String) async -> Result<[StatsData], NetworkError>
 }
