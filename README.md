@@ -57,7 +57,12 @@
 ## 아키텍처
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 graph TB
+    classDef pres fill:#bfdbfe,stroke:#3b82f6,color:#1e3a5f
+    classDef dom  fill:#bbf7d0,stroke:#16a34a,color:#14532d
+    classDef dat  fill:#fed7aa,stroke:#ea580c,color:#7c2d12
+
     subgraph Presentation["📱 Presentation Layer"]
         Coordinator["Coordinator\n(AppCoordinator · MainCoordinator)"]
         VC["ViewControllers\n(Home · DietList · Chart\nMenu · Onboarding · Create)"]
@@ -90,9 +95,9 @@ graph TB
     Repo -->|"Protocol 구현"| RepoProtocol
     Repo -->|"Domain 타입 반환"| Entity
 
-    style Presentation fill:#E8F4FD,stroke:#2196F3
-    style Domain fill:#E8F5E9,stroke:#4CAF50
-    style Data fill:#FFF3E0,stroke:#FF9800
+    class Coordinator,VC,VM,DI pres
+    class UseCase,RepoProtocol,Entity dom
+    class Repo,DTO,Network,CoreData dat
 ```
 
 **Coordinator Pattern**
