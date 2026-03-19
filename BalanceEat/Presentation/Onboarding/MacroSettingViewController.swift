@@ -11,7 +11,7 @@ import RxSwift
 import RxCocoa
 
 final class MacroSettingViewController: UIViewController {
-    private let viewModel = TutorialPageViewModel.shared
+    private let viewModel: TutorialPageViewModel
     private let disposeBag = DisposeBag()
     
     private let mainStackView: UIStackView = {
@@ -60,7 +60,8 @@ final class MacroSettingViewController: UIViewController {
     
     let inputCompleted = PublishRelay<Void>()
     
-    init () {
+    init(viewModel: TutorialPageViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         setUpView()
         setBinding()

@@ -31,7 +31,7 @@ final class MockFoodUseCase: FoodUseCaseProtocol {
         return searchFoodResult
     }
 
-    func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodData, NetworkError> {
+    func createFood(_ request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {
         createFoodCallCount += 1
         return createFoodResult
     }

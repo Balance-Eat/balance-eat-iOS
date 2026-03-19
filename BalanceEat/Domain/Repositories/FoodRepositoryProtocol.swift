@@ -8,7 +8,6 @@
 import Foundation
 
 protocol FoodRepositoryProtocol {
-    func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodData, NetworkError>
-    func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult,
-                                                                            NetworkError>
+    func createFood(_ request: FoodCreateRequest) async -> Result<FoodData, NetworkError>
+    func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult, NetworkError>
 }

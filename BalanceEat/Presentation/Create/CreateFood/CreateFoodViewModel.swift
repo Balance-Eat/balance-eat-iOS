@@ -20,11 +20,11 @@ final class CreateFoodViewModel: BaseViewModel {
     }
     
     @MainActor
-    func createFood(createFoodDTO: CreateFoodDTO) async {
+    func createFood(_ request: FoodCreateRequest) async {
         loadingRelay.accept(true)
-        
-        let createFoodResponse = await foodUseCase.createFood(createFoodDTO: createFoodDTO)
-        
+
+        let createFoodResponse = await foodUseCase.createFood(request)
+
         switch createFoodResponse {
         case .success(let foodData):
             createFoodResultRelay.accept(foodData)

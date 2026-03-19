@@ -23,7 +23,7 @@ final class TutorialPageViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     init() {
-        viewModel = TutorialPageViewModel.shared
+        viewModel = TutorialPageViewModel()
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -39,35 +39,35 @@ final class TutorialPageViewController: UIViewController {
     }
     
     private func setUpPage() {
-        let basicInfoViewController = BasicInfoViewController()
-        
+        let basicInfoViewController = BasicInfoViewController(viewModel: viewModel)
+
         basicInfoViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 self.goToNextPage()
             })
             .disposed(by: disposeBag)
-        
-        let targetInfoViewController = TargetInfoViewController()
-        
+
+        let targetInfoViewController = TargetInfoViewController(viewModel: viewModel)
+
         targetInfoViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 self.goToNextPage()
             })
             .disposed(by: disposeBag)
-        
-        let activityLevelViewController = ActivityLevelViewController()
-        
+
+        let activityLevelViewController = ActivityLevelViewController(viewModel: viewModel)
+
         activityLevelViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 self.goToNextPage()
             })
             .disposed(by: disposeBag)
-        
-        let macroSettingViewController = MacroSettingViewController()
-        
+
+        let macroSettingViewController = MacroSettingViewController(viewModel: viewModel)
+
         macroSettingViewController.inputCompleted
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }

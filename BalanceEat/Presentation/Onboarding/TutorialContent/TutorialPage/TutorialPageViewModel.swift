@@ -10,7 +10,6 @@ import RxSwift
 import RxCocoa
 
 final class TutorialPageViewModel {
-    static let shared = TutorialPageViewModel()
     
     let dataRelay = BehaviorRelay<TutorialData>(value: TutorialData())
     let goalTypeRelay = BehaviorRelay<GoalType>(value: .none)
@@ -62,7 +61,7 @@ final class TutorialPageViewModel {
     
     private let disposeBag = DisposeBag()
 
-    private init() {
+    init() {
         targetCaloriesObservable
             .bind(to: targetCaloriesRelay)
             .disposed(by: disposeBag)

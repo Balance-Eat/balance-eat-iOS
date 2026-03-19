@@ -10,18 +10,22 @@ import Foundation
 struct FoodRepository: FoodRepositoryProtocol {
     private let apiClient = APIClient.shared
     
-    func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodData, NetworkError> {
-        let endPoint = FoodEndPoints.create(createFoodDTO: createFoodDTO)
-        let result = await apiClient.request(
-            endpoint: endPoint,
-            responseType: BaseResponse<FoodDTO>.self
+    func createFood(_ request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {
+        let createFoodDTO = CreateFoodDTO(
+            uuid: request.uuid,
+            name: request.name,
+            servingSize: request.servingSize,
+            unit: request.unit,
+            carbohydrates: request.carbohydrates,
+            protein: request.protein,
+            fat: request.fat,
+            brand: request.brand
         )
-        
+        let endPoint = FoodEndPoints.create(createFoodDTO: createFoodDTO)
+        let result = await apiClient.request(endpoint: endPoint, responseType: BaseResponse<FoodDTO>.self)
         switch result {
-        case .success(let response):
-            return .success(response.data.DTOToModel())
-        case .failure(let error):
-            return .failure(error)
+        case .success(let response): return .success(response.data.DTOToModel())
+        case .failure(let error):    return .failure(error)
         }
     }
     

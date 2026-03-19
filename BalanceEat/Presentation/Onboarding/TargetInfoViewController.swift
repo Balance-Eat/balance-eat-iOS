@@ -45,15 +45,17 @@ final class TargetInfoViewController: UIViewController {
     private var currentFatPercentageText: Observable<String?> = Observable.just(nil)
     private var targetFatPercentageText: Observable<String?> = Observable.just(nil)
     
+    private let viewModel: TutorialPageViewModel
+
     let inputCompleted = PublishRelay<Void>()
     private let optionalIsOpen = BehaviorRelay(value: false)
-    
+
     private let disposeBag = DisposeBag()
-    
-    
-    init() {
+
+    init(viewModel: TutorialPageViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        
+
         setUpView()
         setUpBinding()
     }
@@ -259,15 +261,15 @@ final class TargetInfoViewController: UIViewController {
         
         Observable.combineLatest(targetWeightText, selectedGoal, currentSMIText, targetSMIText, currentFatPercentageText, targetFatPercentageText)
             .subscribe(onNext: { weight, goal, currentSMI, targetSMI, currentFatPercentage, targetFatPercentage in
-                var data = TutorialPageViewModel.shared.dataRelay.value
+                var data = self.viewModel.dataRelay.value
                 data.targetWeight = Double(weight ?? "") ?? 0
                 data.smi = currentSMI == "" ? nil : Double(currentSMI ?? "") ?? 0
                 data.targetSmi = targetSMI == "" ? nil : Double(targetSMI ?? "") ?? 0
                 data.fatPercentage = currentFatPercentage == "" ? nil : Double(currentFatPercentage ?? "") ?? 0
                 data.targetFatPercentage = targetFatPercentage == "" ? nil : Double(targetFatPercentage ?? "") ?? 0
-                
-                TutorialPageViewModel.shared.goalTypeRelay.accept(goal ?? .none)
-                TutorialPageViewModel.shared.dataRelay.accept(data)
+
+                self.viewModel.goalTypeRelay.accept(goal ?? .none)
+                self.viewModel.dataRelay.accept(data)
             })
             .disposed(by: disposeBag)
         
@@ -301,7 +303,7 @@ final class TargetInfoViewController: UIViewController {
     }
     
     private func setUpBinding() {
-        TutorialPageViewModel.shared.dataRelay
+        viewModel.dataRelay
             .map { $0.weight ?? 0 }
             .distinctUntilChanged()
             .map { weight in

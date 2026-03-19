@@ -37,14 +37,17 @@ final class ActivityLevelViewController: UIViewController {
     }()
     private let estimatedDailyCalorieView = EstimatedDailyCalorieView(title: "예상 일일 소모 칼로리")
     
+    private let viewModel: TutorialPageViewModel
+
     private var selectedActivityLevel: BehaviorRelay<ActivityLevel> = BehaviorRelay(value: .none)
     let inputCompleted = PublishRelay<Void>()
-    
+
     private let disposeBag = DisposeBag()
-    
-    init() {
+
+    init(viewModel: TutorialPageViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        
+
         setUpView()
         setUpBinding()
     }
@@ -109,7 +112,7 @@ final class ActivityLevelViewController: UIViewController {
             })
             .disposed(by: disposeBag)
         
-        TutorialPageViewModel.shared.dataRelay
+        viewModel.dataRelay
             .map { $0.activityLevel != ActivityLevel.none }
             .bind(to: nextButton.rx.isEnabled)
             .disposed(by: disposeBag)
@@ -120,16 +123,16 @@ final class ActivityLevelViewController: UIViewController {
     }
     
     private func setUpBinding() {
-        TutorialPageViewModel.shared.targetCaloriesObservable
+        viewModel.targetCaloriesObservable
             .bind(to: self.estimatedDailyCalorieView.calorieRelay)
             .disposed(by: disposeBag)
-        
+
         selectedActivityLevel
             .subscribe(onNext: { [weak self] level in
                 guard let self else { return }
-                var data = TutorialPageViewModel.shared.dataRelay.value
+                var data = viewModel.dataRelay.value
                 data.activityLevel = level
-                TutorialPageViewModel.shared.dataRelay.accept(data)
+                viewModel.dataRelay.accept(data)
                 
                 self.estimatedDailyCalorieView.isHidden = false
             })
@@ -310,6 +313,18 @@ final class ActivityLevelCardView: UIView {
             self.layer.borderColor = borderColor
             self.layer.borderWidth = borderWidth
             self.backgroundColor = bgColor
+        }
+    }
+}
+
+private extension ActivityLevel {
+    var selectedBorderColor: UIColor {
+        switch self {
+        case .sedentary: .sedentarySelectedBorder
+        case .light:     .lightSelectedBorder
+        case .moderate:  .moderateSelectedBorder
+        case .active:    .vigorousSelectedBorder
+        default:         .clear
         }
     }
 }

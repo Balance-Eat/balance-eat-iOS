@@ -8,23 +8,22 @@
 import Foundation
 
 protocol FoodUseCaseProtocol {
-    func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodData, NetworkError>
-    func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult,
-                                                                            NetworkError>
+    func createFood(_ request: FoodCreateRequest) async -> Result<FoodData, NetworkError>
+    func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult, NetworkError>
 }
 
 struct FoodUseCase: FoodUseCaseProtocol {
     private let repository: FoodRepositoryProtocol
-    
+
     init(repository: FoodRepositoryProtocol) {
         self.repository = repository
     }
-    
-    func createFood(createFoodDTO: CreateFoodDTO) async -> Result<FoodData, NetworkError> {
-        await repository.createFood(createFoodDTO: createFoodDTO)
+
+    func createFood(_ request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {
+        await repository.createFood(request)
     }
-    
+
     func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult, NetworkError> {
-          await repository.searchFood(foodName: foodName, page: page, size: size)
-      }
+        await repository.searchFood(foodName: foodName, page: page, size: size)
+    }
 }

@@ -282,7 +282,7 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
                     let brand = brandNameRelay.value
                     
                     
-                    let createFoodDTO = CreateFoodDTO(
+                    let request = FoodCreateRequest(
                         uuid: UUID.uuidV7String(),
                         name: name,
                         servingSize: servingSize,
@@ -292,9 +292,9 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
                         fat: fat,
                         brand: brand == "" ? "없음" : brand
                     )
-                
+
                 Task {
-                    await self.viewModel.createFood(createFoodDTO: createFoodDTO)
+                    await self.viewModel.createFood(request)
                 }
             })
             .disposed(by: disposeBag)

@@ -39,13 +39,16 @@ final class BasicInfoViewController: UIViewController {
     private var heightText: Observable<String?> = Observable.just(nil)
     private var weightText: Observable<String?> = Observable.just(nil)
     
+    private let viewModel: TutorialPageViewModel
+
     let inputCompleted = PublishRelay<Void>()
-    
+
     private let disposeBag = DisposeBag()
-    
-    init() {
+
+    init(viewModel: TutorialPageViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        
+
         setUpView()
     }
     
@@ -172,12 +175,12 @@ final class BasicInfoViewController: UIViewController {
         
         Observable.combineLatest(gender, ageText, heightText, weightText)
             .subscribe(onNext: { gender, age, height, weight in
-                var data = TutorialPageViewModel.shared.dataRelay.value
+                var data = self.viewModel.dataRelay.value
                 data.gender = gender
                 data.age = Int(age ?? "")
                 data.height = Double(height ?? "")
                 data.weight = Double(weight ?? "")
-                TutorialPageViewModel.shared.dataRelay.accept(data)
+                self.viewModel.dataRelay.accept(data)
             })
             .disposed(by: disposeBag)
 
