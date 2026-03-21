@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NotificationRepository: NotificationRepositoryProtocol {
+struct DefaultNotificationRepository: NotificationRepository {
     private let apiClient = APIClient.shared
 
     func createNotification(request: NotificationCreateRequest, userId: String) async -> Result<NotificationData, NetworkError> {

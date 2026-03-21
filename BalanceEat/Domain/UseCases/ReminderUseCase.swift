@@ -17,9 +17,9 @@ protocol ReminderUseCaseProtocol {
 }
 
 struct ReminderUseCase: ReminderUseCaseProtocol {
-    private let repository: ReminderRepositoryProtocol
+    private let repository: ReminderRepository
 
-    init(repository: ReminderRepositoryProtocol) {
+    init(repository: ReminderRepository) {
         self.repository = repository
     }
 

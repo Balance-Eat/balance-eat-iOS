@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ReminderRepository: ReminderRepositoryProtocol {
+struct DefaultReminderRepository: ReminderRepository {
     private let apiClient = APIClient.shared
 
     func getReminderList(page: Int, size: Int, userId: String) async -> Result<ReminderListData, NetworkError> {

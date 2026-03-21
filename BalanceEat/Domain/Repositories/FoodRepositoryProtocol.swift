@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol FoodRepositoryProtocol {
+protocol FoodRepository {
     func createFood(request: FoodCreateRequest) async -> Result<FoodData, NetworkError>
     func searchFood(foodName: String, page: Int, size: Int) async -> Result<FoodSearchResult, NetworkError>
 }

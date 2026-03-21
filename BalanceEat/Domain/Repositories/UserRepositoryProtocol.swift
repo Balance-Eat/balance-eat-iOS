@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol UserRepositoryProtocol {
+protocol UserRepository {
     func createUser(request: UserCreateRequest) async -> Result<Void, NetworkError>
     func updateUser(userData: UserData) async -> Result<Void, NetworkError>
     func getUser(uuid: String) async -> Result<UserData, NetworkError>

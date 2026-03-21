@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct FoodRepository: FoodRepositoryProtocol {
+struct DefaultFoodRepository: FoodRepository {
     private let apiClient = APIClient.shared
     
     func createFood(request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {

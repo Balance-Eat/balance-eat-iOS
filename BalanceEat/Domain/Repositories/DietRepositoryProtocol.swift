@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol DietRepositoryProtocol {
+protocol DietRepository {
       func createDiet(mealType: MealType, consumedAt: String, dietFoods: [DietFoodRequest], userId: String)
   async -> Result<Void, NetworkError>
       func updateDiet(dietId: Int, mealType: MealType, consumedAt: String, dietFoods: [DietFoodRequest],

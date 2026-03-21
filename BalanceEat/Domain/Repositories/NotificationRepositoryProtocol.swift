@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol NotificationRepositoryProtocol {
+protocol NotificationRepository {
     func createNotification(request: NotificationCreateRequest, userId: String) async -> Result<NotificationData, NetworkError>
     func updateActivation(isActive: Bool, deviceId: Int, userId: String) async -> Result<NotificationData, NetworkError>
     func getCurrentDevice(userId: String, agentId: String) async -> Result<NotificationData, NetworkError>

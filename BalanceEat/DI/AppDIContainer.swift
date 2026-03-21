@@ -34,32 +34,32 @@ final class AppDIContainer {
             return appDelegate.persistentContainer.viewContext
         }.inObjectScope(.container)
         
-        container.register(UserRepositoryProtocol.self) { r in
-            UserRepository(context: r.resolveOrFatal(NSManagedObjectContext.self))
+        container.register(UserRepository.self) { r in
+            DefaultUserRepository(context: r.resolveOrFatal(NSManagedObjectContext.self))
         }
-        container.register(FoodRepositoryProtocol.self) { _ in FoodRepository() }
-        container.register(DietRepositoryProtocol.self) { _ in DietRepository() }
-        container.register(ReminderRepositoryProtocol.self) { _ in ReminderRepository() }
-        container.register(StatsRepositoryProtocol.self) { _ in StatsRepository() }
-        container.register(NotificationRepositoryProtocol.self) { _ in NotificationRepository() }
-        
+        container.register(FoodRepository.self) { _ in DefaultFoodRepository() }
+        container.register(DietRepository.self) { _ in DefaultDietRepository() }
+        container.register(ReminderRepository.self) { _ in DefaultReminderRepository() }
+        container.register(StatsRepository.self) { _ in DefaultStatsRepository() }
+        container.register(NotificationRepository.self) { _ in DefaultNotificationRepository() }
+
         container.register(UserUseCaseProtocol.self) { r in
-            UserUseCase(repository: r.resolveOrFatal(UserRepositoryProtocol.self))
+            UserUseCase(repository: r.resolveOrFatal(UserRepository.self))
         }
         container.register(FoodUseCaseProtocol.self) { r in
-            FoodUseCase(repository: r.resolveOrFatal(FoodRepositoryProtocol.self))
+            FoodUseCase(repository: r.resolveOrFatal(FoodRepository.self))
         }
         container.register(DietUseCaseProtocol.self) { r in
-            DietUseCase(repository: r.resolveOrFatal(DietRepositoryProtocol.self))
+            DietUseCase(repository: r.resolveOrFatal(DietRepository.self))
         }
         container.register(StatsUseCaseProtocol.self) { r in
-            StatsUseCase(repository: r.resolveOrFatal(StatsRepositoryProtocol.self))
+            StatsUseCase(repository: r.resolveOrFatal(StatsRepository.self))
         }
         container.register(NotificationUseCaseProtocol.self) { r in
-            NotificationUseCase(repository: r.resolveOrFatal(NotificationRepositoryProtocol.self))
+            NotificationUseCase(repository: r.resolveOrFatal(NotificationRepository.self))
         }
         container.register(ReminderUseCaseProtocol.self) { r in
-            ReminderUseCase(repository: r.resolveOrFatal(ReminderRepositoryProtocol.self))
+            ReminderUseCase(repository: r.resolveOrFatal(ReminderRepository.self))
         }
     }
 }

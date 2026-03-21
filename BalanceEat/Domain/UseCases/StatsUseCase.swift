@@ -12,9 +12,9 @@ protocol StatsUseCaseProtocol {
 }
 
 struct StatsUseCase: StatsUseCaseProtocol {
-    private let repository: StatsRepositoryProtocol
+    private let repository: StatsRepository
 
-    init(repository: StatsRepositoryProtocol) {
+    init(repository: StatsRepository) {
         self.repository = repository
     }
 

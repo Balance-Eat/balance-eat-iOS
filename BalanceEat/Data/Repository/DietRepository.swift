@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DietRepository: DietRepositoryProtocol {
+struct DefaultDietRepository: DietRepository {
     private let apiClient = APIClient.shared
     
     func createDiet(mealType: MealType, consumedAt: String, dietFoods: [DietFoodRequest], userId: String) async -> Result<Void, NetworkError> {

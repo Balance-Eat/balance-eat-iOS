@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-struct UserRepository: UserRepositoryProtocol {
+struct DefaultUserRepository: UserRepository {
     private let apiClient = APIClient.shared
     private var context: NSManagedObjectContext
 

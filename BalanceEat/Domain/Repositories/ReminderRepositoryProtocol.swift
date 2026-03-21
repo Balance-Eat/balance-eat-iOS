@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ReminderRepositoryProtocol {
+protocol ReminderRepository {
     func getReminderList(page: Int, size: Int, userId: String) async -> Result<ReminderListData, NetworkError>
     func createReminder(reminderData: ReminderDataForCreate, userId: String) async -> Result<ReminderDetailData, NetworkError>
     func getReminderDetail(reminderId: Int, userId: String) async -> Result<ReminderDetailData, NetworkError>

@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol StatsRepositoryProtocol {
+protocol StatsRepository {
     func getStats(period: Period, userId: String) async -> Result<[StatsData], NetworkError>
 }

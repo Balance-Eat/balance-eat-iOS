@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct StatsRepository: StatsRepositoryProtocol {
+struct DefaultStatsRepository: StatsRepository {
     private let apiClient = APIClient.shared
 
     func getStats(period: Period, userId: String) async -> Result<[StatsData], NetworkError> {

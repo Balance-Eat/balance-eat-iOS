@@ -16,9 +16,9 @@ protocol DietUseCaseProtocol {
 }
 
 struct DietUseCase: DietUseCaseProtocol {
-    private let repository: DietRepositoryProtocol
+    private let repository: DietRepository
     
-    init(repository: DietRepositoryProtocol) {
+    init(repository: DietRepository) {
         self.repository = repository
     }
     

@@ -14,9 +14,9 @@ protocol NotificationUseCaseProtocol {
 }
 
 struct NotificationUseCase: NotificationUseCaseProtocol {
-    private let repository: NotificationRepositoryProtocol
+    private let repository: NotificationRepository
 
-    init(repository: NotificationRepositoryProtocol) {
+    init(repository: NotificationRepository) {
         self.repository = repository
     }
 
