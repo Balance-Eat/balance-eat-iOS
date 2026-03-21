@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             } else if !userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess) {
                 let token = userDefaultsManager.getString(forKey: .agentId)
                 guard !token.isEmpty else { return }
-                let notificationRequestDTO = NotificationRequestDTO(
+                let request = NotificationCreateRequest(
                     agentId: token,
                     osType: "IOS",
                     deviceName: deviceName,
@@ -52,7 +52,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
                 Task {
                     guard let userId = self.getUserId() else { return }
-                    let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: userId)
+                    let createNotificationResult = await self.notificationUseCase.createNotification(request: request, userId: userId)
 
                     switch createNotificationResult {
                     case .success(let notificationResponseDTO):
@@ -153,7 +153,7 @@ extension AppDelegate: MessagingDelegate {
         guard let fcmToken else { return }
         if userDefaultsManager.getString(forKey: .agentId) != fcmToken {
             let deviceName = UIDevice.current.name
-            let notificationRequestDTO = NotificationRequestDTO(
+            let request = NotificationCreateRequest(
                 agentId: fcmToken,
                 osType: "IOS",
                 deviceName: deviceName,
@@ -162,7 +162,7 @@ extension AppDelegate: MessagingDelegate {
 
             Task {
                 guard let userId = self.getUserId() else { return }
-                let createNotificationResult = await self.notificationUseCase.createNotification(notificationRequestDTO: notificationRequestDTO, userId: userId)
+                let createNotificationResult = await self.notificationUseCase.createNotification(request: request, userId: userId)
 
                 switch createNotificationResult {
                 case .success:
