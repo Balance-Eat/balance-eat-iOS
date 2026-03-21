@@ -41,8 +41,4 @@ extension UIColor {
     /// 기본 테두리 / 비활성 구분선
     static let appBorder: UIColor = .lightGray
 
-    // MARK: - Asset Catalog (Type-safe)
-
-    /// Google 로그인 버튼 테두리 색상
-    static let googleBorderColor: UIColor = UIColor(named: "GoogleBorderColor") ?? .separator
 }
