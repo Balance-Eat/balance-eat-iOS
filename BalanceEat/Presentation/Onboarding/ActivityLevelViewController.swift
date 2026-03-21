@@ -261,7 +261,7 @@ final class ActivityLevelCardView: UIView {
         backgroundColor = .white
         layer.cornerRadius = 12
         layer.borderWidth = 1
-        layer.borderColor = UIColor.lightGray.withAlphaComponent(0.4).cgColor
+        layer.borderColor = UIColor.appBorder.withAlphaComponent(0.4).cgColor
         
         emojiLabel.text = activityLevel.emoji
         emojiLabel.font = .systemFont(ofSize: 28)
@@ -297,7 +297,7 @@ final class ActivityLevelCardView: UIView {
     }
     
     func setSelected(_ isSelected: Bool, animated: Bool = true) {
-        let borderColor = isSelected ? activityLevel.selectedBorderColor.cgColor : UIColor.lightGray.withAlphaComponent(0.4).cgColor
+        let borderColor = isSelected ? activityLevel.selectedBorderColor.cgColor : UIColor.appBorder.withAlphaComponent(0.4).cgColor
         let borderWidth: CGFloat = isSelected ? 2 : 1
         
         let bgColor = isSelected ? activityLevel.selectedBorderColor.withAlphaComponent(0.1) : .white

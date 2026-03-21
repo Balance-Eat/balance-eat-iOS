@@ -16,7 +16,7 @@ final class AchievementRateCell: UITableViewCell {
     private let percentLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .bold)
-        label.textColor = .systemGreen
+        label.textColor = .appPositive
         label.textAlignment = .right
         return label
     }()
@@ -69,7 +69,7 @@ final class AchievementRateCell: UITableViewCell {
         if stat.percent > 100 {
             progressView.progressTintColor = .systemRed
         } else {
-            progressView.progressTintColor = .systemGreen
+            progressView.progressTintColor = .appPositive
         }
     }
 }

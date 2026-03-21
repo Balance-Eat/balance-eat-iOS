@@ -148,7 +148,7 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
 
         let editAgeContentView = EditDataContentView(
             systemImageString: "calendar",
-            imageBackgroundColor: .systemGreen,
+            imageBackgroundColor: .appPositive,
             titleText: "나이",
             subtitleText: "기초대사량 계산에 사용됩니다.",
             subView: editAgeField

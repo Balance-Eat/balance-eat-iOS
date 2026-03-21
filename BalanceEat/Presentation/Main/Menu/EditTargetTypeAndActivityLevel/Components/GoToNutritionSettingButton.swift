@@ -15,7 +15,7 @@ final class GoToNutritionSettingButton: TitledButton {
             backgroundColor: nil,
             titleColor: .white,
             borderColor: nil,
-            gradientColors: [.systemGreen, .systemGreen.withAlphaComponent(0.5)]
+            gradientColors: [.appPositive, .appPositive.withAlphaComponent(0.5)]
         )
         super.init(title: title, image: image, style: buttonStyle)
     }

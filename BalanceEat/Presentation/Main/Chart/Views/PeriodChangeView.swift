@@ -108,15 +108,15 @@ final class PeriodChangeView: BalanceEatContentView {
                 if diff > 0 {
                     self.differenceLabel.text = String(format: "%.1f%@ 증가", diff, nutritionStat.unit)
                     self.differenceLabel.textColor = .systemBlue
-                    self.differenceContainerView.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+                    self.differenceContainerView.backgroundColor = UIColor.appPrimary.withAlphaComponent(0.1)
                 } else if diff < 0 {
                     self.differenceLabel.text = String(format: "%.1f%@ 감소", abs(diff), nutritionStat.unit)
                     self.differenceLabel.textColor = .systemRed
-                    self.differenceContainerView.backgroundColor = UIColor.systemRed.withAlphaComponent(0.1)
+                    self.differenceContainerView.backgroundColor = UIColor.appDestructive.withAlphaComponent(0.1)
                 } else {
                     self.differenceLabel.text = "변화 없음"
                     self.differenceLabel.textColor = .systemGray
-                    self.differenceContainerView.backgroundColor = UIColor.systemGray.withAlphaComponent(0.1)
+                    self.differenceContainerView.backgroundColor = UIColor.appNeutral.withAlphaComponent(0.1)
                 }
             })
             .disposed(by: disposeBag)

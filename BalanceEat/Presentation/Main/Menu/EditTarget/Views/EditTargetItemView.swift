@@ -86,15 +86,15 @@ final class EditTargetItemView: UIView {
                 if diff > 0 {
                     diffLabel.text = String(format: "%.1f%@ 증가", diff, self.editTargetItemType.unit)
                     diffLabel.textColor = .systemBlue
-                    diffLabel.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.1)
+                    diffLabel.backgroundColor = UIColor.appPrimary.withAlphaComponent(0.1)
                 } else if diff < 0 {
                     diffLabel.text = String(format: "%.1f%@ 감소", abs(diff), self.editTargetItemType.unit)
                     diffLabel.textColor = .systemRed
-                    diffLabel.backgroundColor = UIColor.systemRed.withAlphaComponent(0.1)
+                    diffLabel.backgroundColor = UIColor.appDestructive.withAlphaComponent(0.1)
                 } else {
                     diffLabel.text = "변화 없음"
                     diffLabel.textColor = .systemGray
-                    diffLabel.backgroundColor = UIColor.systemGray.withAlphaComponent(0.1)
+                    diffLabel.backgroundColor = UIColor.appNeutral.withAlphaComponent(0.1)
                 }
             } else {
                 let currentString = currentText.value ?? ""
@@ -103,7 +103,7 @@ final class EditTargetItemView: UIView {
                 let labelText = (currentString.isEmpty && targetString.isEmpty) ? "\(title)을 입력해주세요." : currentString.isEmpty ? "현재 \(title)을 입력해주세요." : "목표 \(title)을 입력해주세요."
                 diffLabel.text = labelText
                 diffLabel.textColor = .systemGray
-                diffLabel.backgroundColor = UIColor.systemGray.withAlphaComponent(0.1)
+                diffLabel.backgroundColor = UIColor.appNeutral.withAlphaComponent(0.1)
             }
         })
         .disposed(by: disposeBag)

@@ -280,7 +280,7 @@ final class TutorialPageIndicatorView: UIView {
             make.top.trailing.equalToSuperview()
         }
         
-        backgroundBar.backgroundColor = UIColor.lightGray.withAlphaComponent(0.3)
+        backgroundBar.backgroundColor = UIColor.appBorder.withAlphaComponent(0.3)
         backgroundBar.layer.cornerRadius = 5
         backgroundBar.snp.makeConstraints { make in
             make.leading.equalTo(currentStepLabel.snp.leading)
@@ -289,7 +289,7 @@ final class TutorialPageIndicatorView: UIView {
             make.height.equalTo(10)
         }
         
-        progressBar.backgroundColor = UIColor.systemBlue
+        progressBar.backgroundColor = UIColor.appPrimary
         progressBar.layer.cornerRadius = 5
         backgroundBar.addSubview(progressBar)
         progressBar.snp.makeConstraints { make in

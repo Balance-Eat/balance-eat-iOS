@@ -42,7 +42,7 @@ final class SetNotiTimeView: UIView {
     }
 
     private func setUpView() {
-        self.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.3).cgColor
+        self.layer.borderColor = UIColor.appBorder.withAlphaComponent(0.3).cgColor
         self.layer.borderWidth = 1
         self.layer.cornerRadius = 8
 

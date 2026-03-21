@@ -12,7 +12,7 @@ final class SetNotiMemoView: UIView {
     private let textFieldContainerView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
-        view.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.3).cgColor
+        view.layer.borderColor = UIColor.appBorder.withAlphaComponent(0.3).cgColor
         view.layer.borderWidth = 1
         return view
     }()

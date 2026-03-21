@@ -44,7 +44,7 @@ final class AnalysisInsightView: UIView {
         self.backgroundColor = .blue.withAlphaComponent(0.03)
         self.layer.cornerRadius = 8
         self.layer.borderWidth = 1
-        self.layer.borderColor = UIColor.blue.withAlphaComponent(0.1).cgColor
+        self.layer.borderColor = UIColor.appPrimary.withAlphaComponent(0.1).cgColor
 
         [titleLabel, contentLabel].forEach(addSubview(_:))
 

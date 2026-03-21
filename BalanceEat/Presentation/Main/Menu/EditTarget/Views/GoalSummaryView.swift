@@ -80,7 +80,7 @@ final class GoalSummaryView: UIView {
         self.backgroundColor = .systemBlue.withAlphaComponent(0.05)
         self.layer.cornerRadius = 8
         self.layer.borderWidth = 2
-        self.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.4).cgColor
+        self.layer.borderColor = UIColor.appPrimary.withAlphaComponent(0.4).cgColor
 
         [titleStackView, targetsStackView].forEach { addSubview($0) }
 

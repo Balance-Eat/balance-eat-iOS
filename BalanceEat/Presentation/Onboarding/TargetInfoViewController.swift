@@ -409,7 +409,7 @@ final class GoalCardView: UIView {
         backgroundColor = .white
         layer.cornerRadius = 12
         layer.borderWidth = 1
-        layer.borderColor = UIColor.lightGray.withAlphaComponent(0.4).cgColor
+        layer.borderColor = UIColor.appBorder.withAlphaComponent(0.4).cgColor
         
         emojiLabel.text = emoji
         emojiLabel.font = .systemFont(ofSize: 24)
@@ -438,8 +438,8 @@ final class GoalCardView: UIView {
     }
     
     func setSelected(_ isSelected: Bool, animated: Bool = true) {
-        let borderColor = isSelected ? UIColor.systemBlue.cgColor : UIColor.lightGray.withAlphaComponent(0.4).cgColor
-        let bgColor = isSelected ? UIColor.systemBlue.withAlphaComponent(0.05) : .white
+        let borderColor = isSelected ? UIColor.appPrimary.cgColor : UIColor.appBorder.withAlphaComponent(0.4).cgColor
+        let bgColor = isSelected ? UIColor.appPrimary.withAlphaComponent(0.05) : .white
         
         guard animated else {
             layer.borderColor = borderColor

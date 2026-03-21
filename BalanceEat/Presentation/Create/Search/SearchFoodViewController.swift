@@ -47,7 +47,7 @@ final class SearchFoodViewController: UIViewController {
             backgroundColor: nil,
             titleColor: .white,
             borderColor: nil,
-            gradientColors: [.systemGreen, .systemGreen.withAlphaComponent(0.5)]
+            gradientColors: [.appPositive, .appPositive.withAlphaComponent(0.5)]
         )
     )
     private let toolbar: UIToolbar = {
@@ -260,7 +260,7 @@ final class SearchResultFoodCell: UITableViewCell {
         view.layer.masksToBounds = true
         view.layer.cornerRadius = 8
         view.layer.borderWidth = 1
-        view.layer.borderColor = UIColor.systemGray.withAlphaComponent(0.3).cgColor
+        view.layer.borderColor = UIColor.appNeutral.withAlphaComponent(0.3).cgColor
         return view
     }()
     
@@ -295,7 +295,7 @@ final class SearchResultFoodCell: UITableViewCell {
     private let kcalLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .bold)
-        label.textColor = .systemOrange
+        label.textColor = .appWarning
         return label
     }()
     

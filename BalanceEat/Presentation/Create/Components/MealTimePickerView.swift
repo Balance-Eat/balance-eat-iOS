@@ -200,7 +200,7 @@ final class MealTimePickerItem: UIView {
     
     func setSelected(_ selected: Bool) {
         isSelected = selected
-        self.layer.borderColor = selected ? UIColor.systemBlue.cgColor : UIColor.mealTimePickerBorder.cgColor
+        self.layer.borderColor = selected ? UIColor.appPrimary.cgColor : UIColor.mealTimePickerBorder.cgColor
         self.titleLabel.textColor = selected ? .systemBlue : .mealTimePickerTitle
     }
 }
@@ -219,7 +219,7 @@ final class InputTimeView: UIView {
         textField.font = .systemFont(ofSize: 18, weight: .regular)
         textField.borderStyle = .line
         textField.textAlignment = .center
-        textField.layer.borderColor = UIColor.lightGray.cgColor
+        textField.layer.borderColor = UIColor.appBorder.cgColor
         textField.layer.borderWidth = 1
         textField.layer.cornerRadius = 8
         textField.clipsToBounds = true
@@ -301,7 +301,7 @@ final class InputTimeView: UIView {
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 
-                textField.layer.borderColor = UIColor.systemBlue.cgColor
+                textField.layer.borderColor = UIColor.appPrimary.cgColor
             })
             .disposed(by: disposeBag)
 
@@ -309,7 +309,7 @@ final class InputTimeView: UIView {
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 
-                textField.layer.borderColor = UIColor.lightGray.cgColor
+                textField.layer.borderColor = UIColor.appBorder.cgColor
             })
             .disposed(by: disposeBag)
     }

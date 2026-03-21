@@ -75,7 +75,7 @@ final class EditNameField: UIView {
         textField.rx.controlEvent(.editingDidBegin)
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                self.layer.borderColor = UIColor.systemBlue.cgColor
+                self.layer.borderColor = UIColor.appPrimary.cgColor
             })
             .disposed(by: disposeBag)
 

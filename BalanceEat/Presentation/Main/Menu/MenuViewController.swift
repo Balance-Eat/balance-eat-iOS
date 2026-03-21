@@ -21,8 +21,8 @@ final class MenuViewController: BaseViewController<MenuViewModel> {
     )
     private let editTargetMenuItemView = MenuItemView(
         icon: UIImage(systemName: "person.crop.circle") ?? UIImage(),
-        iconTintColor: .systemGreen,
-        iconBackgroundColor: .systemGreen.withAlphaComponent(0.15),
+        iconTintColor: .appPositive,
+        iconBackgroundColor: .appPositive.withAlphaComponent(0.15),
         title: "목표 수치 편집",
         subtitle: "체중, 골격근량, 체지방률 및 목표 섭취량 조정"
     )
@@ -37,8 +37,8 @@ final class MenuViewController: BaseViewController<MenuViewModel> {
     
     private let pushNotiSwitchMenuItemView = MenuItemView(
         icon: UIImage(systemName: "bell.fill") ?? UIImage(),
-        iconTintColor: .systemYellow,
-        iconBackgroundColor: .systemYellow.withAlphaComponent(0.15),
+        iconTintColor: .appCaution,
+        iconBackgroundColor: .appCaution.withAlphaComponent(0.15),
         title: "푸쉬 알림",
         subtitle: "앱 내에서 발생하는 푸쉬 알림 설정",
         isSwitch: true
@@ -277,7 +277,7 @@ final class ProfileInfoView: UIView {
     
     private func setupGradient() {
         let gradient = CAGradientLayer()
-        gradient.colors = [UIColor.systemBlue.withAlphaComponent(0.5).cgColor, UIColor.systemPurple.withAlphaComponent(0.5).cgColor]
+        gradient.colors = [UIColor.appPrimary.withAlphaComponent(0.5).cgColor, UIColor.systemPurple.withAlphaComponent(0.5).cgColor]
         gradient.startPoint = CGPoint(x: 0, y: 0.5)
         gradient.endPoint = CGPoint(x: 1, y: 0.5)
         layer.insertSublayer(gradient, at: 0)

@@ -253,7 +253,7 @@ final class InputFieldWithIcon: UIView {
         self.backgroundColor = .white
         self.layer.cornerRadius = 8
         self.layer.borderWidth = 1.5
-        self.layer.borderColor = UIColor.lightGray.cgColor
+        self.layer.borderColor = UIColor.appBorder.cgColor
         
         iconImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(16)
@@ -322,7 +322,7 @@ final class InputFieldWithIcon: UIView {
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 
-                self.layer.borderColor = UIColor.systemBlue.cgColor
+                self.layer.borderColor = UIColor.appPrimary.cgColor
             })
             .disposed(by: disposeBag)
 
@@ -330,7 +330,7 @@ final class InputFieldWithIcon: UIView {
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
                 
-                self.layer.borderColor = UIColor.lightGray.cgColor
+                self.layer.borderColor = UIColor.appBorder.cgColor
             })
             .disposed(by: disposeBag)
         

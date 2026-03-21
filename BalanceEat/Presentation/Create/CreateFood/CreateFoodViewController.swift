@@ -475,7 +475,7 @@ final class WillCreateFoodPreviewView: UIView {
     private let titleImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(systemName: "checkmark.circle"))
         imageView.contentMode = .scaleAspectFit
-        imageView.tintColor = .systemGreen
+        imageView.tintColor = .appPositive
         return imageView
     }()
     private let titleLabel: UILabel = {
@@ -543,10 +543,10 @@ final class WillCreateFoodPreviewView: UIView {
     }
     
     private func setUpView() {
-        self.backgroundColor = .systemGreen.withAlphaComponent(0.1)
+        self.backgroundColor = .appPositive.withAlphaComponent(0.1)
         self.layer.cornerRadius = 8
         self.layer.borderWidth = 1.5
-        self.layer.borderColor = UIColor.systemGreen.cgColor
+        self.layer.borderColor = UIColor.appPositive.cgColor
         
         let titleStackView: UIStackView = {
             let stackView = UIStackView(arrangedSubviews: [titleImageView, titleLabel])

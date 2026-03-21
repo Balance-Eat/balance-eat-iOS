@@ -95,7 +95,7 @@ final class RemindNotificationView: UIView {
         dayLabel.text = "금요일"
 
         self.backgroundColor = .white
-        self.layer.borderColor = UIColor.lightGray.cgColor
+        self.layer.borderColor = UIColor.appBorder.cgColor
         self.layer.borderWidth = 1
         self.layer.cornerRadius = 8
 

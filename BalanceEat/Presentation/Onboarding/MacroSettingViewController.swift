@@ -48,7 +48,7 @@ final class MacroSettingViewController: UIViewController {
             backgroundColor: nil,
             titleColor: .white,
             borderColor: nil,
-            gradientColors: [.systemGreen, .systemGreen.withAlphaComponent(0.5)]
+            gradientColors: [.appPositive, .appPositive.withAlphaComponent(0.5)]
         )
     )
     

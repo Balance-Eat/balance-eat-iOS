@@ -70,7 +70,7 @@ final class AddedFoodCell: UITableViewCell {
         containerView.backgroundColor = .white
         containerView.layer.cornerRadius = 8
         containerView.layer.borderWidth = 2
-        containerView.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.1).cgColor
+        containerView.layer.borderColor = UIColor.appBorder.withAlphaComponent(0.1).cgColor
 
         containerView.addSubview(foodNameLabel)
         containerView.addSubview(foodServingSizeLabel)

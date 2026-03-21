@@ -105,11 +105,11 @@ final class TwoOptionPickerView: UIView {
         let secondSelected = selectedOption.value == .second
         
         let update = {
-            self.firstButton.backgroundColor = firstSelected ? UIColor.systemBlue : .white
+            self.firstButton.backgroundColor = firstSelected ? UIColor.appPrimary : .white
             self.firstButton.setTitleColor(firstSelected ? .white : .systemBlue, for: .normal)
             self.firstButton.layer.shadowOpacity = firstSelected ? 0.25 : 0.1
             
-            self.secondButton.backgroundColor = secondSelected ? UIColor.systemBlue : .white
+            self.secondButton.backgroundColor = secondSelected ? UIColor.appPrimary : .white
             self.secondButton.setTitleColor(secondSelected ? .white : .systemBlue, for: .normal)
             self.secondButton.layer.shadowOpacity = secondSelected ? 0.25 : 0.1
         }

@@ -17,7 +17,7 @@ final class TargetGuideViewController: UIViewController {
         view.backgroundColor = .systemBlue.withAlphaComponent(0.05)
         view.layer.cornerRadius = 16
         view.layer.borderWidth = 2
-        view.layer.borderColor = UIColor.systemBlue.withAlphaComponent(0.4).cgColor
+        view.layer.borderColor = UIColor.appPrimary.withAlphaComponent(0.4).cgColor
         return view
     }()
     
@@ -122,7 +122,7 @@ final class TargetGuideViewController: UIViewController {
                 string: fullText,
                 attributes: [
                     .font: UIFont.systemFont(ofSize: 12, weight: .regular),
-                    .foregroundColor: UIColor.systemBlue
+                    .foregroundColor: UIColor.appPrimary
                 ]
             )
             

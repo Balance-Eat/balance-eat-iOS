@@ -58,12 +58,12 @@ final class CircleProgressView: UIView {
     }
     
     private func setupLayers() {
-        trackLayer.strokeColor = UIColor.lightGray.withAlphaComponent(0.3).cgColor
+        trackLayer.strokeColor = UIColor.appBorder.withAlphaComponent(0.3).cgColor
         trackLayer.lineWidth = 16
         trackLayer.fillColor = UIColor.clear.cgColor
         layer.addSublayer(trackLayer)
         
-        progressLayer.strokeColor = UIColor.systemBlue.cgColor
+        progressLayer.strokeColor = UIColor.appPrimary.cgColor
         progressLayer.lineWidth = 16
         progressLayer.fillColor = UIColor.clear.cgColor
         progressLayer.lineCap = .round
@@ -152,7 +152,7 @@ final class CircleProgressView: UIView {
         
         attributedText.addAttributes([
             .font: UIFont.systemFont(ofSize: 14),
-            .foregroundColor: UIColor.darkGray
+            .foregroundColor: UIColor.appSubtitle
         ], range: (fullText as NSString).range(of: "/ \(maxString)"))
         
         progressLabel.attributedText = attributedText

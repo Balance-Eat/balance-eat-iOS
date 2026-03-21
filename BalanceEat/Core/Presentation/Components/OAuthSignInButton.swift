@@ -127,7 +127,7 @@ final class OAuthSignInButton: UIView {
         self.layer.masksToBounds = false
         
         self.layer.borderWidth = provider == .google ? 1 : 0
-        self.layer.borderColor = provider == .google ? UIColor(named: "GoogleBorderColor")?.cgColor : UIColor.clear.cgColor
+        self.layer.borderColor = provider == .google ? UIColor.googleBorderColor.cgColor : UIColor.clear.cgColor
         
         if provider == .apple {
             iconImageView.image = icon.withRenderingMode(.alwaysTemplate)
