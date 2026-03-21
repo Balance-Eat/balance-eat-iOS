@@ -11,19 +11,6 @@ import RxCocoa
 import SnapKit
 
 final class DietListViewController: BaseViewController<DietListViewModel> {
-
-    private static let hourMinuteInputFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        f.timeZone = TimeZone(identifier: "Asia/Seoul")
-        return f
-    }()
-
-    private static let hourMinuteOutputFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f
-    }()
     
     private let headerView = DietListHeaderView()
     private lazy var sumOfNutritionValueView = SumOfNutritionValueView(
@@ -112,27 +99,26 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
             })
             .disposed(by: disposeBag)
         
+        viewModel.dailyNutritionSummaryRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] summary in
+                guard let self else { return }
+                sumOfNutritionValueView.calorieRelay.accept(summary.calorie)
+                sumOfNutritionValueView.carbonRelay.accept(summary.carbohydrate)
+                sumOfNutritionValueView.proteinRelay.accept(summary.protein)
+                sumOfNutritionValueView.fatRelay.accept(summary.fat)
+            })
+            .disposed(by: disposeBag)
+
         viewModel.selectedDayDataCache
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] dietDatas in
                 guard let self else { return }
-                
-                let totalCalories = dietDatas.flatMap { $0.items }.map { $0.calories }.reduce(0, +)
-                let totalCarbon = dietDatas.flatMap { $0.items }.map { $0.carbohydrates }.reduce(0, +)
-                let totalProtein = dietDatas.flatMap { $0.items }.map { $0.protein }.reduce(0, +)
-                let totalFat = dietDatas.flatMap { $0.items }.map { $0.fat }.reduce(0, +)
-                
-                sumOfNutritionValueView.calorieRelay.accept(totalCalories)
-                sumOfNutritionValueView.carbonRelay.accept(totalCarbon)
-                sumOfNutritionValueView.proteinRelay.accept(totalProtein)
-                sumOfNutritionValueView.fatRelay.accept(totalFat)
-                
                 let mealLogs = dietDatas.map { diet in
-                    
                     MealLogView(
                         icon: UIImage(systemName: diet.mealType.icon),
                         title: diet.mealType.title,
-                        ateTime: self.extractHourMinute(from: diet.consumedAt) ?? "",
+                        ateTime: DietListViewModel.formatConsumedTime(diet.consumedAt) ?? "",
                         consumedCalories: diet.items.reduce(0) { $0 + Int($1.calories) },
                         foodDatas: diet.items,
                         showNutritionInfo: true
@@ -179,13 +165,6 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
         }
     }
     
-    private func extractHourMinute(from dateString: String) -> String? {
-        guard let date = Self.hourMinuteInputFormatter.date(from: dateString) else {
-            return nil
-        }
-        return Self.hourMinuteOutputFormatter.string(from: date)
-    }
-
     private func goToDiet() {
         onGoToDiet?(viewModel.selectedDayDataCache.value, viewModel.selectedDate.value)
     }

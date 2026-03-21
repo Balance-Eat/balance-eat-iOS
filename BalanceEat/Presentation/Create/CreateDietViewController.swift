@@ -161,28 +161,8 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     .subscribe(
                         onNext: { [weak self] foodData in
                             guard let self else { return }
-
-                            let mealTime = viewModel.mealTimeRelay.value
-                            var current = viewModel.dietFoodsRelay.value
-
-                            if current[mealTime.rawValue]?.items.contains(where: { $0.id == foodData.id }) == true {
-                                viewModel.toastMessageRelay.accept("이미 선택된 음식입니다.")
-                                return
-                            }
-                            current[
-                                mealTime.rawValue,
-                                default: DietData(
-                                    id: -1,
-                                    consumeDate: "",
-                                    consumedAt: "",
-                                    mealType: mealTime,
-                                    items: []
-                                )
-                            ].items.append(foodData.modelToDietFoodData(intake: foodData.servingSize))
-
-                        viewModel.dietFoodsRelay.accept(current)
-                        viewModel.mealTimeRelay.accept(mealTime)
-                    })
+                            viewModel.addFood(foodData)
+                        })
                     .disposed(by: searchPresentationBag)
 
                 self.navigationController?.pushViewController(searchFoodViewController, animated: true)
@@ -215,41 +195,11 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
             .disposed(by: disposeBag)
         
         saveButton.rx.tap
-            .subscribe(
-                onNext: { [weak self] in
-                    guard let self else { return }
-                    
-                    let mealType = viewModel.mealTimeRelay.value
-                    let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
-                    let mealTypeString = mealType.rawValue
-                    if let diet = viewModel.dietFoodsRelay.value[mealTypeString] {
-                        let dietFoods: [DietFoodRequest] = diet.items.map { food in
-                            let intake = self.addedFoodListView.cellIntakeRelay.value[food.id] ?? food.intake
-                            return DietFoodRequest(foodId: food.id, intake: intake)
-                        }
-                        guard let userId = viewModel.getUserId() else { return }
-
-                        if viewModel.currentFoodsRelay.value?.id == -1 {
-                            Task { [weak self] in
-                                await self?.viewModel.createDiet(
-                                    mealType: mealType,
-                                    consumedAt: consumedAt,
-                                    dietFoods: dietFoods,
-                                    userId: userId
-                                )
-                            }
-                        } else {
-                            Task { [weak self] in
-                                await self?.viewModel.updateDiet(
-                                    dietId: diet.id,
-                                    mealType: mealType,
-                                    consumedAt: consumedAt,
-                                    dietFoods: dietFoods,
-                                    userId: userId
-                                )
-                            }
-                        }
-                    }
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
+                Task {
+                    await self.viewModel.saveDiet()
+                }
             })
             .disposed(by: disposeBag)
         

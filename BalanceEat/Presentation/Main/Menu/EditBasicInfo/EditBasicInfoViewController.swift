@@ -50,13 +50,6 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
 
     private var bottomConstraint: Constraint?
 
-    private let nameRelay: BehaviorRelay<String> = BehaviorRelay(value: "")
-    private let genderRelay: BehaviorRelay<Gender> = BehaviorRelay(value: .none)
-    private let ageRelay: BehaviorRelay<Int> = BehaviorRelay(value: 0)
-    private let heightRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
-
-    private let valueChangedRelay = BehaviorRelay<Bool>(value: false)
-
     override init(viewModel: EditBasicInfoViewModel) {
         super.init(viewModel: viewModel)
     }
@@ -119,9 +112,9 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
                         genderButtons.forEach {
                             if $0 != button { $0.isSelectedRelay.accept(false) }
                         }
-                        self.genderRelay.accept(button === maleButton ? .male : .female)
+                        viewModel.genderRelay.accept(button === maleButton ? .male : .female)
                     } else {
-                        self.genderRelay.accept(.none)
+                        viewModel.genderRelay.accept(.none)
                     }
                 })
                 .disposed(by: disposeBag)
@@ -140,9 +133,9 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
             subView: genderStackView
         )
 
-        if viewModel.userRelay.value?.gender == .male {
+        if viewModel.genderRelay.value == .male {
             maleButton.isSelectedRelay.accept(true)
-        } else if viewModel.userRelay.value?.gender == .female {
+        } else if viewModel.genderRelay.value == .female {
             femaleButton.isSelectedRelay.accept(true)
         }
 
@@ -211,20 +204,20 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
 
     private func setBinding() {
         editNameField.textRelay
-            .bind(to: nameRelay)
+            .bind(to: viewModel.nameRelay)
             .disposed(by: disposeBag)
 
         editAgeField.textRelay
             .map { Int($0) ?? 0 }
-            .bind(to: ageRelay)
+            .bind(to: viewModel.ageRelay)
             .disposed(by: disposeBag)
 
         editHeightField.textRelay
             .map { Double($0) ?? 0 }
-            .bind(to: heightRelay)
+            .bind(to: viewModel.heightRelay)
             .disposed(by: disposeBag)
 
-        heightRelay
+        viewModel.heightRelay
             .bind(to: bmiView.heightRelay)
             .disposed(by: disposeBag)
 
@@ -235,35 +228,8 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
         saveButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-
-                guard let userData = viewModel.userRelay.value else { return }
-
-                let updatedUserData = UserData(
-                    id: userData.id,
-                    uuid: userData.uuid,
-                    name: nameRelay.value,
-                    email: userData.email,
-                    gender: genderRelay.value,
-                    age: ageRelay.value,
-                    weight: userData.weight,
-                    height: heightRelay.value,
-                    goalType: userData.goalType,
-                    activityLevel: userData.activityLevel,
-                    smi: userData.smi,
-                    fatPercentage: userData.fatPercentage,
-                    targetWeight: userData.targetWeight,
-                    targetCalorie: userData.targetCalorie,
-                    targetSmi: userData.targetSmi,
-                    targetFatPercentage: userData.targetFatPercentage,
-                    targetCarbohydrates: userData.targetCarbohydrates,
-                    targetProtein: userData.targetProtein,
-                    targetFat: userData.targetFat,
-                    providerId: userData.providerId,
-                    providerType: userData.providerType
-                )
-
                 Task {
-                    await self.viewModel.updateUser(updatedUserData)
+                    await self.viewModel.updateUser()
                 }
             })
             .disposed(by: disposeBag)
@@ -287,27 +253,16 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
             })
             .disposed(by: disposeBag)
 
-        Observable.combineLatest(nameRelay, genderRelay, ageRelay, heightRelay, viewModel.userRelay) { name, gender, age, height, userData in
-            let isNameMaintained = name == userData?.name
-            let isGenderMaintained = gender == userData?.gender
-            let isAgeMaintained = age == userData?.age
-            let isHeightMaintained = height == userData?.height
-
-            return isNameMaintained && isGenderMaintained && isAgeMaintained && isHeightMaintained
-        }
-        .bind(to: valueChangedRelay)
-        .disposed(by: disposeBag)
-
-        valueChangedRelay
+        viewModel.isUnchangedObservable
             .map { !$0 }
             .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
 
-        valueChangedRelay
+        viewModel.isUnchangedObservable
             .bind(to: menuEditedWarningView.rx.isHidden)
             .disposed(by: disposeBag)
 
-        valueChangedRelay
+        viewModel.isUnchangedObservable
             .bind(to: resetButton.rx.isHidden)
             .disposed(by: disposeBag)
 

@@ -9,17 +9,8 @@ import UIKit
 import SnapKit
 import RxSwift
 import RxCocoa
-import UUIDV7
 
 final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
-    private let nameRelay = BehaviorRelay(value: "")
-    private let amountRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
-    private let unitRelay = BehaviorRelay(value: "")
-    private let carbonRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
-    private let proteinRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
-    private let fatRelay: BehaviorRelay<Double> = BehaviorRelay(value: 0)
-    private let brandNameRelay = BehaviorRelay(value: "")
-    
     let createdFoodRelay: BehaviorRelay<FoodData?> = BehaviorRelay(value: nil)
     
     private let foodNameInputField = InputFieldWithIcon(placeholder: "", isNumber: false)
@@ -191,186 +182,115 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
     private func setBinding() {
         foodNameInputField.textObservable
             .map { $0 ?? "" }
-            .bind(to: nameRelay)
+            .bind(to: viewModel.nameRelay)
             .disposed(by: disposeBag)
-        
+
         amountInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
-            .bind(to: amountRelay)
+            .bind(to: viewModel.amountRelay)
             .disposed(by: disposeBag)
-        
+
         unitInputField.textObservable
             .map { $0 ?? "" }
-            .bind(to: unitRelay)
+            .bind(to: viewModel.unitRelay)
             .disposed(by: disposeBag)
-        
+
         carbonInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
-            .bind(to: carbonRelay)
+            .bind(to: viewModel.carbonRelay)
             .disposed(by: disposeBag)
-        
+
         proteinInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
-            .bind(to: proteinRelay)
+            .bind(to: viewModel.proteinRelay)
             .disposed(by: disposeBag)
-        
+
         fatInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
-            .bind(to: fatRelay)
+            .bind(to: viewModel.fatRelay)
             .disposed(by: disposeBag)
-        
+
         brandNameInputField.textObservable
             .map { $0 ?? "" }
-            .bind(to: brandNameRelay)
+            .bind(to: viewModel.brandNameRelay)
             .disposed(by: disposeBag)
-        
-        nameRelay
+
+        viewModel.nameRelay
             .bind(to: willCreateFoodPreviewView.foodNameRelay)
             .disposed(by: disposeBag)
-        
-        Observable.combineLatest(carbonRelay, proteinRelay, fatRelay)
-            .map { (carbon, protein, fat) in
-                let carbonCal = carbon * 4
-                let proteinCal = protein * 4
-                let fatCal = fat * 9
-                return Double(carbonCal + proteinCal + fatCal)
-            }
+
+        viewModel.calculatedCalorieObservable
             .bind(to: willCreateFoodPreviewView.calorieRelay)
             .disposed(by: disposeBag)
-        
+
         calorieInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.calorieRelay)
             .disposed(by: disposeBag)
-        
+
         carbonInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.carbonRelay)
             .disposed(by: disposeBag)
-        
+
         proteinInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.proteinRelay)
             .disposed(by: disposeBag)
-        
+
         fatInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.fatRelay)
             .disposed(by: disposeBag)
-        
+
         amountInputField.textObservable
             .map { Double($0 ?? "") ?? 0 }
             .bind(to: willCreateFoodPreviewView.amountRelay)
             .disposed(by: disposeBag)
-        
+
         unitInputField.textObservable
             .map { $0 ?? "" }
             .bind(to: willCreateFoodPreviewView.unitRelay)
             .disposed(by: disposeBag)
-        
-        createButton.rx.tap
-            .subscribe(
-                onNext: { [weak self] in
-                    guard let self else { return }
-                    
-                    let name = nameRelay.value
-                    let servingSize = amountRelay.value
-                    let unit = unitRelay.value
-                    let carbohydrates = carbonRelay.value
-                    let protein = proteinRelay.value
-                    let fat = fatRelay.value
-                    let brand = brandNameRelay.value
-                    
-                    
-                    let request = FoodCreateRequest(
-                        uuid: UUID.uuidV7String(),
-                        name: name,
-                        servingSize: servingSize,
-                        unit: unit,
-                        carbohydrates: carbohydrates,
-                        protein: protein,
-                        fat: fat,
-                        brand: brand == "" ? "없음" : brand
-                    )
 
+        createButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                guard let self else { return }
                 Task {
-                    await self.viewModel.createFood(request)
+                    await self.viewModel.createFood()
                 }
             })
             .disposed(by: disposeBag)
-        
+
         resetButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                
+
                 [foodNameInputField, brandNameInputField, calorieInputField, carbonInputField, proteinInputField, fatInputField, amountInputField, unitInputField].forEach {
                     $0.setText("")
                     $0.textField.sendActions(for: .editingChanged)
                 }
             })
             .disposed(by: disposeBag)
-        
-        let isInValidInputRelay = BehaviorRelay(value: false)
-        
-        Observable.combineLatest(
-            foodNameInputField.textObservable,
-            carbonInputField.textObservable,
-            proteinInputField.textObservable,
-            fatInputField.textObservable,
-            amountInputField.textObservable,
-            unitInputField.textObservable
-        ) { name, carbon, protein, fat, amount, unit -> Bool in
-                        
-            let isNameEmpty = name?.isEmpty ?? true
-            let isCarbonEmpty = carbon?.isEmpty ?? true
-            let isProteinEmpty = protein?.isEmpty ?? true
-            let isFatEmpty = fat?.isEmpty ?? true
-            let isAmountEmpty = amount?.isEmpty ?? true
-            let isUnitEmpty = unit?.isEmpty ?? true
-            
-            return isNameEmpty || isCarbonEmpty || isProteinEmpty || isFatEmpty || isAmountEmpty || isUnitEmpty
-        }
-        .bind(to: isInValidInputRelay)
-        .disposed(by: disposeBag)
-        
-        isInValidInputRelay
+
+        viewModel.isInvalidInputObservable
             .map { !$0 }
             .bind(to: createButton.rx.isEnabled)
             .disposed(by: disposeBag)
-        
-        isInValidInputRelay
+
+        viewModel.isInvalidInputObservable
             .bind(to: willCreateFoodPreviewView.rx.isHidden)
             .disposed(by: disposeBag)
-        
-        Observable.combineLatest(
-            foodNameInputField.textObservable,
-            calorieInputField.textObservable,
-            carbonInputField.textObservable,
-            proteinInputField.textObservable,
-            fatInputField.textObservable,
-            amountInputField.textObservable,
-            unitInputField.textObservable
-        ) { name, calorie, carbon, protein, fat, amount, unit -> Bool in
-            
-            
-            let isNameEmpty = name?.isEmpty ?? true
-            let isCalorieEmpty = calorie?.isEmpty ?? true
-            let isCarbonEmpty = carbon?.isEmpty ?? true
-            let isProteinEmpty = protein?.isEmpty ?? true
-            let isFatEmpty = fat?.isEmpty ?? true
-            let isAmountEmpty = amount?.isEmpty ?? true
-            let isUnitEmpty = unit?.isEmpty ?? true
-            
-            return isNameEmpty && isCalorieEmpty && isCarbonEmpty && isProteinEmpty && isFatEmpty && isAmountEmpty && isUnitEmpty
-        }
-        .bind(to: resetButton.rx.isHidden)
-        .disposed(by: disposeBag)
-        
+
+        viewModel.isResetHiddenObservable
+            .bind(to: resetButton.rx.isHidden)
+            .disposed(by: disposeBag)
+
         viewModel.createFoodResultRelay
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] result in
                 guard let self else { return }
-                
+
                 createdFoodRelay.accept(result)
                 dismiss(animated: true)
             })

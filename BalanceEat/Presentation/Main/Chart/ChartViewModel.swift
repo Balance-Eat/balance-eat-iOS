@@ -62,6 +62,11 @@ final class ChartViewModel: BaseViewModel {
     
     @MainActor
     func getStats(period: Period) async {
+        if let stats = cachedStats[period.rawValue] {
+            currentStatsRelay.accept(stats)
+            return
+        }
+
         guard let userId = getUserId() else { return }
 
         loadingRelay.accept(true)

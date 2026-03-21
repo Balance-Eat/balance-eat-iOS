@@ -152,7 +152,7 @@ final class CircleProgressView: UIView {
         
         attributedText.addAttributes([
             .font: UIFont.systemFont(ofSize: 14),
-            .foregroundColor: UIColor.appSubtitle
+            .foregroundColor: UIColor.appSubtitleText
         ], range: (fullText as NSString).range(of: "/ \(maxString)"))
         
         progressLabel.attributedText = attributedText

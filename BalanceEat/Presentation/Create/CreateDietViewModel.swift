@@ -208,6 +208,52 @@ final class CreateDietViewModel: BaseViewModel {
             return nil
         }
     }
+
+    func addFood(_ foodData: FoodData) {
+        let mealTime = mealTimeRelay.value
+        var current = dietFoodsRelay.value
+
+        if current[mealTime.rawValue]?.items.contains(where: { $0.id == foodData.id }) == true {
+            toastMessageRelay.accept("이미 선택된 음식입니다.")
+            return
+        }
+
+        current[
+            mealTime.rawValue,
+            default: DietData(
+                id: -1,
+                consumeDate: "",
+                consumedAt: "",
+                mealType: mealTime,
+                items: []
+            )
+        ].items.append(foodData.modelToDietFoodData(intake: foodData.servingSize))
+
+        dietFoodsRelay.accept(current)
+        mealTimeRelay.accept(mealTime)
+    }
+
+    @MainActor
+    func saveDiet() async {
+        let mealType = mealTimeRelay.value
+        let consumedAt = Date().toString(format: "yyyy-MM-dd'T'HH:mm:ss")
+        let mealTypeString = mealType.rawValue
+
+        guard let diet = dietFoodsRelay.value[mealTypeString] else { return }
+        guard let userId = getUserId() else { return }
+
+        let currentIntake = intakeRelay.value
+        let dietFoods: [DietFoodRequest] = diet.items.map { food in
+            let intake = currentIntake[food.id] ?? food.intake
+            return DietFoodRequest(foodId: food.id, intake: intake)
+        }
+
+        if currentFoodsRelay.value?.id == -1 {
+            await createDiet(mealType: mealType, consumedAt: consumedAt, dietFoods: dietFoods, userId: userId)
+        } else {
+            await updateDiet(dietId: diet.id, mealType: mealType, consumedAt: consumedAt, dietFoods: dietFoods, userId: userId)
+        }
+    }
     
     private func resetCurrentDiet() {
         let mealTypeString = mealTimeRelay.value.rawValue

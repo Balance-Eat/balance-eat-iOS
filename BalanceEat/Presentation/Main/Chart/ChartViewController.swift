@@ -71,13 +71,9 @@ final class ChartViewController: BaseViewController<ChartViewModel> {
             .subscribe(onNext: { [weak self] period in
                 guard let self else { return }
 
-                if let stats = viewModel.cachedStats[period.rawValue] {
-                    viewModel.currentStatsRelay.accept(stats)
-                } else {
-                    getStatsTask?.cancel()
-                    getStatsTask = Task {
-                        await self.viewModel.getStats(period: period)
-                    }
+                getStatsTask?.cancel()
+                getStatsTask = Task {
+                    await self.viewModel.getStats(period: period)
                 }
             })
             .disposed(by: disposeBag)

@@ -29,6 +29,7 @@ final class DietListViewModel: BaseViewModel {
     let selectedDate = BehaviorRelay<Date>(value: Date())
     let selectedDayDataCache = BehaviorRelay<[DietData]>(value: [])
     let ateDateRelay = BehaviorRelay<Set<Date>>(value: [])
+    let dailyNutritionSummaryRelay: BehaviorRelay<(calorie: Double, carbohydrate: Double, protein: Double, fat: Double)> = .init(value: (0, 0, 0, 0))
 
     init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {
         self.userUseCase = userUseCase
@@ -111,7 +112,7 @@ final class DietListViewModel: BaseViewModel {
 
                 let dateKey = DietListViewModel.dailyFormatter.string(from: date)
                 let monthKey = DietListViewModel.monthlyFormatter.string(from: date)
-                
+
                 if let monthDict = self.monthDataCache.value[monthKey] {
                     self.selectedDayDataCache.accept(monthDict[dateKey] ?? [])
                 } else {
@@ -124,10 +125,37 @@ final class DietListViewModel: BaseViewModel {
                 }
             })
             .disposed(by: disposeBag)
-        
-        
+
+        selectedDayDataCache
+            .subscribe(onNext: { [weak self] dietDatas in
+                guard let self else { return }
+                let totalCalories = dietDatas.flatMap { $0.items }.reduce(0.0) { $0 + $1.calories }
+                let totalCarbon = dietDatas.flatMap { $0.items }.reduce(0.0) { $0 + $1.carbohydrates }
+                let totalProtein = dietDatas.flatMap { $0.items }.reduce(0.0) { $0 + $1.protein }
+                let totalFat = dietDatas.flatMap { $0.items }.reduce(0.0) { $0 + $1.fat }
+                dailyNutritionSummaryRelay.accept((calorie: totalCalories, carbohydrate: totalCarbon, protein: totalProtein, fat: totalFat))
+            })
+            .disposed(by: disposeBag)
     }
     
+    private static let hourMinuteInputFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        f.timeZone = TimeZone(identifier: "Asia/Seoul")
+        return f
+    }()
+
+    private static let hourMinuteOutputFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f
+    }()
+
+    static func formatConsumedTime(_ dateString: String) -> String? {
+        guard let date = DietListViewModel.hourMinuteInputFormatter.date(from: dateString) else { return nil }
+        return DietListViewModel.hourMinuteOutputFormatter.string(from: date)
+    }
+
     private static let consumeDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")

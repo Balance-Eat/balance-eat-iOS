@@ -11,8 +11,6 @@ import RxSwift
 import RxCocoa
 
 final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
-    private let userData: UserData
-
     private let weightEditTargetItemView = EditTargetItemView(editTargetItemType: .weight)
     private let smiEditTargetItemView = EditTargetItemView(editTargetItemType: .smi)
     private let fatPercentageEditTargetItemView = EditTargetItemView(editTargetItemType: .fatPercentage)
@@ -31,16 +29,7 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
 
     private var bottomConstraint: Constraint?
 
-    private let currentWeightRelay = BehaviorRelay<Double?>(value: nil)
-    private let targetWeightRelay = BehaviorRelay<Double?>(value: nil)
-    private let currentSMIRelay = BehaviorRelay<Double?>(value: 0)
-    private let targetSMIRelay = BehaviorRelay<Double?>(value: 0)
-    private let currentFatPercentageRelay = BehaviorRelay<Double?>(value: 0)
-    private let targetFatPercentageRelay = BehaviorRelay<Double?>(value: 0)
-    private let valueOfAllChangedRelay = BehaviorRelay<Bool>(value: false)
-
-    init(userData: UserData, viewModel: EditTargetViewModel) {
-        self.userData = userData
+    override init(viewModel: EditTargetViewModel) {
         super.init(viewModel: viewModel)
     }
 
@@ -83,51 +72,22 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
             make.edges.equalToSuperview().inset(20)
         }
 
-        let currentWeightText = userData.weight.truncatingRemainder(dividingBy: 1) == 0
-        ? String(Int(userData.weight))
-        : String(userData.weight)
-        weightEditTargetItemView.setCurrentText(currentWeightText)
+        let userData = viewModel.userData
 
-        let targetWeightText = userData.targetWeight.truncatingRemainder(dividingBy: 1) == 0
-        ? String(Int(userData.targetWeight))
-        : String(userData.targetWeight)
-        weightEditTargetItemView.setTargetText(targetWeightText)
-
-        if let currentSmiValue = userData.smi {
-            let text = currentSmiValue.truncatingRemainder(dividingBy: 1) == 0
-                ? String(Int(currentSmiValue))
-                : String(currentSmiValue)
-            smiEditTargetItemView.setCurrentText(text)
-        }
-
-        if let targetSmiValue = userData.targetSmi {
-            let text = targetSmiValue.truncatingRemainder(dividingBy: 1) == 0
-                ? String(Int(targetSmiValue))
-                : String(targetSmiValue)
-            smiEditTargetItemView.setTargetText(text)
-        }
-
-        if let currentFatPercentageValue = userData.fatPercentage {
-            let text = currentFatPercentageValue.truncatingRemainder(dividingBy: 1) == 0
-                ? String(Int(currentFatPercentageValue))
-                : String(currentFatPercentageValue)
-            fatPercentageEditTargetItemView.setCurrentText(text)
-        }
-
-        if let targetFatPercentageValue = userData.targetFatPercentage {
-            let text = targetFatPercentageValue.truncatingRemainder(dividingBy: 1) == 0
-                ? String(Int(targetFatPercentageValue))
-                : String(targetFatPercentageValue)
-            fatPercentageEditTargetItemView.setTargetText(text)
-        }
+        weightEditTargetItemView.setCurrentText(userData.weight.displayString)
+        weightEditTargetItemView.setTargetText(userData.targetWeight.displayString)
+        smiEditTargetItemView.setCurrentText(userData.smi.displayString)
+        smiEditTargetItemView.setTargetText(userData.targetSmi.displayString)
+        fatPercentageEditTargetItemView.setCurrentText(userData.fatPercentage.displayString)
+        fatPercentageEditTargetItemView.setTargetText(userData.targetFatPercentage.displayString)
 
         let goalSummaryView = GoalSummaryView(
-            currentWeightRelay: currentWeightRelay,
-            targetWeightRelay: targetWeightRelay,
-            currentSMIRelay: currentSMIRelay,
-            targetSMIRelay: targetSMIRelay,
-            currentFatPercentageRelay: currentFatPercentageRelay,
-            targetFatPercentageRelay: targetFatPercentageRelay
+            currentWeightRelay: viewModel.currentWeightRelay,
+            targetWeightRelay: viewModel.targetWeightRelay,
+            currentSMIRelay: viewModel.currentSMIRelay,
+            targetSMIRelay: viewModel.targetSMIRelay,
+            currentFatPercentageRelay: viewModel.currentFatPercentageRelay,
+            targetFatPercentageRelay: viewModel.targetFatPercentageRelay
         )
 
         saveButton.snp.makeConstraints { make in
@@ -202,66 +162,39 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
     private func setBinding() {
         weightEditTargetItemView.currentText
             .map { Double($0 ?? "") }
-            .bind(to: currentWeightRelay)
+            .bind(to: viewModel.currentWeightRelay)
             .disposed(by: disposeBag)
 
         weightEditTargetItemView.targetText
             .map { Double($0 ?? "") }
-            .bind(to: targetWeightRelay)
+            .bind(to: viewModel.targetWeightRelay)
             .disposed(by: disposeBag)
 
         smiEditTargetItemView.currentText
             .map { Double($0 ?? "") }
-            .bind(to: currentSMIRelay)
+            .bind(to: viewModel.currentSMIRelay)
             .disposed(by: disposeBag)
 
         smiEditTargetItemView.targetText
             .map { Double($0 ?? "") }
-            .bind(to: targetSMIRelay)
+            .bind(to: viewModel.targetSMIRelay)
             .disposed(by: disposeBag)
 
         fatPercentageEditTargetItemView.currentText
             .map { Double($0 ?? "") }
-            .bind(to: currentFatPercentageRelay)
+            .bind(to: viewModel.currentFatPercentageRelay)
             .disposed(by: disposeBag)
 
         fatPercentageEditTargetItemView.targetText
             .map { Double($0 ?? "") }
-            .bind(to: targetFatPercentageRelay)
+            .bind(to: viewModel.targetFatPercentageRelay)
             .disposed(by: disposeBag)
 
         saveButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-
-                let currentUser = userData
-
-                let updatedUserData = UserData(
-                    id: currentUser.id,
-                    uuid: currentUser.uuid,
-                    name: currentUser.name,
-                    email: currentUser.email,
-                    gender: currentUser.gender,
-                    age: currentUser.age,
-                    weight: currentWeightRelay.value ?? 0,
-                    height: currentUser.height,
-                    goalType: currentUser.goalType,
-                    activityLevel: currentUser.activityLevel,
-                    smi: currentSMIRelay.value,
-                    fatPercentage: currentFatPercentageRelay.value,
-                    targetWeight: targetWeightRelay.value ?? 0,
-                    targetCalorie: currentUser.targetCalorie,
-                    targetSmi: targetSMIRelay.value,
-                    targetFatPercentage: targetFatPercentageRelay.value,
-                    targetCarbohydrates: currentUser.targetCarbohydrates,
-                    targetProtein: currentUser.targetProtein,
-                    targetFat: currentUser.targetFat,
-                    providerId: currentUser.providerId,
-                    providerType: currentUser.providerType
-                )
-
                 Task {
-                    await self.viewModel.updateUser(updatedUserData)
+                    await self.viewModel.updateUser()
                 }
             })
             .disposed(by: disposeBag)
@@ -270,38 +203,14 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
 
-                let weightText = userData.weight.truncatingRemainder(dividingBy: 1) == 0
-                    ? String(Int(userData.weight)) : String(userData.weight)
-                weightEditTargetItemView.setCurrentText(weightText)
+                let userData = viewModel.userData
 
-                let targetWeightText = userData.targetWeight.truncatingRemainder(dividingBy: 1) == 0
-                    ? String(Int(userData.targetWeight)) : String(userData.targetWeight)
-                weightEditTargetItemView.setTargetText(targetWeightText)
-
-                if let smi = userData.smi {
-                    let text = smi.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(smi)) : String(smi)
-                    smiEditTargetItemView.setCurrentText(text)
-                } else {
-                    smiEditTargetItemView.setCurrentText("")
-                }
-                if let targetSmi = userData.targetSmi {
-                    let text = targetSmi.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(targetSmi)) : String(targetSmi)
-                    smiEditTargetItemView.setTargetText(text)
-                } else {
-                    smiEditTargetItemView.setTargetText("")
-                }
-                if let fat = userData.fatPercentage {
-                    let text = fat.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(fat)) : String(fat)
-                    fatPercentageEditTargetItemView.setCurrentText(text)
-                } else {
-                    fatPercentageEditTargetItemView.setCurrentText("")
-                }
-                if let targetFat = userData.targetFatPercentage {
-                    let text = targetFat.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(targetFat)) : String(targetFat)
-                    fatPercentageEditTargetItemView.setTargetText(text)
-                } else {
-                    fatPercentageEditTargetItemView.setTargetText("")
-                }
+                weightEditTargetItemView.setCurrentText(userData.weight.displayString)
+                weightEditTargetItemView.setTargetText(userData.targetWeight.displayString)
+                smiEditTargetItemView.setCurrentText(userData.smi.displayString)
+                smiEditTargetItemView.setTargetText(userData.targetSmi.displayString)
+                fatPercentageEditTargetItemView.setCurrentText(userData.fatPercentage.displayString)
+                fatPercentageEditTargetItemView.setTargetText(userData.targetFatPercentage.displayString)
             })
             .disposed(by: disposeBag)
 
@@ -316,33 +225,16 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
             })
             .disposed(by: disposeBag)
 
-        Observable.combineLatest(
-            currentWeightRelay, targetWeightRelay,
-            currentSMIRelay, targetSMIRelay,
-            currentFatPercentageRelay, targetFatPercentageRelay
-        ) { [weak self] currentWeight, targetWeight, currentSMI, targetSMI, currentFatPercentage, targetFatPercentage -> Bool in
-            guard let self else { return false }
-
-            return currentWeight == userData.weight
-                && targetWeight == userData.targetWeight
-                && currentSMI == userData.smi
-                && targetSMI == userData.targetSmi
-                && currentFatPercentage == userData.fatPercentage
-                && targetFatPercentage == userData.targetFatPercentage
-        }
-        .bind(to: valueOfAllChangedRelay)
-        .disposed(by: disposeBag)
-
-        valueOfAllChangedRelay
+        viewModel.isUnchangedObservable
             .map { !$0 }
             .bind(to: saveButton.rx.isEnabled)
             .disposed(by: disposeBag)
 
-        valueOfAllChangedRelay
+        viewModel.isUnchangedObservable
             .bind(to: menuEditedWarningView.rx.isHidden)
             .disposed(by: disposeBag)
 
-        valueOfAllChangedRelay
+        viewModel.isUnchangedObservable
             .bind(to: resetButton.rx.isHidden)
             .disposed(by: disposeBag)
 

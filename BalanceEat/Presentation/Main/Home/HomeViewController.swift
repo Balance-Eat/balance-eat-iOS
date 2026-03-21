@@ -153,23 +153,50 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
     }
     
     private func setBinding() {
-        
         viewModel.dietResponseRelay
             .compactMap { $0 }
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] dietList in
                 guard let self else { return }
-                updateUIForDailyDietDate(dietList: dietList)
+                var mealLogs: [MealLogView] = []
+                dietList.forEach { diet in
+                    let mealLogView = MealLogView(
+                        icon: UIImage(systemName: diet.mealType.icon),
+                        title: diet.mealType.title,
+                        ateTime: self.viewModel.formatConsumedTime(diet.consumedAt),
+                        consumedCalories: diet.items.reduce(0) { $0 + Int($1.calories) },
+                        foodDatas: diet.items
+                    )
+                    mealLogs.append(mealLogView)
+                }
+                todayAteMealLogListView.mealLogsRelay.accept(mealLogs)
             })
             .disposed(by: disposeBag)
-        
+
+        viewModel.dailyNutritionSummaryRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] summary in
+                guard let self else { return }
+                todayCalorieView.update(
+                    currentCalorie: Int(summary.calorie),
+                    targetCalorie: Int(viewModel.userResponseRelay.value?.targetCalorie ?? 0),
+                    currentCarbohydrate: Int(summary.carbohydrate),
+                    targetCarbohydrate: Int(viewModel.userResponseRelay.value?.targetCarbohydrates ?? 0),
+                    currentProtein: Int(summary.protein),
+                    targetProtein: Int(viewModel.userResponseRelay.value?.targetProtein ?? 0),
+                    currentFat: Int(summary.fat),
+                    targetFat: Int(viewModel.userResponseRelay.value?.targetFat ?? 0)
+                )
+            })
+            .disposed(by: disposeBag)
+
         refreshControl.rx.controlEvent(.valueChanged)
             .bind { [weak self] in
                 guard let self else { return }
                 getDatas()
             }
             .disposed(by: disposeBag)
-        
+
         Observable.merge(nowBodyStatusCardView.goToEditTapRelay.asObservable(), targetBodyStatusCardView.goToEditTapRelay.asObservable())
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
@@ -190,7 +217,7 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
                 self?.onAddDiet?()
             })
             .disposed(by: disposeBag)
-        
+
         viewModel.userNameRelay
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] name in
@@ -200,71 +227,26 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
                 }
             })
             .disposed(by: disposeBag)
-        
-        Observable.combineLatest(viewModel.userNowBodyStatusRelay, viewModel.userTargetBodyStatusRelay)
+
+        viewModel.userNowBodyStatusRelay
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] bodyStatus, targetBodyStatus in
+            .subscribe(onNext: { [weak self] bodyStatus in
                 guard let self else { return }
-                            
                 nowBodyStatusCardView.weightRelay.accept(bodyStatus.0)
                 nowBodyStatusCardView.smiRelay.accept(bodyStatus.1)
                 nowBodyStatusCardView.fatPercentageRelay.accept(bodyStatus.2)
-                
-                let weightDiff = targetBodyStatus.0 - bodyStatus.0
-                
-                let smiDiff: Double? = {
-                    if let target = targetBodyStatus.1, let current = bodyStatus.1 {
-                        return target - current
-                    }
-                    return nil
-                }()
-
-                let fatDiff: Double? = {
-                    if let target = targetBodyStatus.2, let current = bodyStatus.2 {
-                        return target - current
-                    }
-                    return nil
-                }()
-                
-                targetBodyStatusCardView.weightRelay.accept(weightDiff)
-                targetBodyStatusCardView.smiRelay.accept(smiDiff)
-                targetBodyStatusCardView.fatPercentageRelay.accept(fatDiff)
             })
             .disposed(by: disposeBag)
-        
-        
-    }
-    
-    private func updateUIForDailyDietDate(dietList: [DietData]) {
-        let currentCalorie = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.calories } }
-        let currentCarbohydrate = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.carbohydrates } }
-        let currentProtein = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.protein } }
-        let currentFat = dietList.reduce(0) { $0 + $1.items.reduce(0) { $0 + $1.fat } }
-        
-        todayCalorieView.update(
-            currentCalorie: Int(currentCalorie),
-            targetCalorie: Int(viewModel.userResponseRelay.value?.targetCalorie ?? 0),
-            currentCarbohydrate: Int(currentCarbohydrate),
-            targetCarbohydrate: Int(viewModel.userResponseRelay.value?.targetCarbohydrates ?? 0),
-            currentProtein: Int(currentProtein),
-            targetProtein: Int(viewModel.userResponseRelay.value?.targetProtein ?? 0),
-            currentFat: Int(currentFat),
-            targetFat: Int(viewModel.userResponseRelay.value?.targetFat ?? 0)
-        )
-        
-        var mealLogs: [MealLogView] = []
-        dietList.forEach { diet in
-            let mealLogView = MealLogView(
-                icon: UIImage(systemName: diet.mealType.icon),
-                title: diet.mealType.title,
-                ateTime: viewModel.formatConsumedTime(diet.consumedAt),
-                consumedCalories: diet.items.reduce(0) { $0 + Int($1.calories) },
-                foodDatas: diet.items
-            )
-            
-            mealLogs.append(mealLogView)
-        }
-        todayAteMealLogListView.mealLogsRelay.accept(mealLogs)
+
+        viewModel.bodyStatusDiffRelay
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] diff in
+                guard let self else { return }
+                targetBodyStatusCardView.weightRelay.accept(diff.weightDiff)
+                targetBodyStatusCardView.smiRelay.accept(diff.smiDiff)
+                targetBodyStatusCardView.fatPercentageRelay.accept(diff.fatDiff)
+            })
+            .disposed(by: disposeBag)
     }
 }
 

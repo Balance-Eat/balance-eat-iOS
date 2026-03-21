@@ -155,8 +155,8 @@ final class MainCoordinator {
 
     private func buildEditTargetViewController(userData: UserData) -> EditTargetViewController {
         let userUseCase = container.container.resolveOrFatal(UserUseCaseProtocol.self)
-        let vm = EditTargetViewModel(userUseCase: userUseCase)
-        return EditTargetViewController(userData: userData, viewModel: vm)
+        let vm = EditTargetViewModel(userData: userData, userUseCase: userUseCase)
+        return EditTargetViewController(viewModel: vm)
     }
 
     private func buildEditTargetTypeAndActivityLevelViewController(userData: UserData) -> EditTargetTypeAndActivityLevelViewController {

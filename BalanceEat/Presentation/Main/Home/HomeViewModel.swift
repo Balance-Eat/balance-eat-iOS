@@ -22,11 +22,14 @@ final class HomeViewModel: BaseViewModel {
     
     let userResponseRelay = BehaviorRelay<UserData?>(value: nil)
     let dietResponseRelay = BehaviorRelay<[DietData]?>(value: nil)
-    
+
     let userNameRelay: BehaviorRelay<String> = .init(value: "")
     /// (weight, smi, fatPercentage)
     let userNowBodyStatusRelay: BehaviorRelay<(Double, Double?, Double?)> = .init(value: (0, nil, nil))
     let userTargetBodyStatusRelay: BehaviorRelay<(Double, Double?, Double?)> = .init(value: (0, nil, nil))
+
+    let dailyNutritionSummaryRelay: BehaviorRelay<(calorie: Double, carbohydrate: Double, protein: Double, fat: Double)> = .init(value: (0, 0, 0, 0))
+    let bodyStatusDiffRelay: BehaviorRelay<(weightDiff: Double, smiDiff: Double?, fatDiff: Double?)> = .init(value: (0, nil, nil))
     
     init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {
         self.userUseCase = userUseCase
@@ -40,11 +43,39 @@ final class HomeViewModel: BaseViewModel {
         userResponseRelay
             .subscribe(onNext: { [weak self] user in
                 guard let self else { return }
-                
+
                 userNameRelay.accept(user?.name ?? "")
-                
+
                 userNowBodyStatusRelay.accept((user?.weight ?? 0, user?.smi, user?.fatPercentage))
                 userTargetBodyStatusRelay.accept((user?.targetWeight ?? 0, user?.targetSmi, user?.targetFatPercentage))
+            })
+            .disposed(by: disposeBag)
+
+        dietResponseRelay
+            .compactMap { $0 }
+            .subscribe(onNext: { [weak self] dietList in
+                guard let self else { return }
+                let calorie = dietList.reduce(0.0) { $0 + $1.items.reduce(0) { $0 + $1.calories } }
+                let carbohydrate = dietList.reduce(0.0) { $0 + $1.items.reduce(0) { $0 + $1.carbohydrates } }
+                let protein = dietList.reduce(0.0) { $0 + $1.items.reduce(0) { $0 + $1.protein } }
+                let fat = dietList.reduce(0.0) { $0 + $1.items.reduce(0) { $0 + $1.fat } }
+                dailyNutritionSummaryRelay.accept((calorie: calorie, carbohydrate: carbohydrate, protein: protein, fat: fat))
+            })
+            .disposed(by: disposeBag)
+
+        Observable.combineLatest(userNowBodyStatusRelay, userTargetBodyStatusRelay)
+            .subscribe(onNext: { [weak self] bodyStatus, targetBodyStatus in
+                guard let self else { return }
+                let weightDiff = targetBodyStatus.0 - bodyStatus.0
+                let smiDiff: Double? = {
+                    if let target = targetBodyStatus.1, let current = bodyStatus.1 { return target - current }
+                    return nil
+                }()
+                let fatDiff: Double? = {
+                    if let target = targetBodyStatus.2, let current = bodyStatus.2 { return target - current }
+                    return nil
+                }()
+                bodyStatusDiffRelay.accept((weightDiff: weightDiff, smiDiff: smiDiff, fatDiff: fatDiff))
             })
             .disposed(by: disposeBag)
     }
