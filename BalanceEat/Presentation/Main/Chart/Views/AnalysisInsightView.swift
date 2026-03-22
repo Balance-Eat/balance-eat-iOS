@@ -86,8 +86,10 @@ final class AnalysisInsightView: UIView {
                     isInTargetCount = stats.filter { $0.totalFat <= target }.count
                 }
 
+                let percentDiff = target > 0 ? abs((average - target) / target) * 100 : 0
+                let comparison = average >= target ? "초과" : "미달"
                 let contentString = """
-                                • 평균 \(String(format: "%.0f", average))\(nutritionStatType.unit)로 목표 대비 \(String(format: "%.1f", abs((average - target) / target) * 100))% 초과입니다.
+                                • 평균 \(String(format: "%.0f", average))\(nutritionStatType.unit)로 목표 대비 \(String(format: "%.1f", percentDiff))% \(comparison)입니다.
                                 • \(isInTargetCount)일이 목표 범위 내에 있습니다.
                                 """
                 contentLabel.setTextWithLineSpacing(contentString, lineSpacing: 6)
