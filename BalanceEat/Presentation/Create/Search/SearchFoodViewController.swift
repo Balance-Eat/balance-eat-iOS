@@ -11,11 +11,10 @@ import RxSwift
 import RxCocoa
 import Toast
 
-final class SearchFoodViewController: UIViewController {
-    private let viewModel: SearchFoodViewModel
+final class SearchFoodViewController: BaseViewController<SearchFoodViewModel> {
     let selectedFoodDataRelay: BehaviorRelay<FoodData?> = BehaviorRelay(value: nil)
-    
-    private let contentView = UIView()
+
+    private let searchContentView = UIView()
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "음식 이름을 입력해주세요."
@@ -59,50 +58,54 @@ final class SearchFoodViewController: UIViewController {
     
     var makeCreateFoodViewController: (() -> CreateFoodViewController?)?
 
-    private let disposeBag = DisposeBag()
     private var presentationBag = DisposeBag()
 
-    init(viewModel: SearchFoodViewModel) {
-        self.viewModel = viewModel
-        super.init(nibName: nil, bundle: nil)
-        
-        setUpView()
-        setBinding()
+    override init(viewModel: SearchFoodViewModel) {
+        super.init(viewModel: viewModel)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setUpView()
+        setBinding()
+    }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(false, animated: false)
     }
     
     private func setUpView() {
-        view.backgroundColor = .homeScreenBackground
-        view.addSubview(contentView)
-        contentView.addSubview(tableView)
-        contentView.addSubview(createFoodButton)
-        
-        contentView.snp.makeConstraints { make in
+        topContentView.snp.makeConstraints { make in
+            make.height.equalTo(0)
+        }
+
+        view.addSubview(searchContentView)
+        searchContentView.addSubview(tableView)
+        searchContentView.addSubview(createFoodButton)
+
+        searchContentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
+
         tableView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
-        
+
         let noFoodStackView = UIStackView(arrangedSubviews: [noFoodLabel, createFoodButton])
         noFoodStackView.axis = .vertical
         noFoodStackView.spacing = 8
-        
-        contentView.addSubview(noFoodStackView)
-        
+
+        searchContentView.addSubview(noFoodStackView)
+
         noFoodStackView.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
-        
+
         let flexSpace = UIBarButtonItem(
             barButtonSystemItem: .flexibleSpace,
             target: nil,
@@ -111,7 +114,7 @@ final class SearchFoodViewController: UIViewController {
 
         toolbar.items = [flexSpace, doneButton]
         searchBar.searchTextField.inputAccessoryView = toolbar
-        
+
         navigationItem.titleView = searchBar
         navigationItem.leftBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "chevron.backward"),
@@ -119,18 +122,11 @@ final class SearchFoodViewController: UIViewController {
             target: self,
             action: #selector(backButtonTapped)
         )
+
+        view.bringSubviewToFront(loadingView)
     }
     
     private func setBinding() {
-        
-        viewModel.toastMessageRelay
-            .observe(on: MainScheduler.instance)
-            .compactMap { $0 }
-            .subscribe(onNext: { [weak self] message in
-                self?.view.makeToast(message, duration: 1.5, position: .center)
-            })
-            .disposed(by: disposeBag)
-        
         searchBar.rx.text.orEmpty
             .debounce(.milliseconds(300), scheduler: MainScheduler.instance)
             .distinctUntilChanged()
