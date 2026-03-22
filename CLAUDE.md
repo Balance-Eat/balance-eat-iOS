@@ -22,24 +22,31 @@ MVVM + Clean Architecture + Coordinator Pattern.
 ### 레이어 구조
 
 ```
-Domain/
-├── Entities/          # 순수 Swift 모델 (UserData, DietData, FoodData 등)
-├── Repositories/      # Repository 프로토콜 — 파일명 XxxRepositoryProtocol.swift, protocol 이름은 XxxRepository
-└── UseCases/          # UseCase 구현체 + XxxUseCaseProtocol
-
-Data/
-├── Repository/        # DefaultXxxRepository (프로토콜 구현체)
-├── DTOs/              # Codable 네트워크/코어데이터 모델
-├── Network/           # APIClient, APIEndPoints
-└── CoreData/          # UserCoreData (로컬 저장)
-
-Presentation/
-├── Base/              # BaseViewController<VM>, BaseViewModel
+BalanceEat/
 ├── Coordinator/       # AppCoordinator, MainCoordinator
 ├── DI/                # AppDIContainer (Swinject)
-├── Main/              # Home, List(캘린더), Chart(통계), Menu(설정/알림)
-├── Create/            # 식단 등록, 음식 검색/생성
-└── Onboarding/        # 튜토리얼, 신체정보/목표 설정
+├── Core/
+│   └── Presentation/
+│       └── Components/  # 공통 UI 컴포넌트
+├── Domain/
+│   ├── Entities/      # 순수 Swift 모델 (UserData, DietData, FoodData 등)
+│   ├── Models/        # 도메인 모델
+│   ├── Repositories/  # Repository 프로토콜 — 파일명 XxxRepositoryProtocol.swift, protocol 이름은 XxxRepository
+│   └── UseCases/      # UseCase 구현체 + XxxUseCaseProtocol
+├── Data/
+│   ├── Repository/    # DefaultXxxRepository (프로토콜 구현체)
+│   ├── DTOs/          # Codable 네트워크/코어데이터 모델
+│   ├── Network/       # APIClient, APIEndPoints
+│   └── CoreData/      # UserCoreData (로컬 저장)
+├── Presentation/
+│   ├── Base/          # BaseViewController<VM>, BaseViewModel
+│   ├── Login/         # 로그인
+│   ├── Main/          # Home, List(캘린더), Chart(통계), Menu(설정/알림)
+│   ├── Create/        # 식단 등록, 음식 검색/생성
+│   └── Onboarding/   # 튜토리얼, 신체정보/목표 설정
+├── Extension/
+├── Resources/
+└── Utils/
 ```
 
 ### 핵심 패턴
