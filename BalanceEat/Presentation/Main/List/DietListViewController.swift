@@ -15,7 +15,7 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
     private let headerView = DietListHeaderView()
     private lazy var sumOfNutritionValueView = SumOfNutritionValueView(
         title: "이날의 영양 요약",
-        subTitle: "목표 : \(viewModel.userDataRelay.value?.targetCalorie ?? 0)kcal"
+        subTitle: ""
     )
     private let todayAteMealLogListView = MealLogListView()
     private let dietEmptyInfoView = DietEmptyInfoView()
