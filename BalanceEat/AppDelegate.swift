@@ -106,7 +106,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let container = NSPersistentContainer(name: "BalanceEat")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                #if DEBUG
+                assertionFailure("CoreData 로드 실패: \(error), \(error.userInfo)")
+                #endif
             }
         })
         return container
@@ -120,8 +122,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             do {
                 try context.save()
             } catch {
+                #if DEBUG
                 let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                print("CoreData 저장 실패: \(nserror), \(nserror.userInfo)")
+                #endif
             }
         }
     }
