@@ -118,23 +118,34 @@ graph TB
 
 ```
 BalanceEat/
-├── App/                        # AppDelegate, SceneDelegate
+├── AppDelegate.swift
+├── SceneDelegate.swift
 ├── Coordinator/                # AppCoordinator, MainCoordinator
 ├── DI/                         # AppDIContainer (Swinject)
+├── Core/
+│   └── Presentation/
+│       └── Components/         # 공통 UI 컴포넌트
 ├── Domain/
 │   ├── Entities/
-│   ├── UseCases/
-│   └── Interfaces/             # Repository Protocols
+│   ├── Models/
+│   ├── Repositories/           # Repository Protocols
+│   └── UseCases/
 ├── Data/
 │   ├── Network/                # APIClient, APIEndPoints
-│   ├── Repositories/
-│   └── DTOs/
-└── Presentation/
-    ├── Base/                   # BaseViewController, BaseViewModel
-    ├── Onboarding/
-    └── Main/
-        ├── Home/
-        ├── List/               # 식단 캘린더
-        ├── Chart/              # 통계
-        └── Menu/               # 사용자 설정, 리마인더
+│   ├── Repository/
+│   ├── DTOs/
+│   └── CoreData/
+├── Presentation/
+│   ├── Base/                   # BaseViewController, BaseViewModel
+│   ├── Login/
+│   ├── Onboarding/
+│   ├── Create/                 # 식단 등록, 음식 검색/생성
+│   └── Main/
+│       ├── Home/
+│       ├── List/               # 식단 캘린더
+│       ├── Chart/              # 통계
+│       └── Menu/               # 사용자 설정, 리마인더
+├── Extension/
+├── Resources/
+└── Utils/
 ```
