@@ -10,14 +10,10 @@ import CoreData
 
 struct DefaultUserRepository: UserRepository {
     private let apiClient = APIClient.shared
-    private var context: NSManagedObjectContext
+    private let userCoreData: UserCoreData
 
     init(context: NSManagedObjectContext) {
-        self.context = context
-    }
-    
-    private var userCoreData: UserCoreData {
-        UserCoreData(viewContext: context)
+        self.userCoreData = UserCoreData(viewContext: context)
     }
     
     func createUser(request: UserCreateRequest) async -> Result<Void, NetworkError> {
