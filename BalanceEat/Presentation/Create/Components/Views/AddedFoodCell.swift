@@ -146,12 +146,13 @@ final class AddedFoodCell: UITableViewCell {
             .subscribe(onNext: { [weak self] selectedOption in
                 guard let self else { return }
 
+                let stepValue = foodData.intake > 0 ? intake / foodData.intake : 1.0
                 switch selectedOption {
                 case .first:
-                    stepperView.stepValue = intake / foodData.intake
+                    stepperView.stepValue = stepValue
                     stepperView.stepperModeRelay.accept(.servingSize)
                 case .second:
-                    stepperView.stepValue = intake / foodData.intake
+                    stepperView.stepValue = stepValue
                     stepperView.stepperModeRelay.accept(.amountSize)
                 }
             })
