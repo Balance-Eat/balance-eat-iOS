@@ -8,6 +8,11 @@
 import Foundation
 @preconcurrency import Alamofire
 
+private struct ErrorResponse: Decodable {
+    let message: String
+    let status: String
+}
+
 final class APIClient {
     static let shared = APIClient()
     private init() {}
@@ -84,11 +89,9 @@ final class APIClient {
                             if let apiError = try? Self.decoder.decode(BaseResponse<EmptyData>.self, from: data) {
                                 statusMessage = apiError.status
                                 serverMessage = apiError.message
-                            } else if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                                      let message = json["message"] as? String,
-                                      let status = json["status"] as? String {
-                                statusMessage = status
-                                serverMessage = message
+                            } else if let errorResponse = try? Self.decoder.decode(ErrorResponse.self, from: data) {
+                                statusMessage = errorResponse.status
+                                serverMessage = errorResponse.message
                             }
                         }
 
