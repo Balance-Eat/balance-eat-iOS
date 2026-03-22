@@ -50,7 +50,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     isActive: granted
                 )
 
-                Task {
+                Task { [weak self] in
+                    guard let self else { return }
                     guard let userId = self.getUserId() else { return }
                     let createNotificationResult = await self.notificationUseCase.createNotification(request: request, userId: userId)
 
@@ -164,7 +165,8 @@ extension AppDelegate: MessagingDelegate {
                 isActive: permissionForNotification
             )
 
-            Task {
+            Task { [weak self] in
+                guard let self else { return }
                 guard let userId = self.getUserId() else { return }
                 let createNotificationResult = await self.notificationUseCase.createNotification(request: request, userId: userId)
 
