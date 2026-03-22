@@ -37,7 +37,6 @@ final class SearchFoodViewModel: BaseViewModel {
         case .success(let result):
             searchFoodResultRelay.accept(result.items)
             totalPage = result.totalPages
-            currentPage = 1
         case .failure(let failure):
             #if DEBUG
             print("SearchFoodViewModel.searchFood failed: \(failure)")
@@ -52,7 +51,7 @@ final class SearchFoodViewModel: BaseViewModel {
 
         isLoadingNextPageRelay.accept(true)
 
-        let searchFoodResponse = await foodUseCase.searchFood(foodName: foodName, page: currentPage, size: pageSize)
+        let searchFoodResponse = await foodUseCase.searchFood(foodName: foodName, page: currentPage + 1, size: pageSize)
 
         switch searchFoodResponse {
         case .success(let searchResponseDTO):
