@@ -28,7 +28,7 @@ struct DietFoodForCreateDietDTO: Codable {
     let id: Int
     let foodId: Int
     let foodName: String
-    let intake: Int
+    let intake: Double
     let nutrition: FoodNutritionForCreateDietDTO
 }
 
