@@ -219,7 +219,8 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
                     let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
                         Task { [weak self] in
-                            await self?.viewModel.deleteDiet(dietId: diet.id, userId: userId)
+                            guard let self else { return }
+                            await viewModel.deleteDiet(dietId: diet.id, userId: userId)
                         }
                     }
                     

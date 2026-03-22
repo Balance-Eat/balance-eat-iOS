@@ -270,7 +270,8 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                 )
 
                 Task { [weak self] in
-                    await self?.viewModel.createReminder(reminderDataForCreate: reminderDataForCreate)
+                    guard let self else { return }
+                    await viewModel.createReminder(reminderDataForCreate: reminderDataForCreate)
                 }
             })
             .disposed(by: addPresentationBag)
