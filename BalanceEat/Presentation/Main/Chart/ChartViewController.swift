@@ -82,7 +82,7 @@ final class ChartViewController: BaseViewController<ChartViewModel> {
             .bind { [weak self] in
                 guard let self else { return }
 
-                getStats()
+                getStats(forceRefresh: true)
             }
             .disposed(by: disposeBag)
 
@@ -125,11 +125,11 @@ final class ChartViewController: BaseViewController<ChartViewModel> {
         }
     }
 
-    private func getStats() {
+    private func getStats(forceRefresh: Bool = false) {
         let period = headerView.periodRelay.value
         getStatsTask?.cancel()
         getStatsTask = Task {
-            await viewModel.getStats(period: period)
+            await viewModel.getStats(period: period, forceRefresh: forceRefresh)
             refreshControl.endRefreshing()
         }
     }
