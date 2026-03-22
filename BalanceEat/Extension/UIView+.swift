@@ -6,16 +6,3 @@
 //
 
 import UIKit
-import SnapKit
-
-extension UIView {
-    func wrapBalanceEatContentView() {
-        let balanceEatContentView = BalanceEatContentView()
-        
-        balanceEatContentView.addSubview(self)
-        
-        self.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(20)
-        }
-    }
-}
