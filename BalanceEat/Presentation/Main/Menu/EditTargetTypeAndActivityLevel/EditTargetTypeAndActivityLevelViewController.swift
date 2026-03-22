@@ -23,7 +23,7 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
     private let menuEditedWarningView = MenuEditedWarningView()
     
     
-    private let valueChangedRelay = BehaviorRelay<Bool>(value: false)
+    private let isUnchangedRelay = BehaviorRelay<Bool>(value: false)
     
     private var bottomConstraint: Constraint?
     
@@ -160,19 +160,19 @@ final class EditTargetTypeAndActivityLevelViewController: BaseViewController<Edi
 
             return isGoalMaintained && isActivityLevelMaintained
         }
-        .bind(to: valueChangedRelay)
+        .bind(to: isUnchangedRelay)
         .disposed(by: disposeBag)
         
-//        valueChangedRelay
+//        isUnchangedRelay
 //            .map { !$0 }
 //            .bind(to: goToNutritionSettingButton.rx.isEnabled)
 //            .disposed(by: disposeBag)
         
-        valueChangedRelay
+        isUnchangedRelay
             .bind(to: menuEditedWarningView.rx.isHidden)
             .disposed(by: disposeBag)
         
-        valueChangedRelay
+        isUnchangedRelay
             .bind(to: resetButton.rx.isHidden)
             .disposed(by: disposeBag)
         
