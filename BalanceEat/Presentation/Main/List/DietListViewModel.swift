@@ -31,6 +31,12 @@ final class DietListViewModel: BaseViewModel {
     let ateDateRelay = BehaviorRelay<Set<Date>>(value: [])
     let dailyNutritionSummaryRelay: BehaviorRelay<(calorie: Double, carbohydrate: Double, protein: Double, fat: Double)> = .init(value: (0, 0, 0, 0))
 
+    private var fetchDietTask: Task<Void, Never>?
+
+    func clearMonthCache() {
+        monthDataCache.accept([:])
+    }
+
     init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {
         self.userUseCase = userUseCase
         self.dietUseCase = dietUseCase
@@ -116,9 +122,11 @@ final class DietListViewModel: BaseViewModel {
                 if let monthDict = self.monthDataCache.value[monthKey] {
                     self.selectedDayDataCache.accept(monthDict[dateKey] ?? [])
                 } else {
-                    Task { @MainActor [weak self] in
+                    fetchDietTask?.cancel()
+                    fetchDietTask = Task { @MainActor [weak self] in
                         guard let self else { return }
                         await getMonthlyDiets()
+                        guard !Task.isCancelled else { return }
                         let updatedMonthDict = monthDataCache.value[monthKey]
                         selectedDayDataCache.accept(updatedMonthDict?[dateKey] ?? [])
                     }

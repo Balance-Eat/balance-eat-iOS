@@ -44,6 +44,7 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
+        viewModel.clearMonthCache()
         fetchTask?.cancel()
         fetchTask = Task {
             async let user: Void = viewModel.getUser()
