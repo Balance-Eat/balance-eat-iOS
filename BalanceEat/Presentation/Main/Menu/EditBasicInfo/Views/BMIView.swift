@@ -117,9 +117,15 @@ final class BMIView: UIView {
                 guard let weight = userData?.weight else { return }
 
                 currentWeightLabel.text = "현재 체중 \(String(format: "%.1f", userData?.weight ?? 0))kg 기준"
-                let bmi = weight / (pow(height, 2) * 0.0001)
 
-                valueLabel.text = height == 0 ? "-" : String(format: "%.1f", bmi)
+                guard height > 0 else {
+                    valueLabel.text = "-"
+                    evaluationLabel.text = "-"
+                    return
+                }
+
+                let bmi = weight / (pow(height, 2) * 0.0001)
+                valueLabel.text = String(format: "%.1f", bmi)
 
                 if bmi < 18.5 {
                     evaluationLabel.text = "저체중"
