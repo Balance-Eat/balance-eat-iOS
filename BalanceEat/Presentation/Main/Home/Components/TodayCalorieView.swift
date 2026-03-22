@@ -93,7 +93,7 @@ final class TodayCalorieView: UIView {
     }
     
     private func createSubNutritionalView(title: String, current: Int, target: Int, isOver: Bool = false) -> UIView {
-        let containerVIew = UIView()
+        let containerView = UIView()
         
         let titleLabel = UILabel()
         titleLabel.text = title
@@ -114,8 +114,8 @@ final class TodayCalorieView: UIView {
         stack.axis = .vertical
         stack.alignment = .center
         
-        containerVIew.addSubview(titleLabel)
-        containerVIew.addSubview(stack)
+        containerView.addSubview(titleLabel)
+        containerView.addSubview(stack)
         
         titleLabel.snp.makeConstraints { make in
             make.top.equalToSuperview()
@@ -128,7 +128,7 @@ final class TodayCalorieView: UIView {
             make.centerX.equalToSuperview()
         }
         
-        return containerVIew
+        return containerView
     }
     
     func update(currentCalorie: Int, targetCalorie: Int, currentCarbohydrate: Int, targetCarbohydrate: Int, currentProtein: Int, targetProtein: Int, currentFat: Int, targetFat: Int) {
