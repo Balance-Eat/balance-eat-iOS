@@ -137,7 +137,6 @@ BalanceEat/
 │   └── CoreData/
 ├── Presentation/
 │   ├── Base/                   # BaseViewController, BaseViewModel
-│   ├── Login/
 │   ├── Onboarding/
 │   ├── Create/                 # 식단 등록, 음식 검색/생성
 │   └── Main/
@@ -149,3 +148,32 @@ BalanceEat/
 ├── Resources/
 └── Utils/
 ```
+
+<br>
+
+## 테스트
+
+XCTest 기반 ViewModel 단위 테스트 **103개** 작성
+
+- `MockUseCase`로 네트워크 의존성 격리
+- Given / When / Then 구조로 성공·실패·로딩 흐름 전 케이스 검증
+- 테스트 대상: `HomeViewModel`, `DietListViewModel`, `ChartViewModel`, `SearchFoodViewModel`, `SetRemindNotiViewModel` 등
+
+<br>
+
+## 트러블슈팅
+
+### 1. ViewController에 비즈니스 로직 집중으로 인한 유지보수 어려움
+- **문제**: 영양소 합산, 입력 유효성 검사, 날짜 포맷 변환 등 로직이 VC에 직접 구현되어 역할이 뒤섞임
+- **해결**: 각 화면의 로직을 ViewModel로 이동, VC는 UI 바인딩만 담당하도록 분리
+- **결과**: ViewModel 단독 테스트 가능, 기능 추가 시 변경 범위 명확화
+
+### 2. RxSwift 구독 누적으로 인한 메모리 누수
+- **문제**: `viewWillAppear`에서 바인딩 설정 시 화면이 나타날 때마다 구독이 쌓임
+- **해결**: `presentationBag = DisposeBag()`을 도입해 화면 진입마다 이전 구독 해제, 일회성 이벤트는 `.take(1)` 적용
+- **결과**: 메모리 누수 해소, 구독 관리 안정성 향상
+
+### 3. FCM 토큰 갱신 시 기기 중복 등록 문제
+- **문제**: 앱 재설치나 토큰 갱신 시 서버에 동일 기기가 중복 등록될 수 있었음
+- **해결**: `UserDefaults`에 저장된 이전 토큰과 비교해 변경 시에만 서버에 등록 요청
+- **결과**: 기기 중복 등록 없는 안정적인 토큰 관리 구현
