@@ -66,4 +66,8 @@ final class MockDietUseCase: DietUseCaseProtocol {
     func getMonthlyDiet(year: Int, month: Int, userId: String) async -> Result<[DietData], NetworkError> {
         getMonthlyDietResult
     }
+
+    func calculateNutritionAchievement(diets: [DietData], target: UserData) -> NutritionAchievement {
+        NutritionAchievement(calorieRate: 0, carbohydrateRate: 0, proteinRate: 0, fatRate: 0)
+    }
 }
