@@ -15,6 +15,8 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     private var bottomConstraint: Constraint?
     private let tableView = UITableView()
     private let refreshControl = UIRefreshControl()
+    // 화면 present 시마다 새 DisposeBag으로 교체하여 이전 구독을 해제한다.
+    // 교체하지 않으면 이전 인스턴스의 구독이 누적되어 중복 이벤트가 발생한다.
     private var editPresentationBag = DisposeBag()
     private var addPresentationBag = DisposeBag()
     private let dataEmptyLabel: UILabel = {
@@ -88,6 +90,8 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
             action: #selector(didTapPlus)
         )
         button.tintColor = .systemBlue
+        button.accessibilityLabel = "알림 추가"
+        button.accessibilityHint = "새 반복 알림을 추가합니다"
         navigationItem.rightBarButtonItem = button
     }
 
