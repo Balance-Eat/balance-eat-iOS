@@ -13,7 +13,7 @@ private struct ErrorResponse: Decodable {
     let status: String
 }
 
-final class APIClient {
+final class APIClient: APIClientProtocol {
     static let shared = APIClient()
     private init() {}
 
@@ -28,8 +28,29 @@ final class APIClient {
 
     private let baseURL = "https://api.balance-eat.com"
 
+    private func buildDataRequest(endpoint: any Endpoint) -> DataRequest {
+        let url = baseURL + endpoint.path
+        if let body = endpoint.body {
+            return session.request(
+                url,
+                method: endpoint.method,
+                parameters: body,
+                encoder: JSONParameterEncoder.default,
+                headers: endpoint.headers
+            )
+        } else {
+            return session.request(
+                url,
+                method: endpoint.method,
+                parameters: endpoint.queryParameters,
+                encoding: URLEncoding.default,
+                headers: endpoint.headers
+            )
+        }
+    }
+
     func request<T: Decodable>(
-        endpoint: Endpoint,
+        endpoint: any Endpoint,
         responseType: T.Type
     ) async -> Result<T, NetworkError> {
         let url = baseURL + endpoint.path
@@ -38,24 +59,7 @@ final class APIClient {
         let debugQueryParameters = String(describing: endpoint.queryParameters ?? [:])
         #endif
 
-        let dataRequest: DataRequest
-        if let body = endpoint.body {
-            dataRequest = session.request(
-                url,
-                method: endpoint.method,
-                parameters: body,
-                encoder: JSONParameterEncoder.default,
-                headers: endpoint.headers
-            )
-        } else {
-            dataRequest = session.request(
-                url,
-                method: endpoint.method,
-                parameters: endpoint.queryParameters,
-                encoding: URLEncoding.default,
-                headers: endpoint.headers
-            )
-        }
+        let dataRequest = buildDataRequest(endpoint: endpoint)
 
         return await withCheckedContinuation { continuation in
             dataRequest
@@ -108,33 +112,41 @@ final class APIClient {
                         print(errorMessage)
                         print("query parameters: \(debugQueryParameters)")
                         #endif
-                        continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage)))
+
+                        let networkError: NetworkError
+                        if let urlError = afError.underlyingError as? URLError {
+                            switch urlError.code {
+                            case .timedOut:
+                                networkError = .timeout
+                            case .notConnectedToInternet, .networkConnectionLost:
+                                networkError = .noConnection
+                            default:
+                                networkError = .requestFailed(statusMessage, serverMessage)
+                            }
+                        } else {
+                            switch statusCode {
+                            case 401:
+                                networkError = .unauthorized
+                            case 403:
+                                networkError = .forbidden
+                            case 404:
+                                networkError = .notFound
+                            case 429:
+                                networkError = .rateLimited
+                            case let code where (code ?? 0) >= 500:
+                                networkError = .internalServerError
+                            default:
+                                networkError = .requestFailed(statusMessage, serverMessage)
+                            }
+                        }
+                        continuation.resume(returning: .failure(networkError))
                     }
                 }
         }
     }
 
-    func requestVoid(endpoint: Endpoint) async -> Result<Void, NetworkError> {
-        let url = baseURL + endpoint.path
-
-        let dataRequest: DataRequest
-        if let body = endpoint.body {
-            dataRequest = session.request(
-                url,
-                method: endpoint.method,
-                parameters: body,
-                encoder: JSONParameterEncoder.default,
-                headers: endpoint.headers
-            )
-        } else {
-            dataRequest = session.request(
-                url,
-                method: endpoint.method,
-                parameters: endpoint.queryParameters,
-                encoding: URLEncoding.default,
-                headers: endpoint.headers
-            )
-        }
+    func requestVoid(endpoint: any Endpoint) async -> Result<Void, NetworkError> {
+        let dataRequest = buildDataRequest(endpoint: endpoint)
 
         return await withCheckedContinuation { continuation in
             dataRequest
@@ -161,7 +173,50 @@ final class APIClient {
                         #endif
                         continuation.resume(returning: .success(()))
                     } else {
-                        continuation.resume(returning: .failure(.requestFailed(statusMessage, serverMessage)))
+                        let networkError: NetworkError
+                        if let afError = response.error {
+                            if let urlError = afError.underlyingError as? URLError {
+                                switch urlError.code {
+                                case .timedOut:
+                                    networkError = .timeout
+                                case .notConnectedToInternet, .networkConnectionLost:
+                                    networkError = .noConnection
+                                default:
+                                    networkError = .requestFailed(statusMessage, serverMessage)
+                                }
+                            } else {
+                                switch statusCode {
+                                case 401:
+                                    networkError = .unauthorized
+                                case 403:
+                                    networkError = .forbidden
+                                case 404:
+                                    networkError = .notFound
+                                case 429:
+                                    networkError = .rateLimited
+                                case 500...:
+                                    networkError = .internalServerError
+                                default:
+                                    networkError = .requestFailed(statusMessage, serverMessage)
+                                }
+                            }
+                        } else {
+                            switch statusCode {
+                            case 401:
+                                networkError = .unauthorized
+                            case 403:
+                                networkError = .forbidden
+                            case 404:
+                                networkError = .notFound
+                            case 429:
+                                networkError = .rateLimited
+                            case 500...:
+                                networkError = .internalServerError
+                            default:
+                                networkError = .requestFailed(statusMessage, serverMessage)
+                            }
+                        }
+                        continuation.resume(returning: .failure(networkError))
                     }
                 }
         }
