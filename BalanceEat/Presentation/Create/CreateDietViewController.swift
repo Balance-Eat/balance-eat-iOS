@@ -152,8 +152,11 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                 guard let self else { return }
                 guard let searchFoodViewController = makeSearchFoodViewController?() else { return }
 
+                // push 직전 DisposeBag을 교체해 이전 구독을 해제한다.
                 searchPresentationBag = DisposeBag()
 
+                // take(1): SearchFoodViewController는 push/pop 후 재사용된다.
+                // 구독이 누적되면 음식 선택 콜백이 중복 호출되므로 첫 번째 이벤트만 수신한다.
                 searchFoodViewController.selectedFoodDataRelay
                     .observe(on: MainScheduler.instance)
                     .compactMap { $0 }

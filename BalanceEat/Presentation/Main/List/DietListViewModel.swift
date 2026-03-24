@@ -122,6 +122,7 @@ final class DietListViewModel: BaseViewModel {
                 if let monthDict = self.monthDataCache.value[monthKey] {
                     self.selectedDayDataCache.accept(monthDict[dateKey] ?? [])
                 } else {
+                    // 날짜가 빠르게 변경될 때 이전 fetch 요청을 취소하고 최신 날짜 데이터만 반영한다.
                     fetchDietTask?.cancel()
                     fetchDietTask = Task { @MainActor [weak self] in
                         guard let self else { return }

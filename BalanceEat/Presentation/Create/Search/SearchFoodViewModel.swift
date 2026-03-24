@@ -47,6 +47,7 @@ final class SearchFoodViewModel: BaseViewModel {
     
     @MainActor
     func fetchSearchFood(foodName: String) async {
+        // 스크롤 이벤트는 연속으로 발생할 수 있으므로 마지막 페이지 도달 시 중복 호출을 방지한다.
         guard !isLastPage else { return }
 
         isLoadingNextPageRelay.accept(true)
