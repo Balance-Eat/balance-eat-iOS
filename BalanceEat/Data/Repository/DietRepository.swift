@@ -8,7 +8,11 @@
 import Foundation
 
 struct DefaultDietRepository: DietRepository {
-    private let apiClient = APIClient.shared
+    private let apiClient: any APIClientProtocol
+
+    init(apiClient: any APIClientProtocol = APIClient.shared) {
+        self.apiClient = apiClient
+    }
     
     func createDiet(mealType: MealType, consumedAt: String, dietFoods: [DietFoodRequest], userId: String) async -> Result<Void, NetworkError> {
         let dtoFoods = dietFoods.map { FoodItemForCreateDietDTO(foodId: $0.foodId, intake: $0.intake) }

@@ -8,7 +8,11 @@
 import Foundation
 
 struct DefaultStatsRepository: StatsRepository {
-    private let apiClient = APIClient.shared
+    private let apiClient: any APIClientProtocol
+
+    init(apiClient: any APIClientProtocol = APIClient.shared) {
+        self.apiClient = apiClient
+    }
 
     func getStats(period: Period, userId: String) async -> Result<[StatsData], NetworkError> {
         let endPoint = StatsEndPoints.getStats(period: period, userId: userId)

@@ -33,15 +33,32 @@ final class AppDIContainer {
             }
             return appDelegate.persistentContainer.viewContext
         }.inObjectScope(.container)
-        
+
+        container.register(APIClientProtocol.self) { _ in
+            APIClient.shared
+        }.inObjectScope(.container)
+
         container.register(UserRepository.self) { r in
-            DefaultUserRepository(context: r.resolveOrFatal(NSManagedObjectContext.self))
+            DefaultUserRepository(
+                apiClient: r.resolveOrFatal(APIClientProtocol.self),
+                context: r.resolveOrFatal(NSManagedObjectContext.self)
+            )
         }
-        container.register(FoodRepository.self) { _ in DefaultFoodRepository() }
-        container.register(DietRepository.self) { _ in DefaultDietRepository() }
-        container.register(ReminderRepository.self) { _ in DefaultReminderRepository() }
-        container.register(StatsRepository.self) { _ in DefaultStatsRepository() }
-        container.register(NotificationRepository.self) { _ in DefaultNotificationRepository() }
+        container.register(FoodRepository.self) { r in
+            DefaultFoodRepository(apiClient: r.resolveOrFatal(APIClientProtocol.self))
+        }
+        container.register(DietRepository.self) { r in
+            DefaultDietRepository(apiClient: r.resolveOrFatal(APIClientProtocol.self))
+        }
+        container.register(ReminderRepository.self) { r in
+            DefaultReminderRepository(apiClient: r.resolveOrFatal(APIClientProtocol.self))
+        }
+        container.register(StatsRepository.self) { r in
+            DefaultStatsRepository(apiClient: r.resolveOrFatal(APIClientProtocol.self))
+        }
+        container.register(NotificationRepository.self) { r in
+            DefaultNotificationRepository(apiClient: r.resolveOrFatal(APIClientProtocol.self))
+        }
 
         container.register(UserUseCaseProtocol.self) { r in
             UserUseCase(repository: r.resolveOrFatal(UserRepository.self))

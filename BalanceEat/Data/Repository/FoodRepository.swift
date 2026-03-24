@@ -8,7 +8,11 @@
 import Foundation
 
 struct DefaultFoodRepository: FoodRepository {
-    private let apiClient = APIClient.shared
+    private let apiClient: any APIClientProtocol
+
+    init(apiClient: any APIClientProtocol = APIClient.shared) {
+        self.apiClient = apiClient
+    }
     
     func createFood(request: FoodCreateRequest) async -> Result<FoodData, NetworkError> {
         let createFoodDTO = CreateFoodDTO(

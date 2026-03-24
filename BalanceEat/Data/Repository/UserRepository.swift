@@ -9,10 +9,11 @@ import Foundation
 import CoreData
 
 struct DefaultUserRepository: UserRepository {
-    private let apiClient = APIClient.shared
+    private let apiClient: any APIClientProtocol
     private let userCoreData: UserCoreData
 
-    init(context: NSManagedObjectContext) {
+    init(apiClient: any APIClientProtocol = APIClient.shared, context: NSManagedObjectContext) {
+        self.apiClient = apiClient
         self.userCoreData = UserCoreData(viewContext: context)
     }
     

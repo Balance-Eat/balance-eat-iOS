@@ -8,7 +8,11 @@
 import Foundation
 
 struct DefaultNotificationRepository: NotificationRepository {
-    private let apiClient = APIClient.shared
+    private let apiClient: any APIClientProtocol
+
+    init(apiClient: any APIClientProtocol = APIClient.shared) {
+        self.apiClient = apiClient
+    }
 
     func createNotification(request: NotificationCreateRequest, userId: String) async -> Result<NotificationData, NetworkError> {
         let dto = NotificationRequestDTO(
