@@ -19,6 +19,11 @@ protocol UserCoreDataProtocol {
     func deleteUserId(_ id: Int64) -> Result<Void, CoreDataError>
 }
 
+private enum UserAttribute {
+    static let uuid = "uuid"
+    static let userId = "userId"
+}
+
 struct UserCoreData: UserCoreDataProtocol {
     private let viewContext: NSManagedObjectContext
     init(viewContext: NSManagedObjectContext) {
@@ -58,7 +63,7 @@ struct UserCoreData: UserCoreDataProtocol {
     
     func deleteUserUUID(_ uuid: String) -> Result<Void, CoreDataError> {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "uuid == %@", uuid)
+        fetchRequest.predicate = NSPredicate(format: "%K == %@", UserAttribute.uuid, uuid)
         
         do {
             let result = try viewContext.fetch(fetchRequest)
@@ -125,7 +130,7 @@ struct UserCoreData: UserCoreDataProtocol {
     
     func deleteUserId(_ userId: Int64) -> Result<Void, CoreDataError> {
         let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "userId == %lld", userId)
+        fetchRequest.predicate = NSPredicate(format: "%K == %lld", UserAttribute.userId, userId)
         
         do {
             let result = try viewContext.fetch(fetchRequest)
