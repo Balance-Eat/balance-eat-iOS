@@ -68,13 +68,20 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     
     var makeSearchFoodViewController: (() -> SearchFoodViewController?)?
     private var searchPresentationBag = DisposeBag()
+    private var saveDietTask: Task<Void, Never>?
+    private var deleteDietTask: Task<Void, Never>?
 
     override init(viewModel: CreateDietViewModel) {
         super.init(viewModel: viewModel)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        saveDietTask?.cancel()
+        deleteDietTask?.cancel()
     }
     
     override func viewDidLoad() {
@@ -200,7 +207,7 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
         saveButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                Task {
+                self.saveDietTask = Task {
                     await self.viewModel.saveDiet()
                 }
             })
@@ -221,9 +228,9 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
                     
                     let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
                     let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
-                        Task { [weak self] in
-                            guard let self else { return }
-                            await viewModel.deleteDiet(dietId: diet.id, userId: userId)
+                        guard let self else { return }
+                        self.deleteDietTask = Task {
+                            await self.viewModel.deleteDiet(dietId: diet.id, userId: userId)
                         }
                     }
                     

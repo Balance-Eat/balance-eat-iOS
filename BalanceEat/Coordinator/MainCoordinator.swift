@@ -164,8 +164,8 @@ final class MainCoordinator {
         let vm = EditTargetTypeAndActivityLevelViewModel(userData: userData, userUseCase: userUseCase)
         let vc = EditTargetTypeAndActivityLevelViewController(viewModel: vm)
 
-        vc.onGoToNutritionSetting = { [weak self, weak vm] in
-            guard let self, let vm else { return }
+        vc.onGoToNutritionSetting = { [weak self] in
+            guard let self else { return }
             let nutritionVC = EditNutritionViewController(vm: vm)
             self.nav?.pushViewController(nutritionVC, animated: true)
         }
