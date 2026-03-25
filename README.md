@@ -56,54 +56,6 @@
 
 <br>
 
-## 아키텍처
-
-```mermaid
-%%{init: {'theme': 'neutral'}}%%
-graph TB
-    classDef pres fill:#bfdbfe,stroke:#3b82f6,color:#1e3a5f
-    classDef dom  fill:#bbf7d0,stroke:#16a34a,color:#14532d
-    classDef dat  fill:#fed7aa,stroke:#ea580c,color:#7c2d12
-
-    subgraph Presentation["📱 Presentation Layer"]
-        Coordinator["Coordinator\n(AppCoordinator · MainCoordinator)"]
-        VC["ViewControllers\n(Home · DietList · Chart\nMenu · Onboarding · Create)"]
-        VM["ViewModels\n(HomeVM · DietListVM · ChartVM\nSearchFoodVM · SetRemindNotiVM...)"]
-        DI["DI Container\n(AppDIContainer / Swinject)"]
-        Coordinator --> VC
-        VC --> VM
-        DI -.->|의존성 주입| Coordinator
-    end
-
-    subgraph Domain["🏛️ Domain Layer (순수 Swift)"]
-        UseCase["UseCases\n(User · Diet · Food\nStats · Reminder · Notification)"]
-        RepoProtocol["Repository Protocols\n(UserRepositoryProtocol\nDietRepositoryProtocol 등)"]
-        Entity["Entities\n(UserData · DietData · FoodData\nStatsData · ReminderData 등)"]
-        UseCase --> RepoProtocol
-        UseCase --> Entity
-    end
-
-    subgraph Data["🗄️ Data Layer"]
-        Repo["Repositories\n(UserRepository · DietRepository\nFoodRepository 등)"]
-        DTO["DTOs\n(UserDTO · DietDTO · FoodDTO 등)"]
-        Network["Network\n(APIClient · APIEndPoints)"]
-        CoreData["CoreData\n(UserCoreData)"]
-        Repo --> DTO
-        Repo --> Network
-        Repo --> CoreData
-    end
-
-    VM -->|"UseCase Protocol 호출"| UseCase
-    Repo -->|"Protocol 구현"| RepoProtocol
-    Repo -->|"Domain 타입 반환"| Entity
-
-    class Coordinator,VC,VM,DI pres
-    class UseCase,RepoProtocol,Entity dom
-    class Repo,DTO,Network,CoreData dat
-```
-
-<br>
-
 ## 프로젝트 구조
 
 ```
