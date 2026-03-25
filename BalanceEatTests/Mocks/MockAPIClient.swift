@@ -17,10 +17,10 @@ final class MockAPIClient: APIClientProtocol {
     func request<T: Decodable>(endpoint: any Endpoint, responseType: T.Type) async -> Result<T, NetworkError> {
         requestCallCount += 1
         capturedEndpointPath = endpoint.path
-        if let result = requestResult as? Result<T, NetworkError> {
-            return result
+        guard let result = requestResult as? Result<T, NetworkError> else {
+            return .failure(.invalid)
         }
-        fatalError("MockAPIClient.requestResult 타입이 \(T.self)와 일치하지 않습니다.")
+        return result
     }
 
     func requestVoid(endpoint: any Endpoint) async -> Result<Void, NetworkError> {
