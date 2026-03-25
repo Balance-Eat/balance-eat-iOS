@@ -87,47 +87,48 @@ final class EditTargetTypeAndActivityLevelViewModelTests: XCTestCase {
 
     func test_targetCaloriesObservable_다이어트_칼로리_차감() {
         // Given
-        sut.selectedGoalRelay.accept(.diet)
         sut.selectedActivityLevel.accept(.moderate)
 
-        var maintainCalories: Double?
-        var dietCalories: Double?
+        var maintainCalories: Double = 0
+        var dietCalories: Double = 0
 
+        // take(1)로 현재 값만 캡처해서 이후 goalType 변경에 영향받지 않게 함
         sut.selectedGoalRelay.accept(.maintain)
         sut.targetCaloriesObservable
+            .take(1)
             .subscribe(onNext: { maintainCalories = $0 })
             .disposed(by: disposeBag)
 
         sut.selectedGoalRelay.accept(.diet)
         sut.targetCaloriesObservable
+            .take(1)
             .subscribe(onNext: { dietCalories = $0 })
             .disposed(by: disposeBag)
 
-        if let maintain = maintainCalories, let diet = dietCalories {
-            XCTAssertEqual(maintain - diet, 500, accuracy: 1.0)
-        }
+        XCTAssertEqual(maintainCalories - dietCalories, 500, accuracy: 1.0)
     }
 
     func test_targetCaloriesObservable_벌크업_칼로리_증가() {
         // Given
         sut.selectedActivityLevel.accept(.moderate)
 
-        var maintainCalories: Double?
-        var bulkCalories: Double?
+        var maintainCalories: Double = 0
+        var bulkCalories: Double = 0
 
+        // take(1)로 현재 값만 캡처해서 이후 goalType 변경에 영향받지 않게 함
         sut.selectedGoalRelay.accept(.maintain)
         sut.targetCaloriesObservable
+            .take(1)
             .subscribe(onNext: { maintainCalories = $0 })
             .disposed(by: disposeBag)
 
         sut.selectedGoalRelay.accept(.bulkUp)
         sut.targetCaloriesObservable
+            .take(1)
             .subscribe(onNext: { bulkCalories = $0 })
             .disposed(by: disposeBag)
 
-        if let maintain = maintainCalories, let bulk = bulkCalories {
-            XCTAssertEqual(bulk - maintain, 300, accuracy: 1.0)
-        }
+        XCTAssertEqual(bulkCalories - maintainCalories, 300, accuracy: 1.0)
     }
 
     func test_targetCaloriesRelay_바인딩됨() {

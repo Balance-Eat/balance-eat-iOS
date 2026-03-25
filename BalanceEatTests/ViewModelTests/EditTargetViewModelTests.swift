@@ -16,9 +16,9 @@ final class EditTargetViewModelTests: XCTestCase {
 
     private let baseUserData = UserData.fixture(
         weight: 70.0,
-        targetWeight: 68.0,
         smi: nil,
-        fatPercentage: nil
+        fatPercentage: nil,
+        targetWeight: 68.0
     )
 
     override func setUp() async throws {

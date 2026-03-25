@@ -70,7 +70,7 @@ final class MenuViewModelTests: XCTestCase {
 
     func test_getUser_UUID_실패시_UseCase_미호출() async {
         // Given
-        mockUserUseCase.getUserUUIDResult = .failure(.fetchFailed)
+        mockUserUseCase.getUserUUIDResult = .failure(.readError("test"))
 
         // When
         await sut.getUser()
