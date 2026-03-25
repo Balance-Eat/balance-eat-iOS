@@ -29,12 +29,18 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
 
     private var bottomConstraint: Constraint?
 
+    private var updateUserTask: Task<Void, Never>?
+
     override init(viewModel: EditTargetViewModel) {
         super.init(viewModel: viewModel)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        updateUserTask?.cancel()
     }
 
     override func viewDidLoad() {
@@ -193,7 +199,7 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
         saveButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                Task {
+                self.updateUserTask = Task {
                     await self.viewModel.updateUser()
                 }
             })

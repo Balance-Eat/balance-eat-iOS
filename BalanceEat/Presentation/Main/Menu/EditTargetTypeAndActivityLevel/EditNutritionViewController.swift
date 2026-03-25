@@ -29,13 +29,19 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
         setBinding()
     }
     
+    private var updateUserTask: Task<Void, Never>?
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    deinit {
+        updateUserTask?.cancel()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         setUpView()
         setUpKeyboardDismissGesture()
         observeKeyboard()
@@ -193,7 +199,7 @@ final class EditNutritionViewController: BaseViewController<EditTargetTypeAndAct
                     providerType: userData.providerType
                 )
 
-                Task {
+                self.updateUserTask = Task {
                     await self.viewModel.updateUser(updatedUserData)
                 }
             })

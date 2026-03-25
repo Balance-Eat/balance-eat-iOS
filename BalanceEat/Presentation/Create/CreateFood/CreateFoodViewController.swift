@@ -136,14 +136,20 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
     private var bottomConstraint: Constraint?
     
     
+    private var createFoodTask: Task<Void, Never>?
+
     override init(viewModel: CreateFoodViewModel) {
         super.init(viewModel: viewModel)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
+    deinit {
+        createFoodTask?.cancel()
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -256,7 +262,7 @@ final class CreateFoodViewController: BaseViewController<CreateFoodViewModel> {
         createButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 guard let self else { return }
-                Task {
+                self.createFoodTask = Task {
                     await self.viewModel.createFood()
                 }
             })
