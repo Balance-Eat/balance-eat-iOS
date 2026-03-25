@@ -7,7 +7,6 @@
 
 import UIKit
 import CoreData
-import FirebaseCore
 import Firebase
 import FirebaseMessaging
 
@@ -62,7 +61,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         #endif
                         userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
                     case .failure(let error):
-                        if error.description.contains("NOTIFICATION_DEVICE_ALREADY_EXISTS") {
+                        if case .conflict = error {
                             userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
                         }
                         #if DEBUG
@@ -172,6 +171,7 @@ extension AppDelegate: MessagingDelegate {
 
                 switch createNotificationResult {
                 case .success:
+                    userDefaultsManager.set(fcmToken, forKey: .agentId)
                     userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
                 case .failure(let error):
                     #if DEBUG
@@ -180,7 +180,6 @@ extension AppDelegate: MessagingDelegate {
                 }
             }
         }
-        userDefaultsManager.set(fcmToken, forKey: .agentId)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
@@ -191,7 +190,6 @@ extension AppDelegate: MessagingDelegate {
 }
 
 // User Notifications [AKA InApp Notification]
-@available(iOS 10.0, *)
 extension AppDelegate: UNUserNotificationCenterDelegate {
     
     // 푸시 메시지가 앱이 켜져있을 때 나올 경우

@@ -20,6 +20,7 @@ public enum NetworkError: Error {
     case notFound
     case rateLimited
     case internalServerError
+    case conflict
 
     public var userMessage: String {
         switch self {
@@ -47,6 +48,8 @@ public enum NetworkError: Error {
             return "잠시 후 다시 시도해주세요."
         case .internalServerError:
             return "서버 오류가 발생했습니다."
+        case .conflict:
+            return "이미 존재하는 데이터입니다."
         }
     }
 
@@ -76,6 +79,8 @@ public enum NetworkError: Error {
             return "429 Rate Limited"
         case .internalServerError:
             return "500+ Internal Server Error"
+        case .conflict:
+            return "409 Conflict"
         }
     }
 

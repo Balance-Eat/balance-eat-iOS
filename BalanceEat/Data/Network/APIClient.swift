@@ -131,6 +131,8 @@ final class APIClient: APIClientProtocol {
                                 networkError = .forbidden
                             case 404:
                                 networkError = .notFound
+                            case 409:
+                                networkError = .conflict
                             case 429:
                                 networkError = .rateLimited
                             case let code where (code ?? 0) >= 500:
@@ -192,6 +194,8 @@ final class APIClient: APIClientProtocol {
                                     networkError = .forbidden
                                 case 404:
                                     networkError = .notFound
+                                case 409:
+                                    networkError = .conflict
                                 case 429:
                                     networkError = .rateLimited
                                 case 500...:
@@ -208,6 +212,8 @@ final class APIClient: APIClientProtocol {
                                 networkError = .forbidden
                             case 404:
                                 networkError = .notFound
+                            case 409:
+                                networkError = .conflict
                             case 429:
                                 networkError = .rateLimited
                             case 500...:
