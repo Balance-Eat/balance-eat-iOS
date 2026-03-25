@@ -102,12 +102,13 @@ final class DietListViewController: BaseViewController<DietListViewModel> {
         
         viewModel.dailyNutritionSummaryRelay
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] summary in
+            .subscribe(onNext: { [weak self] achievement in
                 guard let self else { return }
-                sumOfNutritionValueView.calorieRelay.accept(summary.calorie)
-                sumOfNutritionValueView.carbonRelay.accept(summary.carbohydrate)
-                sumOfNutritionValueView.proteinRelay.accept(summary.protein)
-                sumOfNutritionValueView.fatRelay.accept(summary.fat)
+                let user = viewModel.userDataRelay.value
+                sumOfNutritionValueView.calorieRelay.accept(achievement.calorieRate * (user?.targetCalorie ?? 0))
+                sumOfNutritionValueView.carbonRelay.accept(achievement.carbohydrateRate * (user?.targetCarbohydrates ?? 0))
+                sumOfNutritionValueView.proteinRelay.accept(achievement.proteinRate * (user?.targetProtein ?? 0))
+                sumOfNutritionValueView.fatRelay.accept(achievement.fatRate * (user?.targetFat ?? 0))
             })
             .disposed(by: disposeBag)
 

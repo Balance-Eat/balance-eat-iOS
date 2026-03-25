@@ -29,7 +29,7 @@ final class DietListViewModel: BaseViewModel {
     let selectedDate = BehaviorRelay<Date>(value: Date())
     let selectedDayDataCache = BehaviorRelay<[DietData]>(value: [])
     let ateDateRelay = BehaviorRelay<Set<Date>>(value: [])
-    let dailyNutritionSummaryRelay: BehaviorRelay<(calorie: Double, carbohydrate: Double, protein: Double, fat: Double)> = .init(value: (0, 0, 0, 0))
+    let dailyNutritionSummaryRelay: BehaviorRelay<NutritionAchievement> = .init(value: NutritionAchievement(calorieRate: 0, carbohydrateRate: 0, proteinRate: 0, fatRate: 0))
 
     private var fetchDietTask: Task<Void, Never>?
 
@@ -135,14 +135,11 @@ final class DietListViewModel: BaseViewModel {
             })
             .disposed(by: disposeBag)
 
-        selectedDayDataCache
-            .subscribe(onNext: { [weak self] dietDatas in
+        Observable.combineLatest(selectedDayDataCache, userDataRelay.compactMap { $0 })
+            .subscribe(onNext: { [weak self] dietDatas, user in
                 guard let self else { return }
-                let totalCalories = dietDatas.flatMap { $0.items }.reduce(0.0) { $0 + $1.calories }
-                let totalCarbon = dietDatas.flatMap { $0.items }.reduce(0.0) { $0 + $1.carbohydrates }
-                let totalProtein = dietDatas.flatMap { $0.items }.reduce(0.0) { $0 + $1.protein }
-                let totalFat = dietDatas.flatMap { $0.items }.reduce(0.0) { $0 + $1.fat }
-                dailyNutritionSummaryRelay.accept((calorie: totalCalories, carbohydrate: totalCarbon, protein: totalProtein, fat: totalFat))
+                let achievement = dietUseCase.calculateNutritionAchievement(diets: dietDatas, target: user)
+                dailyNutritionSummaryRelay.accept(achievement)
             })
             .disposed(by: disposeBag)
     }

@@ -184,17 +184,22 @@ final class HomeViewController: BaseViewController<HomeViewModel> {
 
         viewModel.dailyNutritionSummaryRelay
             .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { [weak self] summary in
+            .subscribe(onNext: { [weak self] achievement in
                 guard let self else { return }
+                let user = viewModel.userResponseRelay.value
+                let targetCalorie = user?.targetCalorie ?? 0
+                let targetCarbohydrate = user?.targetCarbohydrates ?? 0
+                let targetProtein = user?.targetProtein ?? 0
+                let targetFat = user?.targetFat ?? 0
                 todayCalorieView.update(
-                    currentCalorie: Int(summary.calorie),
-                    targetCalorie: Int(viewModel.userResponseRelay.value?.targetCalorie ?? 0),
-                    currentCarbohydrate: Int(summary.carbohydrate),
-                    targetCarbohydrate: Int(viewModel.userResponseRelay.value?.targetCarbohydrates ?? 0),
-                    currentProtein: Int(summary.protein),
-                    targetProtein: Int(viewModel.userResponseRelay.value?.targetProtein ?? 0),
-                    currentFat: Int(summary.fat),
-                    targetFat: Int(viewModel.userResponseRelay.value?.targetFat ?? 0)
+                    currentCalorie: Int(achievement.calorieRate * targetCalorie),
+                    targetCalorie: Int(targetCalorie),
+                    currentCarbohydrate: Int(achievement.carbohydrateRate * targetCarbohydrate),
+                    targetCarbohydrate: Int(targetCarbohydrate),
+                    currentProtein: Int(achievement.proteinRate * targetProtein),
+                    targetProtein: Int(targetProtein),
+                    currentFat: Int(achievement.fatRate * targetFat),
+                    targetFat: Int(targetFat)
                 )
             })
             .disposed(by: disposeBag)

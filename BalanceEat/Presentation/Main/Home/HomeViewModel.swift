@@ -28,7 +28,7 @@ final class HomeViewModel: BaseViewModel {
     let userNowBodyStatusRelay: BehaviorRelay<(Double, Double?, Double?)> = .init(value: (0, nil, nil))
     let userTargetBodyStatusRelay: BehaviorRelay<(Double, Double?, Double?)> = .init(value: (0, nil, nil))
 
-    let dailyNutritionSummaryRelay: BehaviorRelay<(calorie: Double, carbohydrate: Double, protein: Double, fat: Double)> = .init(value: (0, 0, 0, 0))
+    let dailyNutritionSummaryRelay: BehaviorRelay<NutritionAchievement> = .init(value: NutritionAchievement(calorieRate: 0, carbohydrateRate: 0, proteinRate: 0, fatRate: 0))
     let bodyStatusDiffRelay: BehaviorRelay<(weightDiff: Double, smiDiff: Double?, fatDiff: Double?)> = .init(value: (0, nil, nil))
     
     init(userUseCase: UserUseCaseProtocol, dietUseCase: DietUseCaseProtocol) {
@@ -51,15 +51,11 @@ final class HomeViewModel: BaseViewModel {
             })
             .disposed(by: disposeBag)
 
-        dietResponseRelay
-            .compactMap { $0 }
-            .subscribe(onNext: { [weak self] dietList in
+        Observable.combineLatest(dietResponseRelay.compactMap { $0 }, userResponseRelay.compactMap { $0 })
+            .subscribe(onNext: { [weak self] dietList, user in
                 guard let self else { return }
-                let calorie = dietList.reduce(0.0) { $0 + $1.items.reduce(0) { $0 + $1.calories } }
-                let carbohydrate = dietList.reduce(0.0) { $0 + $1.items.reduce(0) { $0 + $1.carbohydrates } }
-                let protein = dietList.reduce(0.0) { $0 + $1.items.reduce(0) { $0 + $1.protein } }
-                let fat = dietList.reduce(0.0) { $0 + $1.items.reduce(0) { $0 + $1.fat } }
-                dailyNutritionSummaryRelay.accept((calorie: calorie, carbohydrate: carbohydrate, protein: protein, fat: fat))
+                let achievement = dietUseCase.calculateNutritionAchievement(diets: dietList, target: user)
+                dailyNutritionSummaryRelay.accept(achievement)
             })
             .disposed(by: disposeBag)
 
