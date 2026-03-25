@@ -29,12 +29,20 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
         return label
     }()
 
+    private var fetchTask: Task<Void, Never>?
+    private var actionTask: Task<Void, Never>?
+
     override init(viewModel: SetRemindNotiViewModel) {
         super.init(viewModel: viewModel)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        fetchTask?.cancel()
+        actionTask?.cancel()
     }
 
     override func viewDidLoad() {
@@ -160,7 +168,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                                     dayOfWeeks: dayOfWeeks
                                 )
 
-                                Task {
+                                self.actionTask = Task {
                                     await self.viewModel.updateReminder(reminderDataForCreate: reminderDataForCreate, reminderId: model.id)
                                 }
                             })
@@ -182,9 +190,9 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                         )
 
                         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
-                        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { _ in
-                            Task {
-                                await self.viewModel.deleteReminder(reminderId: model.id)
+                        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+                            self?.actionTask = Task {
+                                await self?.viewModel.deleteReminder(reminderId: model.id)
                             }
                         })
 
@@ -197,7 +205,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                     .observe(on: MainScheduler.instance)
                     .subscribe(onNext: { [weak self] isOn in
                         guard let self else { return }
-                        Task {
+                        self.actionTask = Task {
                             await self.viewModel.updateReminderActivation(isActive: isOn, reminderId: model.id)
                         }
                     })
@@ -211,7 +219,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                 guard let self else { return }
                 let threshold = self.tableView.contentSize.height - self.tableView.frame.size.height
                 if offset.y > threshold && !self.viewModel.isLastPage && self.viewModel.isLoadingNextPageRelay.value == false {
-                    Task {
+                    self.fetchTask = Task {
                         await self.viewModel.fetchReminderList()
                     }
                 }
@@ -235,7 +243,7 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
     }
 
     private func getDatas(page: Int, size: Int) {
-        Task {
+        fetchTask = Task {
             await viewModel.getReminderList(page: page, size: size)
             refreshControl.endRefreshing()
         }
@@ -273,9 +281,8 @@ final class SetRemindNotiViewController: BaseViewController<SetRemindNotiViewMod
                     dayOfWeeks: dayOfWeeks
                 )
 
-                Task { [weak self] in
-                    guard let self else { return }
-                    await viewModel.createReminder(reminderDataForCreate: reminderDataForCreate)
+                self.actionTask = Task {
+                    await self.viewModel.createReminder(reminderDataForCreate: reminderDataForCreate)
                 }
             })
             .disposed(by: addPresentationBag)
