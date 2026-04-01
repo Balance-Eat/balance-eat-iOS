@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: macos-latest
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -19,8 +20,13 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Install fastlane
-        run: gem install fastlane
+      - name: Cache Derived Data
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.xcodeproj/project.pbxproj') }}
+          restore-keys: |
+            ${{ runner.os }}-derived-data-
 
       - name: Deploy to TestFlight
         env:
@@ -29,5 +35,5 @@ jobs:
           FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
           FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
           FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120
-          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 6
-        run: fastlane beta
+          FASTLANE_XCODEBUILD_SETTINGS_RETRIES: 3
+        run: bundle exec fastlane beta
