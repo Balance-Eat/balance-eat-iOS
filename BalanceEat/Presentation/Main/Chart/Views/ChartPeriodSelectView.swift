@@ -80,25 +80,25 @@ final class ChartPeriodSelectView: UIView {
     private func setBinding() {
         for button in periodButtons {
             button.isSelectedRelay
-                .subscribe(onNext: { [weak self, weak button] isSelected in
-                    guard let self, let button else { return }
+                .subscribe(onNext: { [weak self] isSelected in
+                    guard let self else { return }
+                    guard isSelected else { return }
 
-                    if isSelected {
-                        periodButtons.forEach {
-                            if $0 !== button {
-                                $0.isSelectedRelay.accept(false)
-                            }
+                    self.periodButtons.forEach {
+                        if $0 !== button {
+                            $0.isSelectedRelay.accept(false)
                         }
-                        switch button {
-                        case dailyButton:
-                            periodRelay.accept(.daily)
-                        case weeklyButton:
-                            periodRelay.accept(.weekly)
-                        case monthlyButton:
-                            periodRelay.accept(.monthly)
-                        default:
-                            break
-                        }
+                    }
+
+                    switch button {
+                    case self.dailyButton:
+                        self.periodRelay.accept(.daily)
+                    case self.weeklyButton:
+                        self.periodRelay.accept(.weekly)
+                    case self.monthlyButton:
+                        self.periodRelay.accept(.monthly)
+                    default:
+                        break
                     }
                 })
                 .disposed(by: disposeBag)

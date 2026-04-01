@@ -94,28 +94,27 @@ final class ChartNutritionStatsSelectView: UIView {
     private func setBinding() {
         for button in nutritionButtons {
             button.isSelectedRelay
-                .subscribe(onNext: { [weak self, weak button] isSelected in
-                    guard let self, let button else { return }
+                .subscribe(onNext: { [weak self] isSelected in
+                    guard let self else { return }
+                    guard isSelected else { return }
 
-                    if isSelected {
-                        nutritionButtons.forEach {
-                            if $0 !== button {
-                                $0.isSelectedRelay.accept(false)
-                            }
+                    self.nutritionButtons.forEach {
+                        if $0 !== button {
+                            $0.isSelectedRelay.accept(false)
                         }
+                    }
 
-                        switch button {
-                        case calorieButton:
-                            nutritionRelay.accept(.calorie)
-                        case carbohydrateButton:
-                            nutritionRelay.accept(.carbohydrate)
-                        case proteinButton:
-                            nutritionRelay.accept(.protein)
-                        case fatButton:
-                            nutritionRelay.accept(.fat)
-                        default:
-                            break
-                        }
+                    switch button {
+                    case self.calorieButton:
+                        self.nutritionRelay.accept(.calorie)
+                    case self.carbohydrateButton:
+                        self.nutritionRelay.accept(.carbohydrate)
+                    case self.proteinButton:
+                        self.nutritionRelay.accept(.protein)
+                    case self.fatButton:
+                        self.nutritionRelay.accept(.fat)
+                    default:
+                        break
                     }
                 })
                 .disposed(by: disposeBag)
