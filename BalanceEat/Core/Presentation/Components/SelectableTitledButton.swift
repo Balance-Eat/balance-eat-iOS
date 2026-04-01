@@ -94,7 +94,7 @@ final class SelectableTitledButton: UIView {
     private func bindSelectedState() {
         isSelectedRelay
             .bind { [weak self] isSelected in
-                guard let self = self, let style = self.style else { return }
+                guard let self, let style = self.style else { return }
                 UIView.animate(withDuration: 0.25) {
                     if isSelected {
                         self.backgroundColor = style.selectedBackgroundColor ?? style.backgroundColor

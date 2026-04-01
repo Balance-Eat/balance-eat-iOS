@@ -95,7 +95,7 @@ final class ChartNutritionStatsSelectView: UIView {
         for button in nutritionButtons {
             button.isSelectedRelay
                 .subscribe(onNext: { [weak self, weak button] isSelected in
-                    guard let self = self, let button = button else { return }
+                    guard let self, let button else { return }
 
                     if isSelected {
                         nutritionButtons.forEach {

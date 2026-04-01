@@ -113,7 +113,7 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
         for button in genderButtons {
             button.isSelectedRelay
                 .subscribe(onNext: { [weak self, weak button] isSelected in
-                    guard let self = self, let button = button else { return }
+                    guard let self, let button else { return }
                     if isSelected {
                         genderButtons.forEach {
                             if $0 != button { $0.isSelectedRelay.accept(false) }
