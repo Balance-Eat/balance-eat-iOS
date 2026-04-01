@@ -20,6 +20,15 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      - name: Configure Git for Match
+        env:
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+        run: |
+          DECODED=$(echo "$MATCH_GIT_BASIC_AUTHORIZATION" | base64 --decode)
+          USERNAME=$(echo "$DECODED" | cut -d: -f1)
+          TOKEN=$(echo "$DECODED" | cut -d: -f2-)
+          git config --global url."https://${USERNAME}:${TOKEN}@github.com/".insteadOf "https://github.com/"
+
       - name: Cache Derived Data
         uses: actions/cache@v4
         with:
