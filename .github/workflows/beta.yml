@@ -30,18 +30,21 @@ jobs:
           echo "machine github.com login ${USERNAME} password ${TOKEN}" > ~/.netrc
           chmod 600 ~/.netrc
 
-      - name: Write API Key
+      - name: Write and Diagnose API Key
         env:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
-        run: printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
-
-      - name: Normalize API Key
         run: |
-          OPENSSL="$(brew --prefix openssl)/bin/openssl"
-          $OPENSSL pkcs8 -topk8 -outform PEM -in /tmp/AuthKey.p8 -out /tmp/AuthKey_norm.p8 -nocrypt 2>&1 \
-            && mv /tmp/AuthKey_norm.p8 /tmp/AuthKey.p8 \
-            && echo "Normalized: $(head -1 /tmp/AuthKey.p8)" \
-            || echo "Normalization failed"
+          printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
+          echo "=== Diagnostics ==="
+          echo "Line count: $(wc -l < /tmp/AuthKey.p8)"
+          echo "Byte count: $(wc -c < /tmp/AuthKey.p8)"
+          echo "First line: $(head -1 /tmp/AuthKey.p8)"
+          echo "Ruby OpenSSL version:"
+          ruby -e "require 'openssl'; puts OpenSSL::OPENSSL_LIBRARY_VERSION"
+          echo "Can Ruby load a test EC key?"
+          ruby -e "require 'openssl'; k = OpenSSL::PKey::EC.generate('prime256v1'); puts OpenSSL::PKey.read(k.to_pem).class"
+          echo "Can Ruby load the actual key?"
+          ruby -e "require 'openssl'; puts OpenSSL::PKey.read(File.binread('/tmp/AuthKey.p8')).class" 2>&1 || true
 
       - name: Patch fastlane for OpenSSL 3.x compatibility
         run: |
