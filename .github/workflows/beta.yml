@@ -34,27 +34,10 @@ jobs:
         env:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: |
-          # Step 1: reconstruct multi-line PEM from single-line secret
-          printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" | python3 -c "
-          import re, sys
-          key = sys.stdin.read().strip()
-          if '\n' not in key:
-              m = re.match(r'(-----BEGIN [^-]+-----)(.*)(-----END [^-]+-----)', key)
-              if m:
-                  header, body, footer = m.group(1), m.group(2), m.group(3)
-                  folded = '\n'.join(body[i:i+64] for i in range(0, len(body), 64))
-                  sys.stdout.write(header + '\n' + folded + '\n' + footer + '\n')
-              else:
-                  sys.stdout.write(key)
-          else:
-              sys.stdout.write(key)
-          " > /tmp/AuthKey_pkcs8.pem
-          echo "PKCS8 lines: $(wc -l < /tmp/AuthKey_pkcs8.pem)"
-          # Step 2: convert PKCS#8 → SEC1 (-----BEGIN EC PRIVATE KEY-----)
-          $(brew --prefix openssl)/bin/openssl ec \
-            -in /tmp/AuthKey_pkcs8.pem \
-            -out /tmp/AuthKey.p8 2>&1
-          echo "SEC1 first line: $(head -1 /tmp/AuthKey.p8)"
+          # Secret is stored as base64-encoded .p8 file
+          echo "$APP_STORE_CONNECT_API_KEY_CONTENT" | base64 -d > /tmp/AuthKey.p8
+          echo "lines: $(wc -l < /tmp/AuthKey.p8), bytes: $(wc -c < /tmp/AuthKey.p8)"
+          echo "first line: $(head -1 /tmp/AuthKey.p8)"
 
       - name: Patch fastlane for OpenSSL 3.x compatibility
         run: |
