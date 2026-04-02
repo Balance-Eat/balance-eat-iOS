@@ -35,6 +35,12 @@ jobs:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
 
+      - name: Convert API Key to EC format
+        run: |
+          echo "Before: $(head -1 /tmp/AuthKey.p8)"
+          /usr/bin/openssl ec -in /tmp/AuthKey.p8 -out /tmp/AuthKey_ec.pem 2>&1 && mv /tmp/AuthKey_ec.pem /tmp/AuthKey.p8
+          echo "After: $(head -1 /tmp/AuthKey.p8)"
+
       - name: Patch fastlane for OpenSSL 3.x compatibility
         run: |
           TOKEN_FILE="vendor/bundle/ruby/3.1.0/gems/fastlane-2.232.2/spaceship/lib/spaceship/connect_api/token.rb"
