@@ -33,10 +33,15 @@ jobs:
       - name: Write API Key
         env:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
+
+      - name: Normalize API Key
         run: |
-          printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
-          echo "Line count: $(wc -l < /tmp/AuthKey.p8)"
-          echo "First line: $(head -1 /tmp/AuthKey.p8)"
+          OPENSSL="$(brew --prefix openssl)/bin/openssl"
+          $OPENSSL pkcs8 -topk8 -outform PEM -in /tmp/AuthKey.p8 -out /tmp/AuthKey_norm.p8 -nocrypt 2>&1 \
+            && mv /tmp/AuthKey_norm.p8 /tmp/AuthKey.p8 \
+            && echo "Normalized: $(head -1 /tmp/AuthKey.p8)" \
+            || echo "Normalization failed"
 
       - name: Patch fastlane for OpenSSL 3.x compatibility
         run: |
