@@ -35,9 +35,15 @@ jobs:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
 
-      - name: Convert API Key to EC format
+      - name: Patch fastlane for OpenSSL 3.x compatibility
         run: |
-          openssl ec -in /tmp/AuthKey.p8 -out /tmp/AuthKey_ec.pem 2>/dev/null && mv /tmp/AuthKey_ec.pem /tmp/AuthKey.p8 || true
+          TOKEN_FILE=$(find vendor/bundle -name "token.rb" -path "*/connect_api/*" 2>/dev/null | head -1)
+          if [ -n "$TOKEN_FILE" ]; then
+            sed -i '' 's/OpenSSL::PKey::EC\.new(key_content)/OpenSSL::PKey.read(key_content)/g' "$TOKEN_FILE"
+            echo "Patched: $TOKEN_FILE"
+          else
+            echo "token.rb not found"
+          fi
 
       - name: Cache Derived Data
         uses: actions/cache@v4
