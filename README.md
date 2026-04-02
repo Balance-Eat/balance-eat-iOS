@@ -2,7 +2,7 @@
 
 > 체중, 골격근량, 체지방률 기반 식단 기록 및 영양 목표 관리 iOS 앱
 
-![Swift](https://img.shields.io/badge/Swift-5.0-orange) ![iOS](https://img.shields.io/badge/iOS-18.0+-blue) ![Xcode](https://img.shields.io/badge/Xcode-26.0+-lightgrey)
+![Swift](https://img.shields.io/badge/Swift-5.0-orange) ![iOS](https://img.shields.io/badge/iOS-18.0+-blue) ![Xcode](https://img.shields.io/badge/Xcode-26.0+-lightgrey) [![Beta Deploy](https://github.com/Balance-Eat/balance-eat-iOS/actions/workflows/beta.yml/badge.svg)](https://github.com/Balance-Eat/balance-eat-iOS/actions/workflows/beta.yml)
 
 [![App Store](https://img.shields.io/badge/App_Store-Download-0D96F6?logo=app-store&logoColor=white)](https://apps.apple.com/us/app/balanceeat/id6754953745)
 
@@ -53,6 +53,7 @@
 | 푸시 알림 | Firebase Cloud Messaging (FCM) |
 | 차트 | DGCharts |
 | 테스트 | XCTest |
+| CI/CD | GitHub Actions, fastlane, fastlane match |
 
 <br>
 
