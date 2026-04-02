@@ -37,12 +37,19 @@ jobs:
 
       - name: Patch fastlane for OpenSSL 3.x compatibility
         run: |
-          TOKEN_FILE=$(find vendor/bundle -name "token.rb" -path "*/connect_api/*" 2>/dev/null | head -1)
-          if [ -n "$TOKEN_FILE" ]; then
-            sed -i '' 's/OpenSSL::PKey::EC\.new(key_content)/OpenSSL::PKey.read(key_content)/g' "$TOKEN_FILE"
-            echo "Patched: $TOKEN_FILE"
+          TOKEN_FILE="vendor/bundle/ruby/3.1.0/gems/fastlane-2.232.2/spaceship/lib/spaceship/connect_api/token.rb"
+          if [ -f "$TOKEN_FILE" ]; then
+            ruby -e "
+              f = '$TOKEN_FILE'
+              c = File.read(f)
+              patched = c.gsub('OpenSSL::PKey::EC.new', 'OpenSSL::PKey.read')
+              File.write(f, patched)
+              puts 'Changed: ' + (c != patched).to_s
+            "
+            grep -n 'OpenSSL::PKey' "$TOKEN_FILE"
           else
-            echo "token.rb not found"
+            echo "File not found: $TOKEN_FILE"
+            find vendor/bundle -name "token.rb" 2>/dev/null
           fi
 
       - name: Cache Derived Data
