@@ -33,7 +33,7 @@ jobs:
       - name: Write API Key
         env:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
-        run: echo "$APP_STORE_CONNECT_API_KEY_CONTENT" | base64 --decode > /tmp/AuthKey.p8
+        run: printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
 
       - name: Cache Derived Data
         uses: actions/cache@v4
