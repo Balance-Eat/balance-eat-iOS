@@ -30,6 +30,11 @@ jobs:
           echo "machine github.com login ${USERNAME} password ${TOKEN}" > ~/.netrc
           chmod 600 ~/.netrc
 
+      - name: Write API Key
+        env:
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+        run: echo "$APP_STORE_CONNECT_API_KEY_CONTENT" | base64 --decode > /tmp/AuthKey.p8
+
       - name: Cache Derived Data
         uses: actions/cache@v4
         with:
