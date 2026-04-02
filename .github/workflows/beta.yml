@@ -30,21 +30,27 @@ jobs:
           echo "machine github.com login ${USERNAME} password ${TOKEN}" > ~/.netrc
           chmod 600 ~/.netrc
 
-      - name: Write and Diagnose API Key
+      - name: Write API Key
         env:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: |
           printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
-          echo "=== Diagnostics ==="
-          echo "Line count: $(wc -l < /tmp/AuthKey.p8)"
-          echo "Byte count: $(wc -c < /tmp/AuthKey.p8)"
-          echo "First line: $(head -1 /tmp/AuthKey.p8)"
-          echo "Ruby OpenSSL version:"
-          ruby -e "require 'openssl'; puts OpenSSL::OPENSSL_LIBRARY_VERSION"
-          echo "Can Ruby load a test EC key?"
-          ruby -e "require 'openssl'; k = OpenSSL::PKey::EC.generate('prime256v1'); puts OpenSSL::PKey.read(k.to_pem).class"
-          echo "Can Ruby load the actual key?"
-          ruby -e "require 'openssl'; puts OpenSSL::PKey.read(File.binread('/tmp/AuthKey.p8')).class" 2>&1 || true
+          python3 -c "
+          import re
+          key = open('/tmp/AuthKey.p8').read().strip()
+          if '\n' not in key:
+              m = re.match(r'(-----BEGIN [^-]+-----)(.*)(-----END [^-]+-----)', key)
+              if m:
+                  header, body, footer = m.group(1), m.group(2), m.group(3)
+                  folded = '\n'.join(body[i:i+64] for i in range(0, len(body), 64))
+                  pem = header + '\n' + folded + '\n' + footer + '\n'
+                  open('/tmp/AuthKey.p8', 'w').write(pem)
+                  print('Reconstructed PEM: ' + str(pem.count(chr(10))) + ' lines')
+              else:
+                  print('ERROR: cannot parse key')
+          else:
+              print('Key already has newlines')
+          "
 
       - name: Patch fastlane for OpenSSL 3.x compatibility
         run: |
