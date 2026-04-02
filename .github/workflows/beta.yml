@@ -35,21 +35,9 @@ jobs:
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
         run: printf '%s' "$APP_STORE_CONNECT_API_KEY_CONTENT" > /tmp/AuthKey.p8
 
-      - name: Enable OpenSSL Legacy Provider
+      - name: Convert API Key to EC format
         run: |
-          cat > /tmp/openssl_legacy.cnf << 'EOF'
-          openssl_conf = openssl_init
-          [openssl_init]
-          providers = provider_sect
-          [provider_sect]
-          default = default_sect
-          legacy = legacy_sect
-          [default_sect]
-          activate = 1
-          [legacy_sect]
-          activate = 1
-          EOF
-          echo "OPENSSL_CONF=/tmp/openssl_legacy.cnf" >> $GITHUB_ENV
+          openssl ec -in /tmp/AuthKey.p8 -out /tmp/AuthKey_ec.pem 2>/dev/null && mv /tmp/AuthKey_ec.pem /tmp/AuthKey.p8 || true
 
       - name: Cache Derived Data
         uses: actions/cache@v4
