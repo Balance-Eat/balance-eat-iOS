@@ -251,7 +251,6 @@ final class SearchFoodViewController: BaseViewController<SearchFoodViewModel> {
     
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
-        dismiss(animated: true)
     }
 }
 

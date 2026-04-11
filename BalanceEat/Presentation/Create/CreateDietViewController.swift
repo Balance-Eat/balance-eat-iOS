@@ -298,6 +298,5 @@ final class CreateDietViewController: BaseViewController<CreateDietViewModel> {
     
     private func goToBack() {
         navigationController?.popViewController(animated: true)
-        dismiss(animated: true)
     }
 }
