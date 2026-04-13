@@ -28,7 +28,91 @@ final class APIClient: APIClientProtocol {
 
     private let baseURL = "https://api.balance-eat.com"
 
-    private func buildDataRequest(endpoint: any Endpoint) -> DataRequest {
+    func request<T: Decodable>(
+        endpoint: any Endpoint,
+        responseType: T.Type
+    ) async -> Result<T, NetworkError> {
+        let url = baseURL + endpoint.path
+        #if DEBUG
+        let debugHeaders = endpoint.headers?.description ?? ""
+        let debugQueryParameters = String(describing: endpoint.queryParameters ?? [:])
+        #endif
+
+        let dataRequest = buildDataRequest(endpoint: endpoint)
+
+        return await withCheckedContinuation { continuation in
+            dataRequest
+                .validate()
+                .responseDecodable(of: T.self) { [self] response in
+                    switch response.result {
+                    case .success(let value):
+                        #if DEBUG
+                        let statusCode = response.response?.statusCode
+                        let responseData = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "No Body"
+                        print("""
+                            🅾️ API Request Success
+                            - URL: \(url)
+                            - Status Code: \(statusCode ?? 0)
+                            - Response Body: \(responseData)
+                            - value: \(value)
+                            """)
+                        #endif
+                        continuation.resume(returning: .success(value))
+
+                    case .failure(let afError):
+                        let (statusMessage, serverMessage) = self.parseServerError(from: response.data, fallbackMessage: afError.localizedDescription)
+
+                        #if DEBUG
+                        let statusCode = response.response?.statusCode
+                        let responseDataString = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "No Body"
+                        print("""
+                            ❌ API Request Failed
+                            - URL: \(url)
+                            - Status Code: \(statusCode ?? 0)
+                            - Error: \(serverMessage)
+                            - Response Body: \(responseDataString)
+                            - afError: \(afError.localizedDescription)
+                            - headers: \(debugHeaders)
+                            """)
+                        print("query parameters: \(debugQueryParameters)")
+                        #endif
+
+                        let networkError = self.mapToNetworkError(afError: afError, statusCode: response.response?.statusCode, statusMessage: statusMessage, serverMessage: serverMessage)
+                        continuation.resume(returning: .failure(networkError))
+                    }
+                }
+        }
+    }
+
+    func requestVoid(endpoint: any Endpoint) async -> Result<Void, NetworkError> {
+        let dataRequest = buildDataRequest(endpoint: endpoint)
+
+        return await withCheckedContinuation { continuation in
+            dataRequest
+                .validate()
+                .response { [self] response in
+                    let statusCode = response.response?.statusCode ?? 0
+
+                    if (200..<300).contains(statusCode) {
+                        #if DEBUG
+                        print("🅾️ API Request Success (Void)")
+                        #endif
+                        continuation.resume(returning: .success(()))
+                    } else {
+                        let fallbackMessage = response.error?.localizedDescription ?? "알 수 없는 오류"
+                        let (statusMessage, serverMessage) = self.parseServerError(from: response.data, fallbackMessage: fallbackMessage)
+                        let networkError = self.mapToNetworkError(afError: response.error, statusCode: statusCode, statusMessage: statusMessage, serverMessage: serverMessage)
+                        continuation.resume(returning: .failure(networkError))
+                    }
+                }
+        }
+    }
+}
+
+// MARK: - Private
+
+private extension APIClient {
+    func buildDataRequest(endpoint: any Endpoint) -> DataRequest {
         let url = baseURL + endpoint.path
         if let body = endpoint.body {
             return session.request(
@@ -49,182 +133,38 @@ final class APIClient: APIClientProtocol {
         }
     }
 
-    func request<T: Decodable>(
-        endpoint: any Endpoint,
-        responseType: T.Type
-    ) async -> Result<T, NetworkError> {
-        let url = baseURL + endpoint.path
-        #if DEBUG
-        let debugHeaders = endpoint.headers?.description ?? ""
-        let debugQueryParameters = String(describing: endpoint.queryParameters ?? [:])
-        #endif
+    func parseServerError(from data: Data?, fallbackMessage: String) -> (status: String, message: String) {
+        guard let data else { return ("Unknown Error", fallbackMessage) }
 
-        let dataRequest = buildDataRequest(endpoint: endpoint)
-
-        return await withCheckedContinuation { continuation in
-            dataRequest
-                .validate()
-                .responseDecodable(of: T.self) { response in
-                    switch response.result {
-                    case .success(let value):
-                        let statusCode = response.response?.statusCode
-                        let responseData = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "No Body"
-
-                        #if DEBUG
-                        let message = """
-                                        🅾️ API Request Success
-                                        - URL: \(url)
-                                        - Status Code: \(statusCode ?? 0)
-                                        - Response Body: \(responseData)
-                                        - value: \(value)
-                                        """
-                        print(message)
-                        #endif
-                        continuation.resume(returning: .success(value))
-
-                    case .failure(let afError):
-                        let statusCode = response.response?.statusCode
-                        let responseDataString = response.data.flatMap { String(data: $0, encoding: .utf8) } ?? "No Body"
-
-                        var statusMessage = "Unknown Error"
-                        var serverMessage = afError.localizedDescription
-
-                        if let data = response.data {
-                            if let apiError = try? Self.decoder.decode(BaseResponse<EmptyData>.self, from: data) {
-                                statusMessage = apiError.status
-                                serverMessage = apiError.message
-                            } else if let errorResponse = try? Self.decoder.decode(ErrorResponse.self, from: data) {
-                                statusMessage = errorResponse.status
-                                serverMessage = errorResponse.message
-                            }
-                        }
-
-                        #if DEBUG
-                        let errorMessage = """
-                                            ❌ API Request Failed
-                                            - URL: \(url)
-                                            - Status Code: \(statusCode ?? 0)
-                                            - Error: \(serverMessage)
-                                            - Response Body: \(responseDataString)
-                                            - afError: \(afError.localizedDescription)
-                                            - headers: \(debugHeaders)
-                                            """
-                        print(errorMessage)
-                        print("query parameters: \(debugQueryParameters)")
-                        #endif
-
-                        let networkError: NetworkError
-                        if let urlError = afError.underlyingError as? URLError {
-                            switch urlError.code {
-                            case .timedOut:
-                                networkError = .timeout
-                            case .notConnectedToInternet, .networkConnectionLost:
-                                networkError = .noConnection
-                            default:
-                                networkError = .requestFailed(statusMessage, serverMessage)
-                            }
-                        } else {
-                            switch statusCode {
-                            case 401:
-                                networkError = .unauthorized
-                            case 403:
-                                networkError = .forbidden
-                            case 404:
-                                networkError = .notFound
-                            case 409:
-                                networkError = .conflict
-                            case 429:
-                                networkError = .rateLimited
-                            case let code where (code ?? 0) >= 500:
-                                networkError = .internalServerError
-                            default:
-                                networkError = .requestFailed(statusMessage, serverMessage)
-                            }
-                        }
-                        continuation.resume(returning: .failure(networkError))
-                    }
-                }
+        if let apiError = try? Self.decoder.decode(BaseResponse<EmptyData>.self, from: data) {
+            return (apiError.status, apiError.message)
+        } else if let errorResponse = try? Self.decoder.decode(ErrorResponse.self, from: data) {
+            return (errorResponse.status, errorResponse.message)
         }
+
+        return ("Unknown Error", fallbackMessage)
     }
 
-    func requestVoid(endpoint: any Endpoint) async -> Result<Void, NetworkError> {
-        let dataRequest = buildDataRequest(endpoint: endpoint)
+    func mapToNetworkError(afError: AFError?, statusCode: Int?, statusMessage: String, serverMessage: String) -> NetworkError {
+        if let urlError = afError?.underlyingError as? URLError {
+            switch urlError.code {
+            case .timedOut:
+                return .timeout
+            case .notConnectedToInternet, .networkConnectionLost:
+                return .noConnection
+            default:
+                return .requestFailed(statusMessage, serverMessage)
+            }
+        }
 
-        return await withCheckedContinuation { continuation in
-            dataRequest
-                .validate()
-                .response { response in
-                    let statusCode = response.response?.statusCode ?? 0
-
-                    var statusMessage = "Unknown Error"
-                    var serverMessage = response.error?.localizedDescription ?? "알 수 없는 오류"
-
-                    if let data = response.data {
-                        if let apiError = try? Self.decoder.decode(BaseResponse<EmptyData>.self, from: data) {
-                            statusMessage = apiError.status
-                            serverMessage = apiError.message
-                        } else if let errorResponse = try? Self.decoder.decode(ErrorResponse.self, from: data) {
-                            statusMessage = errorResponse.status
-                            serverMessage = errorResponse.message
-                        }
-                    }
-
-                    if (200..<300).contains(statusCode) {
-                        #if DEBUG
-                        print("🅾️ API Request Success (Void)")
-                        #endif
-                        continuation.resume(returning: .success(()))
-                    } else {
-                        let networkError: NetworkError
-                        if let afError = response.error {
-                            if let urlError = afError.underlyingError as? URLError {
-                                switch urlError.code {
-                                case .timedOut:
-                                    networkError = .timeout
-                                case .notConnectedToInternet, .networkConnectionLost:
-                                    networkError = .noConnection
-                                default:
-                                    networkError = .requestFailed(statusMessage, serverMessage)
-                                }
-                            } else {
-                                switch statusCode {
-                                case 401:
-                                    networkError = .unauthorized
-                                case 403:
-                                    networkError = .forbidden
-                                case 404:
-                                    networkError = .notFound
-                                case 409:
-                                    networkError = .conflict
-                                case 429:
-                                    networkError = .rateLimited
-                                case 500...:
-                                    networkError = .internalServerError
-                                default:
-                                    networkError = .requestFailed(statusMessage, serverMessage)
-                                }
-                            }
-                        } else {
-                            switch statusCode {
-                            case 401:
-                                networkError = .unauthorized
-                            case 403:
-                                networkError = .forbidden
-                            case 404:
-                                networkError = .notFound
-                            case 409:
-                                networkError = .conflict
-                            case 429:
-                                networkError = .rateLimited
-                            case 500...:
-                                networkError = .internalServerError
-                            default:
-                                networkError = .requestFailed(statusMessage, serverMessage)
-                            }
-                        }
-                        continuation.resume(returning: .failure(networkError))
-                    }
-                }
+        switch statusCode {
+        case 401: return .unauthorized
+        case 403: return .forbidden
+        case 404: return .notFound
+        case 409: return .conflict
+        case 429: return .rateLimited
+        case let code where (code ?? 0) >= 500: return .internalServerError
+        default: return .requestFailed(statusMessage, serverMessage)
         }
     }
 }
