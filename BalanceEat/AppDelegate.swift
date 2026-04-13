@@ -12,71 +12,21 @@ import FirebaseMessaging
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-    let gcmMessageIDKey = "gcm.message_id"
+    private static let gcmMessageIDKey = "gcm.message_id"
 
     private lazy var notificationUseCase: NotificationUseCaseProtocol = AppDIContainer.shared.container.resolveOrFatal(NotificationUseCaseProtocol.self)
     private lazy var userUseCase: UserUseCaseProtocol = AppDIContainer.shared.container.resolveOrFatal(UserUseCaseProtocol.self)
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
         FirebaseApp.configure()
-        
         Messaging.messaging().delegate = self
-        
         UNUserNotificationCenter.current().delegate = self
-
-        let deviceName = UIDevice.current.name  // 메인 스레드에서 미리 캡처
-        let authOption: UNAuthorizationOptions = [.alert, .badge, .sound]
-        UNUserNotificationCenter.current().requestAuthorization(options: authOption) { granted, error in
-            let userDefaultsManager = UserDefaultsManager.shared
-
-            #if DEBUG
-            print("didfinishLaunchingWithOptions: fcm토큰: \(userDefaultsManager.getString(forKey: .agentId))")
-            #endif
-
-            userDefaultsManager.set(granted, forKey: .pushNotificationEnabled)
-            if let error {
-                #if DEBUG
-                print("permission error: \(error)")
-                #endif
-            } else if !userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess) {
-                let token = userDefaultsManager.getString(forKey: .agentId)
-                guard !token.isEmpty else { return }
-                let request = NotificationCreateRequest(
-                    agentId: token,
-                    osType: "IOS",
-                    deviceName: deviceName,
-                    isActive: granted
-                )
-
-                Task { [weak self] in
-                    guard let self else { return }
-                    guard let userId = self.getUserId() else { return }
-                    let createNotificationResult = await self.notificationUseCase.createNotification(request: request, userId: userId)
-
-                    switch createNotificationResult {
-                    case .success(let notificationResponseDTO):
-                        #if DEBUG
-                        print("create noti success: \(notificationResponseDTO)")
-                        #endif
-                        userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
-                    case .failure(let error):
-                        if case .conflict = error {
-                            userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
-                        }
-                        #if DEBUG
-                        print("create noti failed : \(error.description)")
-                        #endif
-                    }
-                }
-            }
-        }
-        
+        requestNotificationAuthorization()
         application.registerForRemoteNotifications()
 
         return true
     }
-    
+
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         #if DEBUG
         print("deviceToken: \(deviceToken)")
@@ -94,19 +44,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "BalanceEat")
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
+        container.loadPersistentStores { _, error in
             if let error = error as NSError? {
                 #if DEBUG
                 assertionFailure("CoreData 로드 실패: \(error), \(error.userInfo)")
                 #endif
             }
-        })
+        }
         return container
     }()
 
-    // MARK: - Core Data Saving support
-
-    func saveContext () {
+    func saveContext() {
         let context = persistentContainer.viewContext
         if context.hasChanges {
             do {
@@ -119,8 +67,64 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
+}
 
-    private func getUserId() -> String? {
+// MARK: - Notification Registration
+
+private extension AppDelegate {
+    func requestNotificationAuthorization() {
+        let deviceName = UIDevice.current.name
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { [weak self] granted, error in
+            UserDefaultsManager.shared.set(granted, forKey: .pushNotificationEnabled)
+
+            if let error {
+                #if DEBUG
+                print("permission error: \(error)")
+                #endif
+                return
+            }
+
+            self?.registerNotificationIfNeeded(deviceName: deviceName, isActive: granted)
+        }
+    }
+
+    func registerNotificationIfNeeded(token: String? = nil, deviceName: String? = nil, isActive: Bool? = nil) {
+        let userDefaultsManager = UserDefaultsManager.shared
+        let fcmToken = token ?? userDefaultsManager.getString(forKey: .agentId)
+        guard !fcmToken.isEmpty else { return }
+
+        let alreadySaved = userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess)
+        let tokenUnchanged = userDefaultsManager.getString(forKey: .agentId) == fcmToken
+        if alreadySaved && tokenUnchanged { return }
+
+        let request = NotificationCreateRequest(
+            agentId: fcmToken,
+            osType: "IOS",
+            deviceName: deviceName ?? UIDevice.current.name,
+            isActive: isActive ?? userDefaultsManager.getBool(forKey: .pushNotificationEnabled)
+        )
+
+        Task { [weak self] in
+            guard let self else { return }
+            guard let userId = self.getUserId() else { return }
+            let result = await self.notificationUseCase.createNotification(request: request, userId: userId)
+
+            switch result {
+            case .success:
+                userDefaultsManager.set(fcmToken, forKey: .agentId)
+                userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
+            case .failure(let error):
+                if case .conflict = error {
+                    userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
+                }
+                #if DEBUG
+                print("알림 기기 등록 실패: \(error.description)")
+                #endif
+            }
+        }
+    }
+
+    func getUserId() -> String? {
         switch userUseCase.getUserId() {
         case .success(let userId): return String(userId)
         case .failure: return nil
@@ -128,50 +132,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-// Cloud Messaging
+// MARK: - MessagingDelegate
+
 extension AppDelegate: MessagingDelegate {
-    
-    // fcm 등록 토큰을 받았을 때
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         #if DEBUG
         print("didReceiveRegistrationToken fcm토큰: \(fcmToken ?? "")")
         #endif
-        let userDefaultsManager = UserDefaultsManager.shared
-        
-        if userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess) && userDefaultsManager.getString(forKey: .agentId) == fcmToken {
-            return
-        }
-        
-        let permissionForNotification = userDefaultsManager.getBool(forKey: .pushNotificationEnabled)
 
         guard let fcmToken else { return }
-        if userDefaultsManager.getString(forKey: .agentId) != fcmToken || !userDefaultsManager.getBool(forKey: .saveToNotificationServerSuccess) {
-            let deviceName = UIDevice.current.name
-            let request = NotificationCreateRequest(
-                agentId: fcmToken,
-                osType: "IOS",
-                deviceName: deviceName,
-                isActive: permissionForNotification
-            )
-
-            Task { [weak self] in
-                guard let self else { return }
-                guard let userId = self.getUserId() else { return }
-                let createNotificationResult = await self.notificationUseCase.createNotification(request: request, userId: userId)
-
-                switch createNotificationResult {
-                case .success:
-                    userDefaultsManager.set(fcmToken, forKey: .agentId)
-                    userDefaultsManager.set(true, forKey: .saveToNotificationServerSuccess)
-                case .failure(let error):
-                    #if DEBUG
-                    print("알림 기기 등록 실패: \(error.description)")
-                    #endif
-                }
-            }
-        }
+        registerNotificationIfNeeded(token: fcmToken)
     }
-    
+
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: any Error) {
         #if DEBUG
         print("FCM registration failed with error: \(error.localizedDescription)")
@@ -179,33 +151,26 @@ extension AppDelegate: MessagingDelegate {
     }
 }
 
-// User Notifications [AKA InApp Notification]
-extension AppDelegate: UNUserNotificationCenterDelegate {
-    
-    // 푸시 메시지가 앱이 켜져있을 때 나올 경우
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        let userInfo = notification.request.content.userInfo
-        
-        if let messageID = userInfo[gcmMessageIDKey] {
-            #if DEBUG
-            print("messageID: \(messageID)")
-            #endif
-        }
+// MARK: - UNUserNotificationCenterDelegate
 
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        #if DEBUG
+        if let messageID = notification.request.content.userInfo[Self.gcmMessageIDKey] {
+            print("messageID: \(messageID)")
+        }
+        #endif
         completionHandler([[.banner, .badge, .sound]])
     }
-    
-    // 푸시 알림 받았을 때
+
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
-        
-        if let messageID = userInfo[gcmMessageIDKey] {
-            #if DEBUG
+        #if DEBUG
+        if let messageID = userInfo[Self.gcmMessageIDKey] {
             print("messageID: \(messageID)")
-            #endif
         }
+        #endif
         NotificationCenter.default.post(name: .pushNotificationReceived, object: nil, userInfo: userInfo)
-
         completionHandler()
     }
 }
