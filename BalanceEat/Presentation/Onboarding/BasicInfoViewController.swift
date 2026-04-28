@@ -109,6 +109,7 @@ final class BasicInfoViewController: UIViewController {
         
         for button in genderButtons {
             button.isSelectedRelay
+                .skip(1)
                 .subscribe(onNext: { [weak self, weak button] isSelected in
                     guard let self, let button else { return }
                     if isSelected {
@@ -116,7 +117,7 @@ final class BasicInfoViewController: UIViewController {
                             if $0 != button { $0.isSelectedRelay.accept(false) }
                         }
                         self.gender.accept(button === maleButton ? .male : .female)
-                    } else {
+                    } else if !genderButtons.contains(where: { $0.isSelectedRelay.value }) {
                         self.gender.accept(.none)
                     }
                 })

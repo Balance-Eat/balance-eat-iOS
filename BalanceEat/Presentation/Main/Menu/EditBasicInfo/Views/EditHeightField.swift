@@ -63,8 +63,8 @@ final class EditHeightField: UIView {
                 guard let self else { return }
 
                 var limitedText = text
-                if text.count > 3 {
-                    limitedText = String(text.prefix(3))
+                if text.count > 5 {
+                    limitedText = String(text.prefix(5))
                     self.textField.text = limitedText
                 }
 

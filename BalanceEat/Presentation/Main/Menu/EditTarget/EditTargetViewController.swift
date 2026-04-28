@@ -257,7 +257,6 @@ final class EditTargetViewController: BaseViewController<EditTargetViewModel> {
 
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
-        dismiss(animated: true)
     }
 
     private func setUpKeyboardDismissGesture() {

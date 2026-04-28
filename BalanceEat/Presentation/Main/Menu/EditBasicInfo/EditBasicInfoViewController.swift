@@ -112,6 +112,7 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
 
         for button in genderButtons {
             button.isSelectedRelay
+                .skip(1)
                 .subscribe(onNext: { [weak self, weak button] isSelected in
                     guard let self, let button else { return }
                     if isSelected {
@@ -119,7 +120,7 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
                             if $0 != button { $0.isSelectedRelay.accept(false) }
                         }
                         viewModel.genderRelay.accept(button === maleButton ? .male : .female)
-                    } else {
+                    } else if !genderButtons.contains(where: { $0.isSelectedRelay.value }) {
                         viewModel.genderRelay.accept(.none)
                     }
                 })
@@ -285,7 +286,6 @@ final class EditBasicInfoViewController: BaseViewController<EditBasicInfoViewMod
 
     @objc private func backButtonTapped() {
         navigationController?.popViewController(animated: true)
-        dismiss(animated: true)
     }
 
     private func setUpKeyboardDismissGesture() {
